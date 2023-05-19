@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">mace_template</string>
+    <string name="donate_products_no_list">donate_products_no_list</string>
+    <string name="donate_products">donate_products</string>
+    <string name="back_button_content_description">back button</string>
+    <string name="menu_content_description">menu</string>
+    <string name="fs_logo_content_description">Florida Software Logo</string>
+</resources>
