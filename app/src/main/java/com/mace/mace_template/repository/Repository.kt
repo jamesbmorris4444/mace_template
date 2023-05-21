@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.fullsekurity.theatreblood.logger.LogUtils
 import com.mace.mace_template.R
 import com.mace.mace_template.repository.network.APIClient
 import com.mace.mace_template.repository.network.APIInterface
@@ -49,7 +50,9 @@ import com.mace.mace_template.utils.Constants
 import com.mace.mace_template.utils.Constants.MAIN_DATABASE_NAME
 import com.mace.mace_template.utils.Constants.MODIFIED_DATABASE_NAME
 import com.mace.mace_template.utils.SingleLiveEvent
+import com.mace.mace_template.utils.Utils
 import io.reactivex.Completable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -84,9 +87,7 @@ class RepositoryImpl : Repository {
     // The code below here refreshes the main donations base
 
     override fun refreshDatabase(context: Context, refreshCompleted: () -> Unit) {
-        //LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.THM), String.format("HHH"))
         saveDatabase(context, MAIN_DATABASE_NAME)
-        deleteDatabase(context, MAIN_DATABASE_NAME)
         var disposable: Disposable? = null
         disposable = donorsService.getDonors(Constants.API_KEY, Constants.LANGUAGE, 13)
             .observeOn(AndroidSchedulers.mainThread())
@@ -94,13 +95,13 @@ class RepositoryImpl : Repository {
             .timeout(15L, TimeUnit.SECONDS)
             .subscribe ({ donorResponse ->
                 disposable?.dispose()
-                //LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.THM), String.format("III"))
                 initializeDataBase(context, refreshCompleted, donorResponse.results, donorResponse.products)
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "refreshDatabase success: donorsSize=${donorResponse.results.size}       productsSize=${donorResponse.products.size}")
             },
             { throwable ->
                 refreshCompleted()
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "refreshDatabase failure: message=${throwable.message}")
                 disposable?.dispose()
-                //LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.THM), String.format("JJJ"))
                 initializeDatabaseFailureModal(context, throwable.message)
             })
     }
@@ -111,6 +112,7 @@ class RepositoryImpl : Repository {
                 products[donorIndex][productIndex].donorId = donors[donorIndex].id
             }
         }
+        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "initializeDataBase complete: donorsSize=${donors.size}")
         insertDonorsAndProductsIntoLocalDatabase(context, refreshCompleted, mainBloodDatabase, donors, products)
     }
 
@@ -123,22 +125,22 @@ class RepositoryImpl : Repository {
                 disposable?.dispose()
                 refreshCompleted()
                 liveDonorListEvent.value = donors
-                ComposeView(context).apply {
-                    setContent {
-                        MaceTemplateTheme {
-                            Surface(modifier = Modifier.fillMaxSize()) {
-                                StandardModal(context)
-                            }
-                        }
-                    }
-                }
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "insertDonorsAndProductsIntoLocalDatabase success: donorsSize=${donors.size}")
+//                ComposeView(context).apply {
+//                    setContent {
+//                        MaceTemplateTheme {
+//                            Surface(modifier = Modifier.fillMaxSize()) {
+//                                StandardModal(context)
+//                            }
+//                        }
+//                    }
+//                }
 
             },
             { throwable ->
                 disposable?.dispose()
                 refreshCompleted()
-                //LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.EXC), "insertDonorsAndProductsIntoLocalDatabase", throwable)
-
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "insertDonorsAndProductsIntoLocalDatabase failure: message=${throwable.message}")
             })
     }
 
@@ -178,7 +180,7 @@ class RepositoryImpl : Repository {
         if (dbWal.exists()) {
             dbWal.copyTo(dbWalBackup, true)
         }
-        //LogUtils.D(tag, LogUtils.FilterTags.withTags(LogUtils.TagFilter.DAO), String.format("Path Name \"%s\" exists and was backed up", db.toString()))
+        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Path Name $db exists and was backed up")
     }
 
 
@@ -340,41 +342,42 @@ class RepositoryImpl : Repository {
 //        return database.databaseDao().loadAllDonorsWithProducts()
 //    }
 //
-//    /**
-//     * Shows the donor and product counts in both the main database and the staging database in a modal popup
-//     */
-//    fun databaseCounts() {
-//        val entryCountList = listOf(
-//            databaseDonorCount(stagingBloodDatabase),
-//            databaseDonorCount(mainBloodDatabase)
-//        )
-//        var disposable: Disposable? = null
-//        disposable = Single.zip(entryCountList) { args -> listOf(args) }
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe({ responseList ->
-//                disposable?.dispose()
-//                val response = responseList[0]
-//                getProductEntryCount(response[0] as Int, response[1] as Int)
-//            },
-//            { throwable ->
-//                disposable?.dispose()
-//                LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.EXC), "databaseCounts", throwable)
-//            })
-//    }
-//    private fun databaseDonorCount(database: BloodDatabase): Single<Int> {
-//        return database.databaseDao().getDonorEntryCount()
-//    }
-//    private fun getProductEntryCount(modifiedDonors: Int, mainDonors: Int) {
-//        val entryCountList = listOf(
-//            databaseProductCount(stagingBloodDatabase),
-//            databaseProductCount(mainBloodDatabase)
-//        )
-//        var disposable: Disposable? = null
-//        disposable = Single.zip(entryCountList) { args -> listOf(args) }
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe({ responseList ->
-//                disposable?.dispose()
-//                val response = responseList[0]
+    /**
+     * Shows the donor and product counts in both the main database and the staging database in a modal popup
+     */
+    fun databaseCounts() {
+        val entryCountList = listOf(
+            databaseDonorCount(stagingBloodDatabase),
+            databaseDonorCount(mainBloodDatabase)
+        )
+        var disposable: Disposable? = null
+        disposable = Single.zip(entryCountList) { args -> listOf(args) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ responseList ->
+                disposable?.dispose()
+                val response = responseList[0]
+                getProductEntryCount(response[0] as Int, response[1] as Int)
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database donors count success: mainDonorCount=${response[0] as Int}     backupDonorCount=${response[1] as Int}")
+            },
+            { throwable ->
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database donors count failure: message=${throwable.message}")
+                disposable?.dispose()
+            })
+    }
+    private fun databaseDonorCount(database: BloodDatabase): Single<Int> {
+        return database.databaseDao().getDonorEntryCount()
+    }
+    private fun getProductEntryCount(modifiedDonors: Int, mainDonors: Int) {
+        val entryCountList = listOf(
+            databaseProductCount(stagingBloodDatabase),
+            databaseProductCount(mainBloodDatabase)
+        )
+        var disposable: Disposable? = null
+        disposable = Single.zip(entryCountList) { args -> listOf(args) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ responseList ->
+                disposable?.dispose()
+                val response = responseList[0]
 //                StandardModal(
 //                    callbacks,
 //                    modalType = StandardModal.ModalType.STANDARD,
@@ -388,15 +391,16 @@ class RepositoryImpl : Repository {
 //                        override fun onBackPressed() { }
 //                    }
 //                ).show(callbacks.fetchActivity().supportFragmentManager, "MODAL")
-//            },
-//            { throwable ->
-//                disposable?.dispose()
-//                LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.EXC), "getProductEntryCount", throwable)
-//            })
-//    }
-//    private fun databaseProductCount(database: BloodDatabase): Single<Int> {
-//        return database.databaseDao().getProductEntryCount()
-//    }
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database products count success: mainProductCount=${response[0] as Int}     backupProductCount=${response[1] as Int}")
+            },
+            { throwable ->
+                disposable?.dispose()
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database products count failure: message=${throwable.message}")
+            })
+    }
+    private fun databaseProductCount(database: BloodDatabase): Single<Int> {
+        return database.databaseDao().getProductEntryCount()
+    }
 //
 //
 //
@@ -426,44 +430,45 @@ class RepositoryImpl : Repository {
 //     * @param   showDonors     callback method in ViewModel when asynchronous operation finishes
 //     * Queries both the staging database and the main database to find a donor from the search key.
 //     */
-//    @Suppress("UNCHECKED_CAST")
-//    fun handleSearchClick(view: View, searchKey: String, showDonors: (donorList: List<Donor>) -> Unit) {
-//        val fullNameResponseList = listOf(
-//            donorsFromFullName(mainBloodDatabase, searchKey),
-//            donorsFromFullName(stagingBloodDatabase, searchKey)
-//        )
-//        var disposable: Disposable? = null
-//        disposable = Single.zip(fullNameResponseList) { args -> listOf(args) }
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribeOn(Schedulers.io())
-//            .subscribe({ responseList ->
-//                disposable?.dispose()
-//                val response = responseList[0]
-//                val stagingDatabaseList = response[1] as List<Donor>
-//                val mainDatabaseList = response[0] as List<Donor>
-//                val newList = stagingDatabaseList.union(mainDatabaseList).distinctBy { donor -> Utils.donorComparisonByString(donor) }
-//                showDonors(newList)
-//            },
-//            { throwable ->
-//                disposable?.dispose()
-//                LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.EXC), "handleSearchClick", throwable)
-//            })
-//    }
-//    private fun donorsFromFullName(database: BloodDatabase, search: String): Single<List<Donor>> {
-//        val searchLast: String
-//        var searchFirst = "%"
-//        val index = search.indexOf(',')
-//        if (index < 0) {
-//            searchLast = "$search%"
-//        } else {
-//            val last = search.substring(0, index)
-//            val first = search.substring(index + 1)
-//            searchFirst = "$first%"
-//            searchLast = "$last%"
-//        }
-//        return database.databaseDao().donorsFromFullName(searchLast, searchFirst)
-//    }
-//
+    @Suppress("UNCHECKED_CAST")
+    fun handleSearchClick(searchKey: String, showDonors: (donorList: List<Donor>) -> Unit) {
+        val fullNameResponseList = listOf(
+            donorsFromFullName(mainBloodDatabase, searchKey),
+            donorsFromFullName(stagingBloodDatabase, searchKey)
+        )
+        var disposable: Disposable? = null
+        disposable = Single.zip(fullNameResponseList) { args -> listOf(args) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe({ responseList ->
+                disposable?.dispose()
+                val response = responseList[0]
+                val stagingDatabaseList = response[1] as List<Donor>
+                val mainDatabaseList = response[0] as List<Donor>
+                val newList = stagingDatabaseList.union(mainDatabaseList).distinctBy { donor -> Utils.donorComparisonByString(donor) }
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "handleSearchClick success: searchKey=$searchKey     returnList=$newList")
+                showDonors(newList)
+            },
+            { throwable ->
+                disposable?.dispose()
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "handleSearchClick failure: message=${throwable.message}")
+            })
+    }
+    private fun donorsFromFullName(database: BloodDatabase, search: String): Single<List<Donor>> {
+        val searchLast: String
+        var searchFirst = "%"
+        val index = search.indexOf(',')
+        if (index < 0) {
+            searchLast = "$search%"
+        } else {
+            val last = search.substring(0, index)
+            val first = search.substring(index + 1)
+            searchFirst = "$first%"
+            searchLast = "$last%"
+        }
+        return database.databaseDao().donorsFromFullName(searchLast, searchFirst)
+    }
+
 //    /**
 //     * @param   searchKey                 first n characters of the last name, case insensitive
 //     * @param   showDonorsAndProducts     callback method in ViewModel when asynchronous operation finishes
@@ -499,7 +504,7 @@ class RepositoryImpl : Repository {
 //            })
 //
 //    }
-//
+
 //    private fun donorsFromFullNameWithProducts(database: BloodDatabase, search: String): Single<List<DonorWithProducts>> {
 //        var searchLast: String
 //        var searchFirst = "%"
@@ -577,7 +582,7 @@ fun DialogBox2FA(onDismiss: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp)
-                        .background(color = Color(0xFF35898f)),
+                        .background(color = Color(0xFF35898F)),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -613,7 +618,7 @@ fun DialogBox2FA(onDismiss: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 36.dp, start = 36.dp, end = 36.dp, bottom = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF35898f)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF35898F)),
                     onClick = {
                         onDismiss()
                         Toast.makeText(

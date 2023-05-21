@@ -3,6 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.mace.mace_template">
     
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    
     <application
         android:name=".di.BaseApplication"
         android:allowBackup="true"

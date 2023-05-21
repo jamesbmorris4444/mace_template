@@ -1,9 +1,6 @@
 package com.mace.mace_template.ui
 
-import SampleData
-import android.content.res.Configuration
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -12,56 +9,123 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Surface
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextField
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.fullsekurity.theatreblood.logger.LogUtils
+import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
-import com.mace.mace_template.Message
+import com.mace.mace_template.DrawerAppScreen
 import com.mace.mace_template.R
-import com.mace.mace_template.ui.theme.MaceTemplateTheme
+import com.mace.mace_template.repository.storage.Donor
 
 @Composable
 fun DonateProductsScreen(
-    transitionToCreateDonation:  Boolean,
+    onComposing: (AppBarState) -> Unit,
+    canNavigateBack: Boolean,
+    navigateUp: () -> Unit,
+    openDrawer: () -> Unit,
+    transitionToCreateDonation: Boolean,
+    onItemButtonClicked: (donor: Donor) -> Unit,
     viewModel: BloodViewModel,
-    dataList: List<Message>,
     modifier: Modifier = Modifier
 ) {
     val completed = remember { mutableStateOf(false) }
     viewModel.RefreshRepository { completed.value = true }
-    Conversation(completed.value, dataList, modifier)
+    DonateProductsHandler(
+        onComposing = onComposing,
+        canNavigateBack = canNavigateBack,
+        navigateUp = navigateUp,
+        openDrawer = openDrawer,
+        viewModel = viewModel,
+        value = completed.value,
+        onItemButtonClicked = onItemButtonClicked,
+        modifier = modifier)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun Conversation(value: Boolean, messages: List<Message>, modifier: Modifier = Modifier) {
-    val buttonBackgroundColor = "0xFF0000FF"
+fun DonateProductsHandler(
+    onComposing: (AppBarState) -> Unit,
+    canNavigateBack: Boolean,
+    navigateUp: () -> Unit,
+    openDrawer: () -> Unit,
+    viewModel: BloodViewModel,
+    value: Boolean,
+    onItemButtonClicked: (donor: Donor) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val donors: MutableState<List<Donor>> = remember { mutableStateOf(listOf()) }
+    fun handleSearchClick(searchKey: String, showDonors: (donorList: List<Donor>) -> Unit) {
+        viewModel.handleSearchClick(searchKey = searchKey, searchCompleted = showDonors)
+    }
+    fun showDonors(donorList: List<Donor>) {
+        donors.value = donorList
+    }
+    LaunchedEffect(key1 = true) {
+        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=${DrawerAppScreen.DonateProductsSearch.screenName}")
+        onComposing(
+            AppBarState(
+                title = DrawerAppScreen.DonateProductsSearch.screenName,
+                actions = {
+                    if (canNavigateBack) {
+                        IconButton(onClick = navigateUp) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back_button_content_description)
+                            )
+                        }
+                    }
+                    IconButton(onClick = openDrawer) {
+                        Icon(
+                            imageVector = Icons.Filled.Menu,
+                            contentDescription = stringResource(R.string.menu_content_description)
+                        )
+                    }
+                },
+                navigationIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Menu,
+                        contentDescription = stringResource(R.string.menu_content_description)
+
+                    )
+                }
+            )
+        )
+    }
     BoxWithConstraints(modifier = modifier.fillMaxWidth(1f)) {
+        val keyboardController = LocalSoftwareKeyboardController.current
         if (value) {
             Column(
                 modifier = Modifier
@@ -70,29 +134,28 @@ fun Conversation(value: Boolean, messages: List<Message>, modifier: Modifier = M
             ) {
                 Row {
                     var text by rememberSaveable { mutableStateOf("") }
-                    TextField(
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .weight(0.7f)
+                            .height(60.dp),
                         value = text,
                         onValueChange = {
                             text = it
                         },
                         shape = RoundedCornerShape(10.dp),
-                        label = { Text("Label") }
+                        label = { Text("Initial letters of last name") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                keyboardController?.hide()
+                                handleSearchClick(text, ::showDonors)
+                            })
                     )
-                    Button(
-                        onClick = {
-
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = Color.White)) {
-                        Text(text = "Submit")
-                    }
                 }
-
-                LazyColumn {
-                    items(messages) { message ->
-                        MessageCard(message)
-                    }
-                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                DonorList(donors, onItemButtonClicked)
             }
         } else {
             Column(
@@ -114,62 +177,46 @@ private fun CustomCircularProgressBar(){
         strokeWidth = 6.dp)
 }
 
-@Preview
 @Composable
-fun PreviewConversation() {
-    MaceTemplateTheme {
-        Conversation(false, SampleData.conversationSample)
-    }
-}
-
-@Composable
-fun MessageCard(msg: Message) {
-    Column {
-        Row(modifier = Modifier.padding(all = 8.dp)) {
-            Image(
-                painter = painterResource(R.drawable.profile_picture),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(45.dp)
-                    .clip(CircleShape)
-                    .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column {
-                androidx.compose.material.Text(
-                    text = msg.author,
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.titleSmall
+fun DonorList(donors: MutableState<List<Donor>>, onItemButtonClicked: (donor: Donor) -> Unit) {
+    LazyColumn {
+        items(items = donors.value, itemContent = {
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onItemButtonClicked(it) }
+            ) {
+                Text(
+                    text = it.lastName,
+                    color = colorResource(id = R.color.black),
+                    style = MaterialTheme.typography.bodyMedium
                 )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Surface(shape = MaterialTheme.shapes.medium, elevation = 1.dp) {
-                    androidx.compose.material.Text(
-                        text = msg.body,
-                        modifier = Modifier.padding(all = 4.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+                Text(
+                    text = it.firstName,
+                    color = colorResource(id = R.color.black),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = it.middleName,
+                    color = colorResource(id = R.color.black),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = it.dob,
+                    color = colorResource(id = R.color.black),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = it.aboRh,
+                    color = colorResource(id = R.color.black),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = it.branch,
+                    color = colorResource(id = R.color.black),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
-        }
-    }
-}
-
-@Preview(name = "Light Mode")
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    name = "Dark Mode"
-)
-@Composable
-fun PreviewMessageCard() {
-    MaceTemplateTheme {
-        Surface {
-            MessageCard(
-                msg = Message("Lexi", "Hey, take a look at Jetpack Compose, it's great!")
-            )
-        }
+            Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+        })
     }
 }

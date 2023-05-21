@@ -1,10 +1,10 @@
 package com.mace.mace_template
 
 import android.app.Application
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.AndroidViewModel
 import com.mace.mace_template.repository.RepositoryImpl
+import com.mace.mace_template.repository.storage.Donor
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -15,7 +15,15 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
 
     @Composable
     fun RefreshRepository(refreshCompleted: () -> Unit) {
-        Log.d("JIMX","JJJJJJ  1")
         repository.refreshDatabase(app.applicationContext, refreshCompleted)
     }
+
+    fun handleSearchClick(searchKey: String, searchCompleted: (List<Donor>) -> Unit) {
+        repository.handleSearchClick(searchKey, searchCompleted)
+    }
+
+    fun setBloodDatabase() {
+        repository.setBloodDatabase(app.applicationContext)
+    }
+
 }
