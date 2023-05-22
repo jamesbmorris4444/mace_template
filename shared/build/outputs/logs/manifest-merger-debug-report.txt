@@ -1,0 +1,25 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml:2:13-83
+INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml:2:13-83
+INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml:2:13-83
+	package
+		INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+		ADDED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml:2:13-83
+		INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+	xmlns:android
+		ADDED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml:2:23-81
+uses-sdk
+INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml reason: use-sdk injection requested
+INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+	android:targetSdkVersion
+		INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+		ADDED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+		INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+	android:minSdkVersion
+		INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+		ADDED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+		INJECTED from /Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml

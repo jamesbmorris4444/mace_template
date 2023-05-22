@@ -43,11 +43,11 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.fullsekurity.theatreblood.logger.LogUtils
 import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.DrawerAppScreen
 import com.mace.mace_template.R
+import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 
 @Composable

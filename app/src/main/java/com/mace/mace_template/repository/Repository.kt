@@ -37,8 +37,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.fullsekurity.theatreblood.logger.LogUtils
 import com.mace.mace_template.R
+import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.network.APIClient
 import com.mace.mace_template.repository.network.APIInterface
 import com.mace.mace_template.repository.storage.BloodDatabase

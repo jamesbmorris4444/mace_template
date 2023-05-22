@@ -1,9 +1,9 @@
-package com.fullsekurity.theatreblood.logger
+package com.mace.mace_template.logger
 
 import android.text.TextUtils
-import com.fullsekurity.theatreblood.logger.LogUtils.LogType.D
-import com.fullsekurity.theatreblood.logger.LogUtils.LogType.E
-import com.fullsekurity.theatreblood.logger.LogUtils.LogType.W
+import com.mace.mace_template.logger.LogUtils.LogType.D
+import com.mace.mace_template.logger.LogUtils.LogType.E
+import com.mace.mace_template.logger.LogUtils.LogType.W
 import timber.log.Timber
 
 object LogUtils {

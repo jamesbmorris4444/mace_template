@@ -41,7 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import com.fullsekurity.theatreblood.logger.LogUtils
+import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.ui.theme.MaceTemplateTheme
 import kotlinx.coroutines.launch
 import timber.log.Timber

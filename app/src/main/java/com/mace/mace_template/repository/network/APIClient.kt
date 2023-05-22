@@ -1,7 +1,7 @@
 package com.mace.mace_template.repository.network
 
-import com.fullsekurity.theatreblood.logger.LogUtils
 import com.google.gson.GsonBuilder
+import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.utils.Constants.DONOR_LIST_CLASS_TYPE
 import com.mace.mace_template.utils.Constants.THEATRE_BLOOD_BASE_URL
 import okhttp3.*

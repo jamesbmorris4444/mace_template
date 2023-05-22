@@ -32,10 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.fullsekurity.theatreblood.logger.LogUtils
 import com.mace.mace_template.AppBarState
 import com.mace.mace_template.DrawerAppScreen
 import com.mace.mace_template.R
+import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 
 @OptIn(ExperimentalMaterial3Api::class)
