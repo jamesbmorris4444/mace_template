@@ -54,6 +54,7 @@ fun StartScreenApp(
             startDestination = DrawerAppScreen.DonateProductsSearch.name
         ) {
             composable(route = DrawerAppScreen.DonateProductsSearch.name) {
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen 1=${DrawerAppScreen.DonateProductsSearch.screenName}")
                 DonateProductsScreen(
                     onComposing = {
                         appBarState = it
@@ -73,6 +74,7 @@ fun StartScreenApp(
                 )
             }
             composable(route = DrawerAppScreen.ManageDonor.name) {
+                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=${DrawerAppScreen.ManageDonor.screenName}")
                 ManageDonorScreen(
                     onComposing = {
                         appBarState = it
@@ -101,8 +103,6 @@ fun StartScreenAppBar(
             containerColor = colorResource(R.color.teal_200)
         ),
         actions = { appBarState.actions?.invoke(this) },
-        navigationIcon = {
-            appBarState.navigationIcon
-        }
+        navigationIcon = { appBarState.navigationIcon }
     )
 }

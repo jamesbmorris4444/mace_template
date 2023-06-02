@@ -3,6 +3,6 @@
 3    package="com.mace.shared" >
 4
 5    <uses-sdk android:minSdkVersion="24" />
-5-->/Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest16209866075178138047.xml
+5-->/Users/jmorris/mace_template/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest8330129110918455203.xml
 6
 7</manifest>

@@ -115,11 +115,12 @@ fun DonateProductsHandler(
                     }
                 },
                 navigationIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Menu,
-                        contentDescription = stringResource(R.string.menu_content_description)
-
-                    )
+                    IconButton(onClick = navigateUp) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back_button_content_description)
+                        )
+                    }
                 }
             )
         )
