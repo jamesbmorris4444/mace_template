@@ -1,26 +1,20 @@
 package com.mace.mace_template
 
+import android.view.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.DrawerValue
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.ModalDrawer
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -31,7 +25,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -43,7 +36,11 @@ import kotlinx.coroutines.launch
 // See https://www.geeksforgeeks.org/android-jetpack-compose-implement-navigation-drawer/ for Navigation Drawer
 
 @Composable
-fun DrawerAppComponent(bloodViewModel: BloodViewModel, requestedScreen: DrawerAppScreen) {
+fun DrawerAppComponent(
+    view: View,
+    bloodViewModel: BloodViewModel,
+    requestedScreen: DrawerAppScreen
+) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val currentScreen = remember { mutableStateOf(requestedScreen) }
     val coroutineScope = rememberCoroutineScope()
@@ -60,6 +57,7 @@ fun DrawerAppComponent(bloodViewModel: BloodViewModel, requestedScreen: DrawerAp
         drawerBackgroundColor = colorResource(id = R.color.black),
         content = {
             BodyContentComponent(
+                view = view,
                 currentScreen = currentScreen.value,
                 openDrawer = { coroutineScope.launch { drawerState.open() } },
                 bloodViewModel = bloodViewModel
@@ -132,75 +130,18 @@ fun DrawerContentComponent(
 
 @Composable
 fun BodyContentComponent(
+    view: View,
     currentScreen: DrawerAppScreen,
     openDrawer: () -> Unit,
     bloodViewModel: BloodViewModel
 ) {
     LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "BodyContentComponent in MainActivity: ${currentScreen.name}}")
-    StartScreenApp(transitionToCreateDonation = true, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer)
-//    when (currentScreen) {
-//        DrawerAppScreen.DonateProductsSearch -> StartScreenApp(transitionToCreateDonation = true, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer)
-//        DrawerAppScreen.ManageDonorSearch -> StartScreenApp(transitionToCreateDonation = false, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer)
-//        DrawerAppScreen.ManageDonor -> StartScreenApp(viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer)
-//        DrawerAppScreen.ReassociateDonation -> ReassociateDonationComponent(openDrawer)
-//        DrawerAppScreen.ViewDonorList -> ViewDonorListComponent(openDrawer)
-//    }
-}
-
-@Composable
-fun ReassociateDonationComponent(openDrawer: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("Reassociate Donation") },
-            navigationIcon = {
-                IconButton(
-                    onClick = openDrawer) {
-                    Icon(imageVector = Icons.Filled.Menu, contentDescription = "Menu")
-                }
-            }
-        )
-        Surface(color = Color(0xFFffd7d7.toInt()), modifier = Modifier.weight(1f)) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = CenterHorizontally,
-                content = {
-                    Text(text = "Reassociate Donation")
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun ViewDonorListComponent(openDrawer: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("View Donor List") },
-            navigationIcon = {
-                IconButton(
-                    onClick = openDrawer) {
-                    Icon(imageVector = Icons.Filled.Menu, contentDescription = "Menu")
-                }
-            }
-        )
-        Surface(color = Color(0xFFffd7d7.toInt()), modifier = Modifier.weight(1f)) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = CenterHorizontally,
-                content = {
-                    Text(text = "View Donor List")
-                }
-            )
-        }
-    }
+    StartScreenApp(view, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer)
 }
 
 enum class DrawerAppScreen(val screenName: String) {
     DonateProductsSearch("Donate Products Search"),
+    CreateProducts("CreateProducts"),
     ManageDonorSearch("Manage Donor Search"),
     ManageDonor("Manage Donor after Search"),
     ReassociateDonation("Reassociate Donation"),

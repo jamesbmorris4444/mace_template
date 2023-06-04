@@ -1,43 +1,6 @@
 package com.mace.mace_template.repository
 
 import android.content.Context
-import android.widget.Toast
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import com.mace.mace_template.R
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.network.APIClient
 import com.mace.mace_template.repository.network.APIInterface
@@ -45,7 +8,6 @@ import com.mace.mace_template.repository.storage.BloodDatabase
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.repository.storage.Product
-import com.mace.mace_template.ui.theme.MaceTemplateTheme
 import com.mace.mace_template.utils.Constants
 import com.mace.mace_template.utils.Constants.MAIN_DATABASE_NAME
 import com.mace.mace_template.utils.Constants.MODIFIED_DATABASE_NAME
@@ -62,6 +24,11 @@ import java.util.concurrent.TimeUnit
 interface Repository {
     fun setBloodDatabase(context: Context)
     fun refreshDatabase(context: Context, refreshCompleted: () -> Unit)
+}
+
+enum class DatabaseSelector {
+    STAGING_DB,
+    MAINBLOOD_DB
 }
 
 class RepositoryImpl : Repository {
@@ -149,15 +116,15 @@ class RepositoryImpl : Repository {
         if (error == null) {
             error = "App cannot continue"
         }
-        ComposeView(context).apply {
-            setContent {
-                MaceTemplateTheme {
-                    Surface(modifier = Modifier.fillMaxSize()) {
-                        StandardModal(context)
-                    }
-                }
-            }
-        }
+//        ComposeView(context).apply {
+//            setContent {
+//                MaceTemplateTheme {
+//                    Surface(modifier = Modifier.fillMaxSize()) {
+//                        StandardModal(context)
+//                    }
+//                }
+//            }
+//        }
     }
 
     private fun deleteDatabase(context: Context, databaseName: String) {
@@ -201,49 +168,22 @@ class RepositoryImpl : Repository {
      *   retrieveDonorFromNameAndDate
      */
 
-//    fun insertDonorIntoDatabase(database: BloodDatabase, donor: Donor, transitionToCreateDonation: Boolean, showList: () -> Unit) {
-//        var disposable: Disposable? = null
-//        disposable = Completable.fromAction { database.databaseDao().insertDonor(donor) }
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribeOn(Schedulers.io())
-//            .subscribe ({
-//                disposable?.dispose()
-//                StandardModal(
-//                    callbacks,
-//                    modalType = StandardModal.ModalType.STANDARD,
-//                    titleText = callbacks.fetchActivity().getString(R.string.std_modal_insert_donor_staging_title),
-//                    bodyText = callbacks.fetchActivity().getString(R.string.std_modal_insert_donor_staging_body),
-//                    positiveText = callbacks.fetchActivity().getString(R.string.std_modal_ok),
-//                    dialogFinishedListener = object : StandardModal.DialogFinishedListener {
-//                        override fun onPositive(string: String) {
-//                            if (transitionToCreateDonation) {
-//                                callbacks.fetchActivity().loadCreateProductsFragment(donor)
-//                            } else {
-//                                callbacks.fetchActivity().onBackPressed()
-//                            }
-//                        }
-//                        override fun onNegative() { }
-//                        override fun onNeutral() { }
-//                        override fun onBackPressed() {
-//                            callbacks.fetchActivity().onBackPressed()
-//                        }
-//                    }
-//                ).show(callbacks.fetchActivity().supportFragmentManager, "MODAL")
-//                showList()
-//            },
-//            { throwable ->
-//                disposable?.dispose()
-//                insertDonorIntoDatabaseFailure(transitionToCreateDonation, donor, "insertDonorIntoDatabase", throwable)
-//            })
-//    }
-//    private fun insertDonorIntoDatabaseFailure(transition: Boolean, donor: Donor, method: String, throwable: Throwable) {
-//        LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.EXC), method, throwable)
-//        if (transition) {
-//            callbacks.fetchActivity().loadCreateProductsFragment(donor)
-//        } else {
-//            callbacks.fetchActivity().onBackPressed()
-//        }
-//    }
+    fun insertDonorIntoDatabase(database: BloodDatabase, donor: Donor, transitionToCreateDonation: Boolean, showList: () -> Unit) {
+        var disposable: Disposable? = null
+        disposable = Completable.fromAction { database.databaseDao().insertDonor(donor) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe ({
+                disposable?.dispose()
+            },
+            { throwable ->
+                disposable?.dispose()
+                insertDonorIntoDatabaseFailure(transitionToCreateDonation, donor, "insertDonorIntoDatabase", throwable)
+            })
+    }
+    private fun insertDonorIntoDatabaseFailure(transition: Boolean, donor: Donor, method: String, throwable: Throwable) {
+        LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), method, throwable)
+    }
 //
 //    fun insertDonorAndProductsIntoDatabase(database: BloodDatabase, donor: Donor, products: List<Product>, showList: () -> Unit) {
 //        var disposable: Disposable? = null
@@ -520,171 +460,4 @@ class RepositoryImpl : Repository {
 //        return database.databaseDao().donorsFromFullNameWithProducts(searchLast, searchFirst)
 //    }
 
-}
-
-@Composable
-fun StandardModal(context: Context) {
-    ComposeView(context).apply {
-        setContent {
-            MaceTemplateTheme(darkTheme = false) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = MaterialTheme.colorScheme.background),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-
-                        var openDialog by remember {
-                            mutableStateOf(false) // Initially dialog is closed
-                        }
-
-                        ButtonClick(buttonText = "Open Dialog") {
-                            openDialog = true
-                        }
-
-                        if (openDialog) {
-                            DialogBox2FA {
-                                openDialog = false
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun DialogBox2FA(onDismiss: () -> Unit) {
-    val contextForToast = LocalContext.current.applicationContext
-    Dialog(
-        onDismissRequest = {
-            onDismiss()
-        }
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shadowElevation = 4.dp
-        ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                        .background(color = Color(0xFF35898F)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        modifier = Modifier
-                            .padding(top = 16.dp, bottom = 16.dp),
-                        painter = painterResource(id = R.drawable.notification),
-                        contentDescription = "2-Step Verification",
-                        alignment = Alignment.Center
-                    )
-                }
-
-                Text(
-                    modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
-                    text = "2-Step Verification",
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontFamily = FontFamily(Font(R.font.avenir_bold, FontWeight.Bold)),
-                        fontSize = 20.sp
-                    )
-                )
-
-                Text(
-                    modifier = Modifier.padding(start = 12.dp, end = 12.dp),
-                    text = "Setup 2-Step Verification to add additional layer of security to your account.",
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontFamily = FontFamily(Font(R.font.avenir_regular, FontWeight.Normal)),
-                        fontSize = 14.sp
-                    )
-                )
-
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 36.dp, start = 36.dp, end = 36.dp, bottom = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF35898F)),
-                    onClick = {
-                        onDismiss()
-                        Toast.makeText(
-                            contextForToast,
-                            "Click: Setup Now",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }) {
-                    Text(
-                        text = "Setup Now",
-                        color = Color.White,
-                        style = TextStyle(
-                            fontFamily = FontFamily(
-                                Font(
-                                    R.font.avenir_book,
-                                    FontWeight.Medium
-                                )
-                            ),
-                            fontSize = 16.sp
-                        )
-                    )
-                }
-
-                TextButton(
-                    onClick = {
-                        onDismiss()
-                        Toast.makeText(
-                            contextForToast,
-                            "Click: I'll Do It Later",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }) {
-                    Text(
-                        text = "I'll Do It Later",
-                        color = Color(0xFF35898f),
-                        style = TextStyle(
-                            fontFamily = FontFamily(
-                                Font(
-                                    R.font.avenir_book,
-                                    FontWeight.Normal
-                                )
-                            ),
-                            fontSize = 14.sp
-                        )
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ButtonClick(
-    buttonText: String,
-    onButtonClick: () -> Unit
-) {
-    Button(
-        shape = RoundedCornerShape(5.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-        onClick = {
-            onButtonClick()
-        }) {
-        Text(
-            text = buttonText,
-            fontSize = 16.sp,
-            color = Color.White
-        )
-    }
 }

@@ -1,7 +1,6 @@
 package com.mace.mace_template.repository.network
 
 import com.google.gson.GsonBuilder
-import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.utils.Constants.DONOR_LIST_CLASS_TYPE
 import com.mace.mace_template.utils.Constants.THEATRE_BLOOD_BASE_URL
 import okhttp3.*
@@ -19,7 +18,7 @@ object APIClient {
         get() {
             val interceptor = HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
                 override fun log(message: String) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RXJ), "okHttp logging interceptor: $message")
+                    //LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RXJ), "okHttp logging interceptor: $message")
                 }
             })
             interceptor.level = HttpLoggingInterceptor.Level.BODY  // BASIC or BODY

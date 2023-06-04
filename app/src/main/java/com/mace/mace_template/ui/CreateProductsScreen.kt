@@ -1,6 +1,5 @@
 package com.mace.mace_template.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -48,40 +47,41 @@ import com.mace.mace_template.DrawerAppScreen
 import com.mace.mace_template.R
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
+import com.mace.mace_template.repository.storage.Product
 
 @Composable
-fun DonateProductsScreen(
+fun CreateProductsScreen(
     onComposing: (AppBarState) -> Unit,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
-    onItemButtonClicked: (donor: Donor) -> Unit,
+    onCompleteButtonClicked: (product: Product) -> Unit,
     viewModel: BloodViewModel,
     modifier: Modifier = Modifier
 ) {
     val completed = remember { mutableStateOf(false) }
     viewModel.RefreshRepository { completed.value = true }
-    DonateProductsHandler(
+    CreateProductsHandler(
         onComposing = onComposing,
         canNavigateBack = canNavigateBack,
         navigateUp = navigateUp,
         openDrawer = openDrawer,
         viewModel = viewModel,
         value = completed.value,
-        onItemButtonClicked = onItemButtonClicked,
+        onCompleteButtonClicked = onCompleteButtonClicked,
         modifier = modifier)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun DonateProductsHandler(
+fun CreateProductsHandler(
     onComposing: (AppBarState) -> Unit,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     viewModel: BloodViewModel,
     value: Boolean,
-    onItemButtonClicked: (donor: Donor) -> Unit,
+    onCompleteButtonClicked: (product: Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val donors: MutableState<List<Donor>> = remember { mutableStateOf(listOf()) }
@@ -148,7 +148,7 @@ fun DonateProductsHandler(
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                DonorList(donors, onItemButtonClicked)
+                ProductsList(donors, onCompleteButtonClicked)
             }
         } else {
             Column(
@@ -171,12 +171,12 @@ private fun CustomCircularProgressBar(){
 }
 
 @Composable
-fun DonorList(donors: MutableState<List<Donor>>, onItemButtonClicked: (donor: Donor) -> Unit) {
+fun ProductsList(donors: MutableState<List<Donor>>, onCompleteButtonClicked: (product: Product) -> Unit) {
     LazyColumn {
         items(items = donors.value, itemContent = {
             Column(modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onItemButtonClicked(it) }
+                //.clickable { onCompleteButtonClicked(it) }
             ) {
                 Text(
                     text = it.lastName,

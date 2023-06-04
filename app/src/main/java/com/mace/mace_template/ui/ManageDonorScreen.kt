@@ -1,10 +1,11 @@
 package com.mace.mace_template.ui
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,17 +13,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExposedDropdownMenuBox
+import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.Composable
@@ -34,11 +37,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mace.mace_template.AppBarState
+import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.DrawerAppScreen
 import com.mace.mace_template.R
 import com.mace.mace_template.logger.LogUtils
@@ -52,6 +58,7 @@ fun ManageDonorScreen(
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     donor: Donor,
+    viewModel: BloodViewModel,
     onUpdateButtonClicked: () -> Unit
 ) {
     ManageDonorHandler(
@@ -63,7 +70,7 @@ fun ManageDonorScreen(
         onUpdateButtonClicked = onUpdateButtonClicked)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ManageDonorHandler(
     onComposing: (AppBarState) -> Unit,
@@ -79,14 +86,6 @@ fun ManageDonorHandler(
             AppBarState(
                 title = DrawerAppScreen.ManageDonor.screenName,
                 actions = {
-                    if (canNavigateBack) {
-                        IconButton(onClick = navigateUp) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back_button_content_description)
-                            )
-                        }
-                    }
                     IconButton(onClick = openDrawer) {
                         Icon(
                             imageVector = Icons.Filled.Menu,
@@ -95,24 +94,36 @@ fun ManageDonorHandler(
                     }
                 },
                 navigationIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Menu,
-                        contentDescription = stringResource(R.string.menu_content_description)
-
-                    )
+                    if (canNavigateBack) {
+                        IconButton(onClick = navigateUp) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back_button_content_description)
+                            )
+                        }
+                    }
                 }
             )
         )
     }
+    val stateVertical = rememberScrollState(0)
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState()),
+            .fillMaxHeight()
+            .verticalScroll(state = stateVertical),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        var aboRhExpanded by remember { mutableStateOf(false) }
+        var branchExpanded by remember { mutableStateOf(false) }
+        var lastNameText by rememberSaveable { mutableStateOf(donor.lastName) }
+        var firstNameText by rememberSaveable { mutableStateOf(donor.firstName) }
+        var middleNameText by rememberSaveable { mutableStateOf(donor.middleName) }
+        var dobText by rememberSaveable { mutableStateOf(donor.dob) }
+        var aboRhText by rememberSaveable { mutableStateOf(donor.aboRh) }
+        var branchText by rememberSaveable { mutableStateOf(donor.branch) }
         Spacer(modifier = Modifier.padding(top = 16.dp))
         Row {
-            var lastNameText by rememberSaveable { mutableStateOf(donor.lastName) }
             OutlinedTextField(
                 modifier = Modifier
                     .height(60.dp),
@@ -127,7 +138,6 @@ fun ManageDonorHandler(
         }
         Spacer(modifier = Modifier.padding(top = 16.dp))
         Row {
-            var firstNameText by rememberSaveable { mutableStateOf(donor.firstName) }
             OutlinedTextField(
                 modifier = Modifier
                     .height(60.dp),
@@ -142,7 +152,6 @@ fun ManageDonorHandler(
         }
         Spacer(modifier = Modifier.padding(top = 16.dp))
         Row {
-            var middleNameText by rememberSaveable { mutableStateOf(donor.middleName) }
             OutlinedTextField(
                 modifier = Modifier
                     .height(60.dp),
@@ -157,7 +166,6 @@ fun ManageDonorHandler(
         }
         Spacer(modifier = Modifier.padding(top = 16.dp))
         Row {
-            var dobText by rememberSaveable { mutableStateOf(donor.dob) }
             OutlinedTextField(
                 modifier = Modifier
                     .height(60.dp),
@@ -174,17 +182,17 @@ fun ManageDonorHandler(
         Row {
             HorizontalRadioButtons(donor.gender)
         }
-        Column {
-            var aboRhText by rememberSaveable { mutableStateOf(donor.aboRh) }
-            var expanded by remember { mutableStateOf(false) }
-            val icon = if (expanded)
-                Icons.Filled.KeyboardArrowUp
-            else
-                Icons.Filled.KeyboardArrowDown
+        ExposedDropdownMenuBox(
+            expanded = aboRhExpanded,
+            onExpandedChange = {
+                aboRhExpanded = !aboRhExpanded
+            }
+        ) {
             OutlinedTextField(
                 modifier = Modifier
                     .height(60.dp),
                 value = aboRhText,
+                readOnly = true,
                 onValueChange = {
                     aboRhText = it
                 },
@@ -192,34 +200,43 @@ fun ManageDonorHandler(
                 label = { Text("Enter Blood Type:") },
                 singleLine = true,
                 trailingIcon = {
-                    Icon(icon,"contentDescription",
-                        Modifier.clickable { expanded = !expanded })
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = aboRhExpanded
+                    )
                 }
             )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .height(60.dp)
+            ExposedDropdownMenu(
+                expanded = aboRhExpanded,
+                onDismissRequest = { aboRhExpanded = false }
             ) {
                 val aboRhArray = stringArrayResource(R.array.abo_rh_array)
                 aboRhArray.forEach { label ->
-                    DropdownMenuItem(onClick = { expanded = false; aboRhText = label }) { Text(text = label) }
+                    DropdownMenuItem(
+                        modifier = Modifier.background(colorResource(R.color.teal_100)),
+                        onClick = {
+                            aboRhExpanded = false
+                            aboRhText = label
+                        }
+                    ) {
+                        Text(
+                            text = label
+                        )
+                    }
                 }
             }
         }
         Spacer(modifier = Modifier.padding(top = 16.dp))
-        Column {
-            var branchText by rememberSaveable { mutableStateOf(donor.branch) }
-            var expanded by remember { mutableStateOf(false) }
-            val icon = if (expanded)
-                Icons.Filled.KeyboardArrowUp
-            else
-                Icons.Filled.KeyboardArrowDown
+        ExposedDropdownMenuBox(
+            expanded = branchExpanded,
+            onExpandedChange = {
+                branchExpanded = !branchExpanded
+            }
+        ) {
             OutlinedTextField(
                 modifier = Modifier
                     .height(60.dp),
                 value = branchText,
+                readOnly = true,
                 onValueChange = {
                     branchText = it
                 },
@@ -227,21 +244,43 @@ fun ManageDonorHandler(
                 label = { Text("Enter Branch:") },
                 singleLine = true,
                 trailingIcon = {
-                    Icon(icon,"contentDescription",
-                        Modifier.clickable { expanded = !expanded })
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = branchExpanded
+                    )
                 }
             )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .height(60.dp)
+            ExposedDropdownMenu(
+                expanded = branchExpanded,
+                onDismissRequest = { branchExpanded = false }
             ) {
                 val branchArray = stringArrayResource(R.array.military_branch_array)
                 branchArray.forEach { label ->
-                    DropdownMenuItem(onClick = { expanded = false; branchText = label }) { Text(text = label) }
+                    DropdownMenuItem(
+                        modifier = Modifier.background(colorResource(R.color.teal_100)),
+                        onClick = {
+                            branchExpanded = false
+                            branchText = label
+                        }
+                    ) {
+                        Text(
+                            text = label
+                        )
+                    }
                 }
             }
+        }
+        Spacer(modifier = Modifier.padding(top = 16.dp))
+        Button(
+            shape = RoundedCornerShape(5.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            onClick = {
+                onUpdateButtonClicked()
+            }) {
+            Text(
+                text = stringResource(R.string.update_button_text),
+                fontSize = 16.sp,
+                color = Color.White
+            )
         }
     }
 }
@@ -274,10 +313,4 @@ fun HorizontalRadioButtons(isMale: Boolean) {
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun DefaultPreview() {
-    HorizontalRadioButtons(true)
 }
