@@ -59,7 +59,7 @@ fun ManageDonorScreen(
     openDrawer: () -> Unit,
     donor: Donor,
     viewModel: BloodViewModel,
-    onUpdateButtonClicked: () -> Unit
+    onUpdateButtonClicked: (databaseModified: Boolean) -> Unit
 ) {
     ManageDonorHandler(
         onComposing = onComposing,
@@ -78,7 +78,7 @@ fun ManageDonorHandler(
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     donor: Donor,
-    onUpdateButtonClicked: () -> Unit
+    onUpdateButtonClicked: (databaseModified: Boolean) -> Unit
 ) {
     LaunchedEffect(key1 = true) {
         LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=${DrawerAppScreen.ManageDonor.screenName}")
@@ -114,6 +114,7 @@ fun ManageDonorHandler(
             .verticalScroll(state = stateVertical),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        var databaseModified by remember { mutableStateOf(false) }
         var aboRhExpanded by remember { mutableStateOf(false) }
         var branchExpanded by remember { mutableStateOf(false) }
         var lastNameText by rememberSaveable { mutableStateOf(donor.lastName) }
@@ -130,6 +131,7 @@ fun ManageDonorHandler(
                 value = lastNameText,
                 onValueChange = {
                     lastNameText = it
+                    databaseModified = true
                 },
                 shape = RoundedCornerShape(10.dp),
                 label = { Text("Enter Last Name") },
@@ -144,6 +146,7 @@ fun ManageDonorHandler(
                 value = firstNameText,
                 onValueChange = {
                     firstNameText = it
+                    databaseModified = true
                 },
                 shape = RoundedCornerShape(10.dp),
                 label = { Text("Enter First Name") },
@@ -158,6 +161,7 @@ fun ManageDonorHandler(
                 value = middleNameText,
                 onValueChange = {
                     middleNameText = it
+                    databaseModified = true
                 },
                 shape = RoundedCornerShape(10.dp),
                 label = { Text("Enter Middle Name") },
@@ -172,6 +176,7 @@ fun ManageDonorHandler(
                 value = dobText,
                 onValueChange = {
                     dobText = it
+                    databaseModified = true
                 },
                 shape = RoundedCornerShape(10.dp),
                 label = { Text("Enter DOB: 13 Mar 2022") },
@@ -216,6 +221,7 @@ fun ManageDonorHandler(
                         onClick = {
                             aboRhExpanded = false
                             aboRhText = label
+                            databaseModified = true
                         }
                     ) {
                         Text(
@@ -260,6 +266,7 @@ fun ManageDonorHandler(
                         onClick = {
                             branchExpanded = false
                             branchText = label
+                            databaseModified = true
                         }
                     ) {
                         Text(
@@ -274,7 +281,8 @@ fun ManageDonorHandler(
             shape = RoundedCornerShape(5.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = {
-                onUpdateButtonClicked()
+                onUpdateButtonClicked(databaseModified || radioButtonChanged)
+                radioButtonChanged = false
             }) {
             Text(
                 text = stringResource(R.string.update_button_text),
@@ -285,6 +293,7 @@ fun ManageDonorHandler(
     }
 }
 
+private var radioButtonChanged = false
 @Composable
 fun HorizontalRadioButtons(isMale: Boolean) {
     val radioOptions = listOf("Male", "Female")
@@ -303,6 +312,7 @@ fun HorizontalRadioButtons(isMale: Boolean) {
                 RadioButton(
                     selected = (text == selectedOption),
                     onClick = {
+                        radioButtonChanged = true
                         onOptionSelected(text)
                     }
                 )

@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit
 interface Repository {
     fun setBloodDatabase(context: Context)
     fun refreshDatabase(context: Context, refreshCompleted: () -> Unit)
+    fun insertDonorIntoDatabase(databaseSelector: DatabaseSelector, donor: Donor, completed: (Boolean) -> Unit)
 }
 
 enum class DatabaseSelector {
@@ -168,21 +169,25 @@ class RepositoryImpl : Repository {
      *   retrieveDonorFromNameAndDate
      */
 
-    fun insertDonorIntoDatabase(database: BloodDatabase, donor: Donor, transitionToCreateDonation: Boolean, showList: () -> Unit) {
+    override fun insertDonorIntoDatabase(databaseSelector: DatabaseSelector, donor: Donor, completed: (Boolean) -> Unit) {
         var disposable: Disposable? = null
-        disposable = Completable.fromAction { database.databaseDao().insertDonor(donor) }
+        disposable = Completable.fromAction {
+                if (databaseSelector == DatabaseSelector.MAINBLOOD_DB) {
+                    mainBloodDatabase.databaseDao().insertDonor(donor)
+                } else {
+                    stagingBloodDatabase.databaseDao().insertDonor(donor)
+                }
+            }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
             .subscribe ({
                 disposable?.dispose()
+                completed(true)
             },
-            { throwable ->
+            {
                 disposable?.dispose()
-                insertDonorIntoDatabaseFailure(transitionToCreateDonation, donor, "insertDonorIntoDatabase", throwable)
+                completed(false)
             })
-    }
-    private fun insertDonorIntoDatabaseFailure(transition: Boolean, donor: Donor, method: String, throwable: Throwable) {
-        LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), method, throwable)
     }
 //
 //    fun insertDonorAndProductsIntoDatabase(database: BloodDatabase, donor: Donor, products: List<Product>, showList: () -> Unit) {

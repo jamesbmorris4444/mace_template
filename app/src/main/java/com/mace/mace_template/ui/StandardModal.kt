@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -51,7 +52,6 @@ import com.mace.mace_template.logger.LogUtils
 @SuppressLint("ViewConstructor")
 class StandardModalComposeView(
     private val composeView: View,
-    private val numberOfButtons: Int = 2,
     private val topIconResId: Int = 0,
     private val titleText: String = "",
     private val bodyText: String = "",
@@ -74,7 +74,6 @@ class StandardModalComposeView(
     @Composable
     override fun Content() {
         StandardModal(
-            numberOfButtons, 
             topIconResId,
             titleText,
             bodyText,
@@ -99,7 +98,6 @@ class StandardModalComposeView(
 
 @Composable
 fun StandardModal(
-    numberOfButtons: Int = 2,
     topIconResId: Int,
     titleText: String = "",
     bodyText: String = "",
@@ -109,168 +107,192 @@ fun StandardModal(
     onDismiss: (DismissSelector) -> Unit
 ) {
     val shouldShowDialog = remember { mutableStateOf(true) }
+    val numberOfButtons = when {
+        negativeText.isEmpty() && neutralText.isEmpty() -> 1
+        neutralText.isEmpty() -> 2
+        else -> 3
+    }
     if (shouldShowDialog.value) {
         Dialog(
-            onDismissRequest = { },
-            content = {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp)
+            onDismissRequest = { }
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (topIconResId > 0) {
-                            Box(
+                    if (topIconResId > 0) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .background(color = colorResource(R.color.teal_200)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                modifier = Modifier
+                                    .padding(top = 22.dp)
+                                    .height(160.dp)
+                                    .width(120.dp),
+                                painter = painterResource(id = topIconResId),
+                                contentDescription = "Dialog Alert"
+                            )
+                        }
+                    }
+
+                    if (titleText.isNotEmpty()) {
+                        Text(
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = if (bodyText.isEmpty()) 0.dp else 16.dp),
+                            text = titleText,
+                            textAlign = TextAlign.Center,
+                            style = TextStyle(
+                                fontFamily = FontFamily(Font(R.font.avenir_bold, FontWeight.Bold)),
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
+
+                    if (bodyText.isNotEmpty()) {
+                        Text(
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+                            text = bodyText,
+                            textAlign = TextAlign.Center,
+                            style = TextStyle(
+                                fontFamily = FontFamily(Font(R.font.avenir_regular, FontWeight.Normal)),
+                                fontSize = 14.sp
+                            )
+                        )
+                    }
+
+                    val positiveButtonTopSpace = 12.dp
+                    val positiveTextButtonTopSpace = 8.dp
+                    val otherButtonTopSpace = 16.dp
+                    val otherTextButtonTopSpace = 8.dp
+                    val buttonBottomSpace = 20.dp
+                    val textButtonBottomSpace = 24.dp
+                    var index = positiveText.indexOf(':')
+                    when  {
+                        index == 3 && positiveText.substring(0,3) == "BKG" -> {
+                            Button(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(100.dp)
-                                    .background(color = colorResource(R.color.teal_200)),
-                                contentAlignment = Alignment.Center
+                                    .padding(top = positiveButtonTopSpace, start = 36.dp, end = 36.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.teal_200)),
+                                onClick = {
+                                    LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss P1")
+                                    shouldShowDialog.value = false
+                                    onDismiss(DismissSelector.POSITIVE)
+                                }
                             ) {
-                                Image(
-                                    modifier = Modifier
-                                        .padding(top = 22.dp)
-                                        .height(160.dp)
-                                        .width(120.dp),
-                                    painter = painterResource(id = topIconResId),
-                                    contentDescription = "Dialog Alert"
-                                )
+                                TextForButton(positiveText.substring(index + 1), true)
+                            }
+                            if (numberOfButtons == 1) {
+                                Spacer(modifier = Modifier.padding(bottom = buttonBottomSpace))
                             }
                         }
-                        
-                        if (titleText.isNotEmpty()) {
-                            Text(
-                                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
-                                text = titleText,
-                                textAlign = TextAlign.Center,
-                                style = TextStyle(
-                                    fontFamily = FontFamily(Font(R.font.avenir_bold, FontWeight.Bold)),
-                                    fontSize = 20.sp
-                                )
-                            )
+                        else -> {
+                            TextButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = positiveTextButtonTopSpace, start = 36.dp, end = 36.dp),
+                                onClick = {
+                                    LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss P2")
+                                    shouldShowDialog.value = false
+                                    onDismiss(DismissSelector.POSITIVE)
+                                }
+                            ) {
+                                TextForButton(positiveText, false)
+                            }
+                            if (numberOfButtons == 1) {
+                                Spacer(modifier = Modifier.padding(bottom = textButtonBottomSpace))
+                            }
                         }
+                    }
 
-                        if (bodyText.isNotEmpty()) {
-                            Text(
-                                modifier = Modifier.padding(start = 12.dp, end = 12.dp),
-                                text = bodyText,
-                                textAlign = TextAlign.Center,
-                                style = TextStyle(
-                                    fontFamily = FontFamily(Font(R.font.avenir_regular, FontWeight.Normal)),
-                                    fontSize = 14.sp
-                                )
-                            )
-                        }
-                        
-                        var index = positiveText.indexOf(':')
+                    if (numberOfButtons > 1) {
+                        index = negativeText.indexOf(':')
                         when  {
-                            index == 3 && positiveText.substring(0,3) == "BKG" -> {
+                            index == 3 && negativeText.substring(0,3) == "BKG" -> {
                                 Button(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 12.dp, start = 36.dp, end = 36.dp),
+                                        .padding(top = otherButtonTopSpace, start = 36.dp, end = 36.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.teal_200)),
                                     onClick = {
-                                        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss P1")
+                                        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss N1")
                                         shouldShowDialog.value = false
-                                        onDismiss(DismissSelector.POSITIVE)
+                                        onDismiss(DismissSelector.NEGATIVE)
                                     }
                                 ) {
-                                    TextForButton(positiveText.substring(index + 1), true)
+                                    TextForButton(negativeText.substring(index + 1), true)
+                                }
+                                if (numberOfButtons == 2) {
+                                    Spacer(modifier = Modifier.padding(bottom = buttonBottomSpace))
                                 }
                             }
                             else -> {
                                 TextButton(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 12.dp, start = 36.dp, end = 36.dp),
+                                        .padding(top = otherTextButtonTopSpace, start = 36.dp, end = 36.dp),
                                     onClick = {
-                                        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss P2")
+                                        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss N2")
                                         shouldShowDialog.value = false
-                                        onDismiss(DismissSelector.POSITIVE)
+                                        onDismiss(DismissSelector.NEGATIVE)
                                     }
                                 ) {
-                                    TextForButton(positiveText, false)
+                                    TextForButton(negativeText, false)
+                                }
+                                if (numberOfButtons == 2) {
+                                    Spacer(modifier = Modifier.padding(bottom = textButtonBottomSpace))
                                 }
                             }
                         }
+                    }
 
-                        if (numberOfButtons > 1) {
-                            index = negativeText.indexOf(':')
-                            when  {
-                                index == 3 && negativeText.substring(0,3) == "BKG" -> {
-                                    Button(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 12.dp, start = 36.dp, end = 36.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.teal_200)),
-                                        onClick = {
-                                            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss N1")
-                                            shouldShowDialog.value = false
-                                            onDismiss(DismissSelector.NEGATIVE)
-                                        }
-                                    ) {
-                                        TextForButton(negativeText.substring(index + 1), true)
+                    if (numberOfButtons > 2) {
+                        index = neutralText.indexOf(':')
+                        when  {
+                            index == 3 && neutralText.substring(0,3) == "BKG" -> {
+                                Button(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = otherButtonTopSpace, start = 36.dp, end = 36.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.teal_200)),
+                                    onClick = {
+                                        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss U1")
+                                        shouldShowDialog.value = false
+                                        onDismiss(DismissSelector.NEUTRAL)
                                     }
+                                ) {
+                                    TextForButton(neutralText.substring(index + 1), true)
                                 }
-                                else -> {
-                                    TextButton(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 12.dp, start = 36.dp, end = 36.dp),
-                                        onClick = {
-                                            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss N2")
-                                            shouldShowDialog.value = false
-                                            onDismiss(DismissSelector.NEGATIVE)
-                                        }
-                                    ) {
-                                        TextForButton(negativeText, false)
-                                    }
-                                }
+                                Spacer(modifier = Modifier.padding(bottom = buttonBottomSpace))
                             }
-                        }
-                        
-                        if (numberOfButtons > 2) {
-                            index = neutralText.indexOf(':')
-                            when  {
-                                index == 3 && neutralText.substring(0,3) == "BKG" -> {
-                                    Button(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 12.dp, start = 36.dp, end = 36.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.teal_200)),
-                                        onClick = {
-                                            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss U1")
-                                            shouldShowDialog.value = false
-                                            onDismiss(DismissSelector.NEUTRAL)
-                                        }
-                                    ) {
-                                        TextForButton(neutralText.substring(index + 1), true)
+                            else -> {
+                                TextButton(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = otherTextButtonTopSpace, start = 36.dp, end = 36.dp),
+                                    onClick = {
+                                        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss U2")
+                                        shouldShowDialog.value = false
+                                        onDismiss(DismissSelector.NEUTRAL)
                                     }
+                                ) {
+                                    TextForButton(neutralText, false)
                                 }
-                                else -> {
-                                    TextButton(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 12.dp, start = 36.dp, end = 36.dp),
-                                        onClick = {
-                                            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss U2")
-                                            shouldShowDialog.value = false
-                                            onDismiss(DismissSelector.NEUTRAL)
-                                        }
-                                    ) {
-                                        TextForButton(neutralText, false)
-                                    }
-                                }
+                                Spacer(modifier = Modifier.padding(bottom = textButtonBottomSpace))
                             }
-                            Spacer(modifier = Modifier.padding(bottom = 16.dp))
                         }
                     }
                 }
             }
-        )
+        }
+
     }
 }
 
@@ -280,13 +302,19 @@ private fun TextForButton(text: String, isBackgrounded: Boolean) {
         text = text,
         color = if (isBackgrounded) colorResource(R.color.white) else colorResource(R.color.teal_700),
         style = TextStyle(
-            fontFamily = FontFamily(
-                Font(
-                    R.font.avenir_book,
-                    FontWeight.Normal
-                )
-            ),
-            fontSize = 14.sp
+            fontFamily = FontFamily(Font(R.font.avenir_bold, FontWeight.Bold)),
+            fontSize = 16.sp
         )
     )
+}
+
+@Preview
+@Composable
+fun StandardModalPreview() {
+    StandardModal(
+        R.drawable.notification,
+        titleText = "Staging entry for donor insertion",
+        bodyText = "An entry was made to the staging database for insertion of a new donor into the remote database",
+        positiveText = "BKG:OK"
+    ) {}
 }

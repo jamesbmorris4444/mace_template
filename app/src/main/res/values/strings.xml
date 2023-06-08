@@ -6,6 +6,13 @@
     <string name="menu_content_description">menu</string>
     <string name="fs_logo_content_description">Florida Software Logo</string>
     <string name="update_button_text">Update</string>
+    <string name="create_products_header_text">DONOR: %1$s, %2$s</string>
+    <string name="no_db_entries_title_text">No entries made into the staging database</string>
+    <string name="made_db_entries_title_text">Staging entry for donor insertion</string>
+    <string name="made_db_entries_body_text">An entry was made to the staging database for insertion of a new donor into the remote database</string>
+    <string name="made_db_entries_failure_text">Insertion of new donor in database failed</string>
+    <string name="positive_button_text_ok">BKG:OK</string>
+    
     <string-array name="abo_rh_array">
         <item>O-Negative</item>
         <item>O-Positive</item>

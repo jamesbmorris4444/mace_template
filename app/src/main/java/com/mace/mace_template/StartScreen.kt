@@ -107,17 +107,34 @@ fun StartScreenApp(
                         openDrawer = openDrawer,
                         donor = donor,
                         viewModel = viewModel
-                    ) {
-                        StandardModalComposeView(
-                            view,
-                            numberOfButtons = 3,
-                            topIconResId = R.drawable.notification,
-                            titleText = "Database Operation",
-                            bodyText = "Now is the time for all good men to come to the aid of their country",
-                            positiveText = "BKG:Positive",
-                            negativeText = "Negative",
-                            neutralText = "Neutral",
-                        ) { navController.navigate(DrawerAppScreen.CreateProducts.name) }.show()
+                    ) { changed ->
+                        if (changed) {
+                            viewModel.insertDonorIntoDatabase(donor) { success ->
+                                if (success) {
+                                    StandardModalComposeView(
+                                        view,
+                                        topIconResId = R.drawable.notification,
+                                        titleText = viewModel.getResources().getString(R.string.made_db_entries_title_text),
+                                        bodyText = viewModel.getResources().getString(R.string.made_db_entries_body_text),
+                                        positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
+                                    ) { navController.navigate(DrawerAppScreen.CreateProducts.name) }.show()
+                                } else {
+                                    StandardModalComposeView(
+                                        view,
+                                        topIconResId = R.drawable.notification,
+                                        titleText = viewModel.getResources().getString(R.string.made_db_entries_failure_text),
+                                        positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
+                                    ) { navController.navigate(DrawerAppScreen.CreateProducts.name) }.show()
+                                }
+                            }
+                        } else {
+                            StandardModalComposeView(
+                                view,
+                                topIconResId = R.drawable.notification,
+                                titleText = viewModel.getResources().getString(R.string.no_db_entries_title_text),
+                                positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
+                            ) { navController.navigate(DrawerAppScreen.CreateProducts.name) }.show()
+                        }
                     }
                 }
                 composable(route = DrawerAppScreen.CreateProducts.name) {
@@ -130,6 +147,7 @@ fun StartScreenApp(
                         canNavigateBack = navController.previousBackStackEntry != null,
                         navigateUp = { navController.navigateUp() },
                         openDrawer = openDrawer,
+                        donor = donor,
                         viewModel = viewModel,
                         onCompleteButtonClicked = {
                             //navController.navigate(StartScreenNames.DonateProducts.name)

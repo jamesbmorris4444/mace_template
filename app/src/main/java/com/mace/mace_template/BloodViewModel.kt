@@ -1,6 +1,7 @@
 package com.mace.mace_template
 
 import android.app.Application
+import android.content.res.Resources
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.AndroidViewModel
 import com.mace.mace_template.repository.DatabaseSelector
@@ -23,8 +24,12 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         repository.handleSearchClick(searchKey, searchCompleted)
     }
 
-    fun insertDonorIntoDatabase(database: DatabaseSelector, donor: Donor, showList: () -> Unit) {
+    fun insertDonorIntoDatabase(donor: Donor, completed: (Boolean) -> Unit) {
+        repository.insertDonorIntoDatabase(DatabaseSelector.STAGING_DB, donor, completed)
+    }
 
+    fun getResources(): Resources {
+        return app.resources
     }
 
     fun setBloodDatabase() {
