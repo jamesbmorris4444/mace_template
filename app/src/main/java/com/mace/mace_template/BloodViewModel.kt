@@ -2,11 +2,13 @@ package com.mace.mace_template
 
 import android.app.Application
 import android.content.res.Resources
+import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.AndroidViewModel
 import com.mace.mace_template.repository.DatabaseSelector
 import com.mace.mace_template.repository.RepositoryImpl
 import com.mace.mace_template.repository.storage.Donor
+import com.mace.mace_template.repository.storage.Product
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -34,6 +36,10 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
 
     fun setBloodDatabase() {
         repository.setBloodDatabase(app.applicationContext)
+    }
+
+    fun insertDonorAndProductsIntoDatabase(modalView: View, databaseSelector: DatabaseSelector, donor: Donor, products: List<Product>) {
+        repository.insertDonorAndProductsIntoDatabase(modalView, databaseSelector, donor, products)
     }
 
 }

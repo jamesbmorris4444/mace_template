@@ -6,12 +6,17 @@
     <string name="menu_content_description">menu</string>
     <string name="fs_logo_content_description">Florida Software Logo</string>
     <string name="update_button_text">Update</string>
+    <string name="clear_button_text">Clear</string>
+    <string name="confirm_button_text">Confirm</string>
+    <string name="complete_button_text">Complete</string>
     <string name="create_products_header_text">DONOR: %1$s, %2$s</string>
     <string name="no_db_entries_title_text">No entries made into the staging database</string>
     <string name="made_db_entries_title_text">Staging entry for donor insertion</string>
     <string name="made_db_entries_body_text">An entry was made to the staging database for insertion of a new donor into the remote database</string>
     <string name="made_db_entries_failure_text">Insertion of new donor in database failed</string>
     <string name="positive_button_text_ok">BKG:OK</string>
+    <string name="positive_button_text_yes">BKG:Yes</string>
+    <string name="negative_button_text_no">BKG:No</string>
     <string name="walking_blood_bank_text">Walking Blood Bank</string>
     <string name="Search_for_donor_title">Search Donors by Last Name</string>
     <string name="create_blood_product_title">Create Blood Product</string>
@@ -33,6 +38,8 @@
     <string name="enter_blood_type_text">Enter Blood Type</string>
     <string name="enter_branch_text">Enter Branch</string>
     <string name="initial_letters_of_last_name_text">Initial letters of last name</string>
+    <string name="std_modal_noconfirm_title">Product Entry Not Confirmed</string>
+    <string name="std_modal_noconfirm_body">Complete button was clicked without confirming current grid entry. Do you want to confirm?</string>
     
     <string-array name="abo_rh_array">
         <item>O-Negative</item>

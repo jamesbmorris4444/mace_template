@@ -1,6 +1,8 @@
 package com.mace.mace_template.repository
 
 import android.content.Context
+import android.view.View
+import com.mace.mace_template.R
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.network.APIClient
 import com.mace.mace_template.repository.network.APIInterface
@@ -8,6 +10,7 @@ import com.mace.mace_template.repository.storage.BloodDatabase
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.repository.storage.Product
+import com.mace.mace_template.ui.StandardModalComposeView
 import com.mace.mace_template.utils.Constants
 import com.mace.mace_template.utils.Constants.MAIN_DATABASE_NAME
 import com.mace.mace_template.utils.Constants.MODIFIED_DATABASE_NAME
@@ -25,6 +28,7 @@ interface Repository {
     fun setBloodDatabase(context: Context)
     fun refreshDatabase(context: Context, refreshCompleted: () -> Unit)
     fun insertDonorIntoDatabase(databaseSelector: DatabaseSelector, donor: Donor, completed: (Boolean) -> Unit)
+    fun insertDonorAndProductsIntoDatabase(modalView: View, databaseSelector: DatabaseSelector, donor: Donor, products: List<Product>)
 }
 
 enum class DatabaseSelector {
@@ -189,45 +193,38 @@ class RepositoryImpl : Repository {
                 completed(false)
             })
     }
-//
-//    fun insertDonorAndProductsIntoDatabase(database: BloodDatabase, donor: Donor, products: List<Product>, showList: () -> Unit) {
-//        var disposable: Disposable? = null
-//        disposable = Completable.fromAction { database.databaseDao().insertDonorAndProducts(donor, products) }
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribeOn(Schedulers.io())
-//            .subscribe ({
-//                disposable?.dispose()
-//                StandardModal(
-//                    callbacks,
-//                    modalType = StandardModal.ModalType.STANDARD,
-//                    titleText = callbacks.fetchActivity().getString(R.string.std_modal_insert_products_staging_title),
-//                    bodyText = callbacks.fetchActivity().getString(R.string.std_modal_insert_products_staging_body),
-//                    positiveText = callbacks.fetchActivity().getString(R.string.std_modal_ok),
-//                    dialogFinishedListener = object : StandardModal.DialogFinishedListener {
-//                        override fun onPositive(string: String) {
-//                            callbacks.fetchActivity().supportFragmentManager.popBackStack(Constants.ROOT_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-//                            callbacks.fetchActivity().loadDonateProductsFragment(true)
-//                        }
-//                        override fun onNegative() { }
-//                        override fun onNeutral() { }
-//                        override fun onBackPressed() {
-//                            callbacks.fetchActivity().supportFragmentManager.popBackStack(Constants.ROOT_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-//                            callbacks.fetchActivity().loadDonateProductsFragment(true)
-//                        }
-//                    }
-//                ).show(callbacks.fetchActivity().supportFragmentManager, "MODAL")
-//                showList()
-//            },
-//            { throwable ->
-//                disposable?.dispose()
-//                insertDonorAndProductsIntoDatabaseFailure("insertDonorAndProductsIntoDatabase", throwable)
-//            })
-//    }
-//    private fun insertDonorAndProductsIntoDatabaseFailure(method: String, throwable: Throwable) {
+
+    override fun insertDonorAndProductsIntoDatabase(modalView: View, databaseSelector: DatabaseSelector, donor: Donor, products: List<Product>) {
+        var disposable: Disposable? = null
+        disposable = Completable.fromAction {
+                if (databaseSelector == DatabaseSelector.MAINBLOOD_DB) {
+                    mainBloodDatabase.databaseDao().insertDonorAndProducts(donor, products)
+                } else {
+                    stagingBloodDatabase.databaseDao().insertDonorAndProducts(donor, products)
+                }
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe ({
+                disposable?.dispose()
+                StandardModalComposeView(
+                    modalView,
+                    topIconResId = R.drawable.notification,
+                    titleText = modalView.context.resources.getString(R.string.made_db_entries_title_text),
+                    bodyText = modalView.context.resources.getString(R.string.made_db_entries_body_text),
+                    positiveText = modalView.context.resources.getString(R.string.positive_button_text_ok),
+                ) { }.show()
+            },
+            { throwable ->
+                disposable?.dispose()
+                insertDonorAndProductsIntoDatabaseFailure("insertDonorAndProductsIntoDatabase", throwable)
+            })
+    }
+    private fun insertDonorAndProductsIntoDatabaseFailure(method: String, throwable: Throwable) {
 //        LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.EXC), method, throwable)
 //        callbacks.fetchActivity().supportFragmentManager.popBackStack(Constants.ROOT_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE)
 //        callbacks.fetchActivity().loadDonateProductsFragment(true)
-//    }
+    }
 //
 //    fun insertReassociatedProductsIntoDatabase(database: BloodDatabase, donor: Donor, products: List<Product>, initializeView: () -> Unit) {
 //        var disposable: Disposable? = null
