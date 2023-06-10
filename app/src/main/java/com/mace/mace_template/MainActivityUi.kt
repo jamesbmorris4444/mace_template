@@ -25,12 +25,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.BeyondBoundsLayout.LayoutDirection.Companion.After
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mace.mace_template.logger.LogUtils
+import com.mace.mace_template.repository.storage.Product
 import kotlinx.coroutines.launch
 
 // See https://www.geeksforgeeks.org/android-jetpack-compose-implement-navigation-drawer/ for Navigation Drawer
@@ -91,7 +93,7 @@ fun DrawerContentComponent(
             Text(
                 modifier = Modifier
                     .align(Alignment.BottomCenter),
-                text = "Walking Blood Bank",
+                text = stringResource(R.string.walking_blood_bank_text),
                 style = MaterialTheme.typography.bodyMedium,
                 color = colorResource(id = R.color.white)
             )
@@ -135,15 +137,15 @@ fun BodyContentComponent(
     openDrawer: () -> Unit,
     bloodViewModel: BloodViewModel
 ) {
-    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "BodyContentComponent in MainActivity: ${currentScreen.name}}")
+    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "BodyContentComponent in MainActivity: ${currentScreen.name}")
     StartScreenApp(view, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer)
 }
 
-enum class DrawerAppScreen(val screenName: String) {
-    DonateProductsSearch("Donate Products Search"),
-    CreateProducts("CreateProducts"),
-    ManageDonorSearch("Manage Donor Search"),
-    ManageDonor("Manage Donor after Search"),
-    ReassociateDonation("Reassociate Donation"),
-    ViewDonorList("View Donor List"),
+enum class DrawerAppScreen(val resId: Int) {
+    DonateProductsSearch(R.string.Search_for_donor_title),
+    CreateProducts(R.string.create_blood_product_title),
+    ManageDonorSearch(R.string.manage_donor_after_search_title),
+    ManageDonor(R.string.manage_donor_title),
+    ReassociateDonation(R.string.reassociate_donation_title),
+    ViewDonorList(R.string.view_donor_list_title)
 }

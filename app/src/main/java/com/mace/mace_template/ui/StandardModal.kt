@@ -19,12 +19,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AbstractComposeView
@@ -39,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -61,8 +64,7 @@ class StandardModalComposeView(
     private val onDismiss: (DismissSelector) -> Unit
 ) : AbstractComposeView(composeView.context) {
     private val windowManager = composeView.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private var params: WindowManager.LayoutParams =
-        WindowManager.LayoutParams().apply {
+    private var params: WindowManager.LayoutParams = WindowManager.LayoutParams().apply {
             gravity = Gravity.TOP
             type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL
             token = composeView.applicationWindowToken
@@ -70,7 +72,8 @@ class StandardModalComposeView(
             height = WindowManager.LayoutParams.WRAP_CONTENT
             format = PixelFormat.TRANSLUCENT
             flags = flags or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        }
+    }
+
     @Composable
     override fun Content() {
         StandardModal(
@@ -81,7 +84,10 @@ class StandardModalComposeView(
             negativeText,
             neutralText
         ) {
-            dismissSelector -> onDismiss(dismissSelector)
+            dismissSelector ->  run {
+                onDismiss(dismissSelector)
+                windowManager.removeView(this)
+            }
         }
     }
 
@@ -106,18 +112,22 @@ fun StandardModal(
     neutralText: String = "",
     onDismiss: (DismissSelector) -> Unit
 ) {
-    val shouldShowDialog = remember { mutableStateOf(true) }
+    var shouldShowDialog by remember { mutableStateOf(true) }
     val numberOfButtons = when {
         negativeText.isEmpty() && neutralText.isEmpty() -> 1
         neutralText.isEmpty() -> 2
         else -> 3
     }
-    if (shouldShowDialog.value) {
+    if (shouldShowDialog) {
         Dialog(
-            onDismissRequest = { }
+            onDismissRequest = { shouldShowDialog = false },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
         ) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
+            Card(
+                Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Column(
@@ -182,8 +192,7 @@ fun StandardModal(
                                     .padding(top = positiveButtonTopSpace, start = 36.dp, end = 36.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.teal_200)),
                                 onClick = {
-                                    LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss P1")
-                                    shouldShowDialog.value = false
+                                    shouldShowDialog = false
                                     onDismiss(DismissSelector.POSITIVE)
                                 }
                             ) {
@@ -199,8 +208,7 @@ fun StandardModal(
                                     .fillMaxWidth()
                                     .padding(top = positiveTextButtonTopSpace, start = 36.dp, end = 36.dp),
                                 onClick = {
-                                    LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss P2")
-                                    shouldShowDialog.value = false
+                                    shouldShowDialog = false
                                     onDismiss(DismissSelector.POSITIVE)
                                 }
                             ) {
@@ -222,8 +230,7 @@ fun StandardModal(
                                         .padding(top = otherButtonTopSpace, start = 36.dp, end = 36.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.teal_200)),
                                     onClick = {
-                                        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss N1")
-                                        shouldShowDialog.value = false
+                                        shouldShowDialog = false
                                         onDismiss(DismissSelector.NEGATIVE)
                                     }
                                 ) {
@@ -239,8 +246,7 @@ fun StandardModal(
                                         .fillMaxWidth()
                                         .padding(top = otherTextButtonTopSpace, start = 36.dp, end = 36.dp),
                                     onClick = {
-                                        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss N2")
-                                        shouldShowDialog.value = false
+                                        shouldShowDialog = false
                                         onDismiss(DismissSelector.NEGATIVE)
                                     }
                                 ) {
@@ -263,8 +269,7 @@ fun StandardModal(
                                         .padding(top = otherButtonTopSpace, start = 36.dp, end = 36.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.teal_200)),
                                     onClick = {
-                                        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss U1")
-                                        shouldShowDialog.value = false
+                                        shouldShowDialog = false
                                         onDismiss(DismissSelector.NEUTRAL)
                                     }
                                 ) {
@@ -278,8 +283,7 @@ fun StandardModal(
                                         .fillMaxWidth()
                                         .padding(top = otherTextButtonTopSpace, start = 36.dp, end = 36.dp),
                                     onClick = {
-                                        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "onDismiss U2")
-                                        shouldShowDialog.value = false
+                                        shouldShowDialog = false
                                         onDismiss(DismissSelector.NEUTRAL)
                                     }
                                 ) {
@@ -292,7 +296,6 @@ fun StandardModal(
                 }
             }
         }
-
     }
 }
 

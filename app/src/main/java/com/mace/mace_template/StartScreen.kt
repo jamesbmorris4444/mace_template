@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -19,10 +21,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -60,7 +67,7 @@ fun StartScreenApp(
     openDrawer: () -> Unit
 ) {
     lateinit var donor: Donor
-    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "StartScreenApp in StartScreen: ${currentScreen.name}}")
+    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "StartScreenApp in StartScreen: ${currentScreen.name}")
     var appBarState by remember { mutableStateOf(AppBarState()) }
     Scaffold(
         topBar = {
@@ -71,12 +78,15 @@ fun StartScreenApp(
         }
     ) { internalPadding ->
         Box(modifier = Modifier.padding(internalPadding)) {
+            val donateProductsSearchStringName = stringResource(DrawerAppScreen.DonateProductsSearch.resId)
+            val manageDonorSearchStringName = stringResource(DrawerAppScreen.ManageDonorSearch.resId)
+            val createProductsStringName = stringResource(DrawerAppScreen.CreateProducts.resId)
             NavHost(
                 navController = navController,
-                startDestination = DrawerAppScreen.DonateProductsSearch.name,
+                startDestination = donateProductsSearchStringName,
             ) {
-                composable(route = DrawerAppScreen.DonateProductsSearch.name) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen 1=${DrawerAppScreen.DonateProductsSearch.screenName}")
+                composable(route = donateProductsSearchStringName) {
+                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen 1=$donateProductsSearchStringName")
                     DonateProductsScreen(
                         onComposing = {
                             appBarState = it
@@ -87,7 +97,7 @@ fun StartScreenApp(
                         openDrawer = openDrawer,
                         onItemButtonClicked = {
                             donor = it
-                            navController.navigate(DrawerAppScreen.ManageDonor.name)
+                            navController.navigate(manageDonorSearchStringName)
                         },
                         viewModel = viewModel,
                         modifier = Modifier
@@ -95,8 +105,8 @@ fun StartScreenApp(
                             .padding(dimensionResource(R.dimen.padding_large))
                     )
                 }
-                composable(route = DrawerAppScreen.ManageDonor.name) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=${DrawerAppScreen.ManageDonor.screenName}")
+                composable(route = manageDonorSearchStringName) {
+                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorSearchStringName")
                     ManageDonorScreen(
                         onComposing = {
                             appBarState = it
@@ -117,14 +127,14 @@ fun StartScreenApp(
                                         titleText = viewModel.getResources().getString(R.string.made_db_entries_title_text),
                                         bodyText = viewModel.getResources().getString(R.string.made_db_entries_body_text),
                                         positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                                    ) { navController.navigate(DrawerAppScreen.CreateProducts.name) }.show()
+                                    ) { navController.navigate(createProductsStringName) }.show()
                                 } else {
                                     StandardModalComposeView(
                                         view,
                                         topIconResId = R.drawable.notification,
                                         titleText = viewModel.getResources().getString(R.string.made_db_entries_failure_text),
                                         positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                                    ) { navController.navigate(DrawerAppScreen.CreateProducts.name) }.show()
+                                    ) { navController.navigate(createProductsStringName) }.show()
                                 }
                             }
                         } else {
@@ -133,12 +143,12 @@ fun StartScreenApp(
                                 topIconResId = R.drawable.notification,
                                 titleText = viewModel.getResources().getString(R.string.no_db_entries_title_text),
                                 positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                            ) { navController.navigate(DrawerAppScreen.CreateProducts.name) }.show()
+                            ) { navController.navigate(createProductsStringName) }.show()
                         }
                     }
                 }
-                composable(route = DrawerAppScreen.CreateProducts.name) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=${DrawerAppScreen.CreateProducts.screenName}")
+                composable(route = createProductsStringName) {
+                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$createProductsStringName")
                     CreateProductsScreen(
                         onComposing = {
                             appBarState = it
@@ -150,7 +160,7 @@ fun StartScreenApp(
                         donor = donor,
                         viewModel = viewModel,
                         onCompleteButtonClicked = {
-                            //navController.navigate(StartScreenNames.DonateProducts.name)
+                            //navController.navigate(donateProductsStringName)
                         }
                     )
                 }

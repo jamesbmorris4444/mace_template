@@ -91,11 +91,12 @@ fun DonateProductsHandler(
     fun showDonors(donorList: List<Donor>) {
         donors.value = donorList
     }
+    val donateProductsSearchStringName = stringResource(DrawerAppScreen.DonateProductsSearch.resId)
     LaunchedEffect(key1 = true) {
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=${DrawerAppScreen.DonateProductsSearch.screenName}")
+        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=$donateProductsSearchStringName")
         onComposing(
             AppBarState(
-                title = DrawerAppScreen.DonateProductsSearch.screenName,
+                title = donateProductsSearchStringName,
                 actions = {
                     IconButton(onClick = openDrawer) {
                         Icon(
@@ -136,7 +137,7 @@ fun DonateProductsHandler(
                             text = it
                         },
                         shape = RoundedCornerShape(10.dp),
-                        label = { Text("Initial letters of last name") },
+                        label = { Text(stringResource(R.string.initial_letters_of_last_name_text)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(
@@ -147,7 +148,9 @@ fun DonateProductsHandler(
                     )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                if (donors.value.isNotEmpty()) {
+                    Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                }
                 DonorList(donors, onItemButtonClicked)
             }
         } else {

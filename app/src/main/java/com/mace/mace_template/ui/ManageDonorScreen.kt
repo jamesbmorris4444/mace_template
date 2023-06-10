@@ -80,11 +80,12 @@ fun ManageDonorHandler(
     donor: Donor,
     onUpdateButtonClicked: (databaseModified: Boolean) -> Unit
 ) {
+    val manageDonorSearchStringName = stringResource(DrawerAppScreen.ManageDonorSearch.resId)
     LaunchedEffect(key1 = true) {
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=${DrawerAppScreen.ManageDonor.screenName}")
+        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorSearchStringName")
         onComposing(
             AppBarState(
-                title = DrawerAppScreen.ManageDonor.screenName,
+                title = manageDonorSearchStringName,
                 actions = {
                     IconButton(onClick = openDrawer) {
                         Icon(
@@ -123,6 +124,13 @@ fun ManageDonorHandler(
         var dobText by rememberSaveable { mutableStateOf(donor.dob) }
         var aboRhText by rememberSaveable { mutableStateOf(donor.aboRh) }
         var branchText by rememberSaveable { mutableStateOf(donor.branch) }
+        val enterLastNameText = stringResource(R.string.enter_last_name_text)
+        val enterFirstNameText = stringResource(R.string.enter_first_name_text)
+        val enterMiddleNameText = stringResource(R.string.enter_middle_name_text)
+        val enterDobText = stringResource(R.string.enter_dob_text)
+        val enterBloodTtypeText = stringResource(R.string.enter_blood_type_text)
+        val enterBranchText = stringResource(R.string.enter_branch_text)
+
         Spacer(modifier = Modifier.padding(top = 16.dp))
         Row {
             OutlinedTextField(
@@ -134,7 +142,7 @@ fun ManageDonorHandler(
                     databaseModified = true
                 },
                 shape = RoundedCornerShape(10.dp),
-                label = { Text("Enter Last Name") },
+                label = { Text(enterLastNameText) },
                 singleLine = true
             )
         }
@@ -149,7 +157,7 @@ fun ManageDonorHandler(
                     databaseModified = true
                 },
                 shape = RoundedCornerShape(10.dp),
-                label = { Text("Enter First Name") },
+                label = { Text(enterFirstNameText) },
                 singleLine = true
             )
         }
@@ -164,7 +172,7 @@ fun ManageDonorHandler(
                     databaseModified = true
                 },
                 shape = RoundedCornerShape(10.dp),
-                label = { Text("Enter Middle Name") },
+                label = { Text(enterMiddleNameText) },
                 singleLine = true
             )
         }
@@ -179,7 +187,7 @@ fun ManageDonorHandler(
                     databaseModified = true
                 },
                 shape = RoundedCornerShape(10.dp),
-                label = { Text("Enter DOB: 13 Mar 2022") },
+                label = { Text(enterDobText) },
                 singleLine = true
             )
         }
@@ -202,7 +210,7 @@ fun ManageDonorHandler(
                     aboRhText = it
                 },
                 shape = RoundedCornerShape(10.dp),
-                label = { Text("Enter Blood Type:") },
+                label = { Text(enterBloodTtypeText) },
                 singleLine = true,
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(
@@ -247,7 +255,7 @@ fun ManageDonorHandler(
                     branchText = it
                 },
                 shape = RoundedCornerShape(10.dp),
-                label = { Text("Enter Branch:") },
+                label = { Text(enterBranchText) },
                 singleLine = true,
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(

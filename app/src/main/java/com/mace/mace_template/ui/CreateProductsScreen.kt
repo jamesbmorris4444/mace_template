@@ -1,5 +1,6 @@
 package com.mace.mace_template.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
@@ -27,16 +29,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.DarkGray
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mace.mace_template.AppBarState
@@ -46,6 +50,7 @@ import com.mace.mace_template.R
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.Product
+import kotlinx.coroutines.delay
 
 @Composable
 fun CreateProductsScreen(
@@ -58,8 +63,6 @@ fun CreateProductsScreen(
     viewModel: BloodViewModel,
     modifier: Modifier = Modifier
 ) {
-    val completed = remember { mutableStateOf(false) }
-    viewModel.RefreshRepository { completed.value = true }
     CreateProductsHandler(
         onComposing = onComposing,
         canNavigateBack = canNavigateBack,
@@ -73,7 +76,6 @@ fun CreateProductsScreen(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CreateProductsHandler(
     onComposing: (AppBarState) -> Unit,
@@ -95,11 +97,21 @@ fun CreateProductsHandler(
     val gridCellWidth = horizontalGridWidth / 2
     val gridCellHeight = horizontalGridHeight / 2
     var dinText by rememberSaveable { mutableStateOf("") }
+    var productCodeText by rememberSaveable { mutableStateOf("") }
+    var expirationText by rememberSaveable { mutableStateOf("") }
+    val createProductsStringName = stringResource(DrawerAppScreen.CreateProducts.resId)
+    val enterDinText = stringResource(R.string.enter_din_text)
+    val dinTitle = stringResource(R.string.din_title)
+    val enterProductCodeText = stringResource(R.string.enter_product_code)
+    val productCodeTitle = stringResource(R.string.product_code_title)
+    val enterExpirationText = stringResource(R.string.enter_expiration_text)
+    val expirationTitle = stringResource(R.string.expiration_title)
+    val aboRhTitle = stringResource(R.string.abo_rh_title)
     LaunchedEffect(key1 = true) {
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=${DrawerAppScreen.CreateProducts.screenName}")
+        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=$createProductsStringName")
         onComposing(
             AppBarState(
-                title = DrawerAppScreen.CreateProducts.screenName,
+                title = createProductsStringName,
                 actions = {
                     IconButton(onClick = openDrawer) {
                         Icon(
@@ -163,14 +175,15 @@ fun CreateProductsHandler(
                                     dinText = it
                                 },
                                 shape = RoundedCornerShape(10.dp),
-                                label = { Text("Enter DIN") },
-                                singleLine = true
+                                label = { Text(enterDinText) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                             )
                             Text(
                                 modifier = Modifier
                                     .padding(PaddingValues(start = 8.dp))
                                     .align(Alignment.TopStart),
-                                text = "DIN"
+                                text = dinTitle
                             )
                         }
                     }
@@ -179,7 +192,28 @@ fun CreateProductsHandler(
                             modifier = Modifier
                                 .size(gridCellWidth, gridCellHeight)
                                 .borders(2.dp, DarkGray, left = true, bottom = true)
-                        )
+                        ) {
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .height(80.dp)
+                                    .padding(PaddingValues(start = 8.dp, end = 8.dp, bottom = 8.dp))
+                                    .align(Alignment.BottomStart),
+                                value = productCodeText,
+                                onValueChange = {
+                                    productCodeText = it
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                label = { Text(enterProductCodeText) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                            )
+                            Text(
+                                modifier = Modifier
+                                    .padding(PaddingValues(start = 8.dp))
+                                    .align(Alignment.TopStart),
+                                text = productCodeTitle
+                            )
+                        }
                     }
                 }
             }
@@ -193,15 +227,56 @@ fun CreateProductsHandler(
                         Box(
                             modifier = Modifier
                                 .size(gridCellWidth, gridCellHeight)
-                                .borders(2.dp, DarkGray, left = true, top = true, right = true, bottom = true)
-                        )
+                                .borders(
+                                    2.dp,
+                                    DarkGray,
+                                    left = true,
+                                    top = true,
+                                    right = true,
+                                    bottom = true
+                                )
+                        ) {
+                            Text(
+                                modifier = Modifier
+                                    .padding(PaddingValues(start = 8.dp))
+                                    .align(Alignment.TopStart),
+                                text = aboRhTitle
+                            )
+                            Text(
+                                modifier = Modifier
+                                    .padding(PaddingValues(bottom = 32.dp))
+                                    .align(Alignment.BottomCenter),
+                                text = donor.aboRh
+                            )
+                        }
                     }
                     item { // lower right
                         Box(
                             modifier = Modifier
                                 .size(gridCellWidth, gridCellHeight)
                                 .borders(2.dp, DarkGray, left = true, right = true, bottom = true)
-                        )
+                        ) {
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .height(80.dp)
+                                    .padding(PaddingValues(start = 8.dp, end = 8.dp, bottom = 8.dp))
+                                    .align(Alignment.BottomStart),
+                                value = expirationText,
+                                onValueChange = {
+                                    expirationText = it
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                label = { Text(enterExpirationText) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                            )
+                            Text(
+                                modifier = Modifier
+                                    .padding(PaddingValues(start = 8.dp))
+                                    .align(Alignment.TopStart),
+                                text = expirationTitle
+                            )
+                        }
                     }
                 }
             }

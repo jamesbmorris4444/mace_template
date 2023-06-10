@@ -12,6 +12,27 @@
     <string name="made_db_entries_body_text">An entry was made to the staging database for insertion of a new donor into the remote database</string>
     <string name="made_db_entries_failure_text">Insertion of new donor in database failed</string>
     <string name="positive_button_text_ok">BKG:OK</string>
+    <string name="walking_blood_bank_text">Walking Blood Bank</string>
+    <string name="Search_for_donor_title">Search Donors by Last Name</string>
+    <string name="create_blood_product_title">Create Blood Product</string>
+    <string name="manage_donor_after_search_title">Manage Donor After Search</string>
+    <string name="manage_donor_title">Manage Donor</string>
+    <string name="reassociate_donation_title">Reassociate Donation</string>
+    <string name="view_donor_list_title">View Donor List</string>
+    <string name="enter_din_text">Enter DIN</string>
+    <string name="din_title">DIN</string>
+    <string name="enter_product_code">Enter Prod Code</string>
+    <string name="product_code_title">PRODUCT CODE</string>
+    <string name="enter_expiration_text">Enter Expiration</string>
+    <string name="expiration_title">EXPIRATION DATE</string>
+    <string name="abo_rh_title">ABO/RH</string>
+    <string name="enter_last_name_text">Enter Last Name</string>
+    <string name="enter_first_name_text">Enter First Name</string>
+    <string name="enter_middle_name_text">Enter Middle Name</string>
+    <string name="enter_dob_text">Enter DOB as 13 Mar 2022</string>
+    <string name="enter_blood_type_text">Enter Blood Type</string>
+    <string name="enter_branch_text">Enter Branch</string>
+    <string name="initial_letters_of_last_name_text">Initial letters of last name</string>
     
     <string-array name="abo_rh_array">
         <item>O-Negative</item>
