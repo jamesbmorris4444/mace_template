@@ -48,9 +48,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import com.mace.mace_template.DismissSelector
 import com.mace.mace_template.R
-import com.mace.mace_template.logger.LogUtils
 
 @SuppressLint("ViewConstructor")
 class StandardModalComposeView(
@@ -112,6 +110,19 @@ fun StandardModal(
     neutralText: String = "",
     onDismiss: (DismissSelector) -> Unit
 ) {
+
+    @Composable
+    fun TextForButton(text: String, isBackgrounded: Boolean) {
+        Text(
+            text = text,
+            color = if (isBackgrounded) colorResource(R.color.white) else colorResource(R.color.teal_700),
+            style = TextStyle(
+                fontFamily = FontFamily(Font(R.font.avenir_bold, FontWeight.Bold)),
+                fontSize = 16.sp
+            )
+        )
+    }
+
     var shouldShowDialog by remember { mutableStateOf(true) }
     val numberOfButtons = when {
         negativeText.isEmpty() && neutralText.isEmpty() -> 1
@@ -299,16 +310,10 @@ fun StandardModal(
     }
 }
 
-@Composable
-private fun TextForButton(text: String, isBackgrounded: Boolean) {
-    Text(
-        text = text,
-        color = if (isBackgrounded) colorResource(R.color.white) else colorResource(R.color.teal_700),
-        style = TextStyle(
-            fontFamily = FontFamily(Font(R.font.avenir_bold, FontWeight.Bold)),
-            fontSize = 16.sp
-        )
-    )
+enum class DismissSelector {
+    POSITIVE,
+    NEGATIVE,
+    NEUTRAL
 }
 
 @Preview

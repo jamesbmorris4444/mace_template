@@ -61,13 +61,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
-import com.mace.mace_template.DismissSelector
-import com.mace.mace_template.DrawerAppScreen
 import com.mace.mace_template.R
+import com.mace.mace_template.ScreenNames
 import com.mace.mace_template.repository.DatabaseSelector
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.Product
 
+@OptIn(ExperimentalComposeUiApi::class)
+@SuppressLint("MutableCollectionMutableState")
 @Composable
 fun CreateProductsScreen(
     onComposing: (AppBarState) -> Unit,
@@ -76,34 +77,8 @@ fun CreateProductsScreen(
     openDrawer: () -> Unit,
     donor: Donor,
     modalView: View,
-    onCompleteButtonClicked: () -> Unit,
-    viewModel: BloodViewModel
-) {
-    CreateProductsHandler(
-        onComposing = onComposing,
-        canNavigateBack = canNavigateBack,
-        navigateUp = navigateUp,
-        openDrawer = openDrawer,
-        donor = donor,
-        modalView = modalView,
-        viewModel = viewModel,
-        onCompleteButtonClicked = onCompleteButtonClicked
-    )
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@SuppressLint("MutableCollectionMutableState")
-@Composable
-fun CreateProductsHandler(
-    onComposing: (AppBarState) -> Unit,
-    canNavigateBack: Boolean,
-    navigateUp: () -> Unit,
-    openDrawer: () -> Unit,
-    donor: Donor,
-    modalView: View,
     viewModel: BloodViewModel,
     onCompleteButtonClicked: () -> Unit,
-//    modifier: Modifier = Modifier
 ) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -116,7 +91,7 @@ fun CreateProductsHandler(
     var dinText by rememberSaveable { mutableStateOf("") }
     var productCodeText by rememberSaveable { mutableStateOf("") }
     var expirationText by rememberSaveable { mutableStateOf("") }
-    val createProductsStringName = stringResource(DrawerAppScreen.CreateProducts.resId)
+    val createProductsStringName = stringResource(ScreenNames.CreateProducts.resId)
     val enterDinText = stringResource(R.string.enter_din_text)
     val dinTitle = stringResource(R.string.din_title)
     val enterProductCodeText = stringResource(R.string.enter_product_code)

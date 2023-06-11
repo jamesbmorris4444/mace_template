@@ -3,7 +3,6 @@ package com.mace.mace_template
 import android.app.Application
 import android.content.res.Resources
 import android.view.View
-import androidx.compose.runtime.Composable
 import androidx.lifecycle.AndroidViewModel
 import com.mace.mace_template.repository.DatabaseSelector
 import com.mace.mace_template.repository.RepositoryImpl
@@ -17,8 +16,7 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
 
     private val repository : RepositoryImpl by inject()
 
-    @Composable
-    fun RefreshRepository(refreshCompleted: () -> Unit) {
+    fun refreshRepository(refreshCompleted: () -> Unit) {
         repository.refreshDatabase(app.applicationContext, refreshCompleted)
     }
 

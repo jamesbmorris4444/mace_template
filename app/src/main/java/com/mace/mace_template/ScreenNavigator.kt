@@ -53,15 +53,15 @@ data class BottomNavItem(
 // Called one time at app startup
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun StartScreenApp(
+fun ScreenNavigator(
     view: View,
     viewModel: BloodViewModel,
-    currentScreen: DrawerAppScreen,
+    currentScreen: ScreenNames,
     navController: NavHostController = rememberNavController(),
     openDrawer: () -> Unit
 ) {
     lateinit var donor: Donor
-    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "StartScreenApp in StartScreen: ${currentScreen.name}")
+    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Start Initial Screen in ScreenNavigator: name=${currentScreen.name}")
     var appBarState by remember { mutableStateOf(AppBarState()) }
     Scaffold(
         topBar = {
@@ -72,9 +72,9 @@ fun StartScreenApp(
         }
     ) { internalPadding ->
         Box(modifier = Modifier.padding(internalPadding)) {
-            val donateProductsSearchStringName = stringResource(DrawerAppScreen.DonateProductsSearch.resId)
-            val manageDonorSearchStringName = stringResource(DrawerAppScreen.ManageDonorSearch.resId)
-            val createProductsStringName = stringResource(DrawerAppScreen.CreateProducts.resId)
+            val donateProductsSearchStringName = stringResource(ScreenNames.DonateProductsSearch.resId)
+            val manageDonorSearchStringName = stringResource(ScreenNames.ManageDonorSearch.resId)
+            val createProductsStringName = stringResource(ScreenNames.CreateProducts.resId)
             NavHost(
                 navController = navController,
                 startDestination = donateProductsSearchStringName,
@@ -109,8 +109,7 @@ fun StartScreenApp(
                         canNavigateBack = navController.previousBackStackEntry != null,
                         navigateUp = { navController.navigateUp() },
                         openDrawer = openDrawer,
-                        donor = donor,
-                        viewModel = viewModel
+                        donor = donor
                     ) { changed ->
                         if (changed) {
                             viewModel.insertDonorIntoDatabase(donor) { success ->
@@ -169,7 +168,6 @@ fun StartScreenApp(
 fun StartScreenAppBar(
     appBarState: AppBarState
 ) {
-    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "StartScreenAppBar=$appBarState")
     TopAppBar(
         title = { Text(appBarState.title) },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -205,10 +203,4 @@ fun BottomNavigationBar(navController: NavHostController) {
             )
         }
     }
-}
-
-enum class DismissSelector {
-    POSITIVE,
-    NEGATIVE,
-    NEUTRAL
 }

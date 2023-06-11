@@ -44,8 +44,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
-import com.mace.mace_template.DrawerAppScreen
 import com.mace.mace_template.R
+import com.mace.mace_template.ScreenNames
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 
@@ -59,8 +59,8 @@ fun DonateProductsScreen(
     viewModel: BloodViewModel,
     modifier: Modifier = Modifier
 ) {
-    val completed = remember { mutableStateOf(false) }
-    viewModel.RefreshRepository { completed.value = true }
+    val completed = remember { mutableStateOf(true) }
+    //viewModel.refreshRepository { completed.value = true }
     DonateProductsHandler(
         onComposing = onComposing,
         canNavigateBack = canNavigateBack,
@@ -91,7 +91,7 @@ fun DonateProductsHandler(
     fun showDonors(donorList: List<Donor>) {
         donors.value = donorList
     }
-    val donateProductsSearchStringName = stringResource(DrawerAppScreen.DonateProductsSearch.resId)
+    val donateProductsSearchStringName = stringResource(ScreenNames.DonateProductsSearch.resId)
     LaunchedEffect(key1 = true) {
         LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=$donateProductsSearchStringName")
         onComposing(

@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         Timber.plant(Timber.DebugTree())
         setContent {
             MaceTemplateTheme {
-                DrawerAppComponent(this.findViewById(android.R.id.content), BloodViewModel(application), DrawerAppScreen.DonateProductsSearch)
+                DrawerAppComponent(this.findViewById(android.R.id.content), BloodViewModel(application), ScreenNames.DonateProductsSearch)
             }
         }
     }

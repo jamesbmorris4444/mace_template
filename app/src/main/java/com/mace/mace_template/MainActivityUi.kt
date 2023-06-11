@@ -25,14 +25,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.BeyondBoundsLayout.LayoutDirection.Companion.After
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.mace.mace_template.logger.LogUtils
-import com.mace.mace_template.repository.storage.Product
 import kotlinx.coroutines.launch
 
 // See https://www.geeksforgeeks.org/android-jetpack-compose-implement-navigation-drawer/ for Navigation Drawer
@@ -41,7 +38,7 @@ import kotlinx.coroutines.launch
 fun DrawerAppComponent(
     view: View,
     bloodViewModel: BloodViewModel,
-    requestedScreen: DrawerAppScreen
+    requestedScreen: ScreenNames
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val currentScreen = remember { mutableStateOf(requestedScreen) }
@@ -70,7 +67,7 @@ fun DrawerAppComponent(
 
 @Composable
 fun DrawerContentComponent(
-    currentScreen: MutableState<DrawerAppScreen>,
+    currentScreen: MutableState<ScreenNames>,
     closeDrawer: () -> Unit
 ) {
     Column(
@@ -99,7 +96,7 @@ fun DrawerContentComponent(
             )
         }
         Spacer(Modifier.height(24.dp))
-        for (screen in DrawerAppScreen.values()) {
+        for (screen in ScreenNames.values()) {
             Column(
                 Modifier.clickable(onClick = {
                     closeDrawer()
@@ -133,15 +130,14 @@ fun DrawerContentComponent(
 @Composable
 fun BodyContentComponent(
     view: View,
-    currentScreen: DrawerAppScreen,
+    currentScreen: ScreenNames,
     openDrawer: () -> Unit,
     bloodViewModel: BloodViewModel
 ) {
-    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "BodyContentComponent in MainActivity: ${currentScreen.name}")
-    StartScreenApp(view, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer)
+    ScreenNavigator(view, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer)
 }
 
-enum class DrawerAppScreen(val resId: Int) {
+enum class ScreenNames(val resId: Int) {
     DonateProductsSearch(R.string.Search_for_donor_title),
     CreateProducts(R.string.create_blood_product_title),
     ManageDonorSearch(R.string.manage_donor_after_search_title),

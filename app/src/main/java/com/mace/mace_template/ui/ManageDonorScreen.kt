@@ -1,6 +1,5 @@
 package com.mace.mace_template.ui
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,43 +43,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mace.mace_template.AppBarState
-import com.mace.mace_template.BloodViewModel
-import com.mace.mace_template.DrawerAppScreen
 import com.mace.mace_template.R
+import com.mace.mace_template.ScreenNames
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 fun ManageDonorScreen(
     onComposing: (AppBarState) -> Unit,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     donor: Donor,
-    viewModel: BloodViewModel,
     onUpdateButtonClicked: (databaseModified: Boolean) -> Unit
 ) {
-    ManageDonorHandler(
-        onComposing = onComposing,
-        canNavigateBack = canNavigateBack,
-        navigateUp = navigateUp,
-        openDrawer = openDrawer,
-        donor = donor,
-        onUpdateButtonClicked = onUpdateButtonClicked)
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun ManageDonorHandler(
-    onComposing: (AppBarState) -> Unit,
-    canNavigateBack: Boolean,
-    navigateUp: () -> Unit,
-    openDrawer: () -> Unit,
-    donor: Donor,
-    onUpdateButtonClicked: (databaseModified: Boolean) -> Unit
-) {
-    val manageDonorSearchStringName = stringResource(DrawerAppScreen.ManageDonorSearch.resId)
+    val manageDonorSearchStringName = stringResource(ScreenNames.ManageDonorSearch.resId)
     LaunchedEffect(key1 = true) {
         LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorSearchStringName")
         onComposing(
@@ -284,8 +262,8 @@ fun ManageDonorHandler(
                 }
             }
         }
-        Spacer(modifier = Modifier.padding(top = 16.dp))
         Button(
+            modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
             shape = RoundedCornerShape(5.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = {

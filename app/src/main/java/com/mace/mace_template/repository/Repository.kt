@@ -39,8 +39,8 @@ enum class DatabaseSelector {
 class RepositoryImpl : Repository {
 
     private val tag = Repository::class.java.simpleName
-    lateinit var mainBloodDatabase: BloodDatabase
-    lateinit var stagingBloodDatabase: BloodDatabase
+    private lateinit var mainBloodDatabase: BloodDatabase
+    private lateinit var stagingBloodDatabase: BloodDatabase
     private val donorsService: APIInterface = APIClient.client
 
     private val liveDonorListEvent: SingleLiveEvent<List<Donor>> = SingleLiveEvent()
@@ -55,8 +55,6 @@ class RepositoryImpl : Repository {
         mainBloodDatabase = dbList[0]
         stagingBloodDatabase = dbList[1]
     }
-
-    // The code below here refreshes the main donations base
 
     override fun refreshDatabase(context: Context, refreshCompleted: () -> Unit) {
         saveDatabase(context, MAIN_DATABASE_NAME)
