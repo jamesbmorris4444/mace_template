@@ -43,7 +43,6 @@ fun DrawerAppComponent(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val currentScreen = remember { mutableStateOf(requestedScreen) }
     val coroutineScope = rememberCoroutineScope()
-    bloodViewModel.setBloodDatabase()
     ModalDrawer(
         drawerState = drawerState,
         gesturesEnabled = true,

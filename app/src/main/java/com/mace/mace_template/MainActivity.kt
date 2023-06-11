@@ -1,5 +1,6 @@
 package com.mace.mace_template
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,6 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, true)
         Timber.plant(Timber.DebugTree())
+        startService(Intent(this, OnClearFromRecentService::class.java))
         setContent {
             MaceTemplateTheme {
                 DrawerAppComponent(this.findViewById(android.R.id.content), BloodViewModel(application), ScreenNames.DonateProductsSearch)

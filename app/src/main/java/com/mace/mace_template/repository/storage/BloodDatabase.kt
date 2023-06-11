@@ -13,10 +13,10 @@ abstract class BloodDatabase : RoomDatabase() {
     companion object {
 
         @Volatile
-        private var MAIN_INSTANCE: BloodDatabase? = null
+        var MAIN_INSTANCE: BloodDatabase? = null
 
         @Volatile
-        private var STAGING_INSTANCE: BloodDatabase? = null
+        var STAGING_INSTANCE: BloodDatabase? = null
 
         fun newInstance(context: Context, mainDatabaseName: String, stagingDatabaseName: String): List<BloodDatabase> {
             synchronized(this) {

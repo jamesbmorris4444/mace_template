@@ -37,6 +37,7 @@ import com.mace.mace_template.ui.ManageDonorScreen
 import com.mace.mace_template.ui.StandardModalComposeView
 import com.mace.mace_template.utils.Constants
 
+
 data class AppBarState(
     val title: String = "",
     val actions: (@Composable RowScope.() -> Unit)? = null,
@@ -80,7 +81,7 @@ fun ScreenNavigator(
                 startDestination = donateProductsSearchStringName,
             ) {
                 composable(route = donateProductsSearchStringName) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen 1=$donateProductsSearchStringName")
+                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$donateProductsSearchStringName")
                     DonateProductsScreen(
                         onComposing = {
                             appBarState = it

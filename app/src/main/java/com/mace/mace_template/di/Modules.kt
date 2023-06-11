@@ -4,5 +4,5 @@ import com.mace.mace_template.repository.RepositoryImpl
 import org.koin.dsl.module
 
 val applicationModule = module {
-    single { RepositoryImpl() }
+    single { RepositoryImpl(get()) }
 }

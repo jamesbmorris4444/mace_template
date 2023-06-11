@@ -34,7 +34,7 @@ interface DBDao {
     // queries
 
     @Query("SELECT COUNT(id) FROM donors")
-    fun getDonorEntryCount(): Single<Int>
+    fun getDonorEntryCount(): Int
 
     @Query("SELECT COUNT(id) FROM products")
     fun getProductEntryCount(): Single<Int>

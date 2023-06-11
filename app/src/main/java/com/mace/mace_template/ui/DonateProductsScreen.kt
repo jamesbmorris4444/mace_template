@@ -59,15 +59,20 @@ fun DonateProductsScreen(
     viewModel: BloodViewModel,
     modifier: Modifier = Modifier
 ) {
-    val completed = remember { mutableStateOf(true) }
-    //viewModel.refreshRepository { completed.value = true }
+    viewModel.setBloodDatabase()
+    val isInvalid = viewModel.isBloodDatabaseInvalid()
+    LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "isInvalid=$isInvalid")
+    var completed by remember { mutableStateOf(!isInvalid) }
+    if (isInvalid) {
+        viewModel.refreshRepository { completed = true }
+    }
     DonateProductsHandler(
         onComposing = onComposing,
         canNavigateBack = canNavigateBack,
         navigateUp = navigateUp,
         openDrawer = openDrawer,
         viewModel = viewModel,
-        value = completed.value,
+        completed = completed,
         onItemButtonClicked = onItemButtonClicked,
         modifier = modifier)
 }
@@ -80,7 +85,7 @@ fun DonateProductsHandler(
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     viewModel: BloodViewModel,
-    value: Boolean,
+    completed: Boolean,
     onItemButtonClicked: (donor: Donor) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -120,7 +125,7 @@ fun DonateProductsHandler(
     }
     BoxWithConstraints(modifier = modifier.fillMaxWidth(1f)) {
         val keyboardController = LocalSoftwareKeyboardController.current
-        if (value) {
+        if (completed) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

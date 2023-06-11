@@ -11,8 +11,8 @@
     <string name="complete_button_text">Complete</string>
     <string name="create_products_header_text">DONOR: %1$s, %2$s</string>
     <string name="no_db_entries_title_text">No entries made into the staging database</string>
-    <string name="made_db_entries_title_text">Staging entry for donor insertion</string>
-    <string name="made_db_entries_body_text">An entry was made to the staging database for insertion of a new donor into the remote database</string>
+    <string name="made_db_entries_title_text">Staging entry for donor/products insertion</string>
+    <string name="made_db_entries_body_text">An entry was made to the staging database for insertion of new donor product(s)</string>
     <string name="made_db_entries_failure_text">Insertion of new donor in database failed</string>
     <string name="positive_button_text_ok">BKG:OK</string>
     <string name="positive_button_text_yes">BKG:Yes</string>

@@ -1,7 +1,10 @@
 package com.mace.mace_template
 
 import android.app.Application
+import android.app.Service
+import android.content.Intent
 import android.content.res.Resources
+import android.os.IBinder
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import com.mace.mace_template.repository.DatabaseSelector
@@ -36,8 +39,23 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         repository.setBloodDatabase(app.applicationContext)
     }
 
+    fun isBloodDatabaseInvalid(): Boolean {
+        return repository.isBloodDatabaseInvalid()
+    }
+
     fun insertDonorAndProductsIntoDatabase(modalView: View, databaseSelector: DatabaseSelector, donor: Donor, products: List<Product>) {
         repository.insertDonorAndProductsIntoDatabase(modalView, databaseSelector, donor, products)
     }
 
+}
+
+class OnClearFromRecentService : Service(), KoinComponent {
+    private val repository: RepositoryImpl by inject()
+    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
+    override fun onDestroy() = super.onDestroy()
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        repository.saveStagingDatabase()
+        stopSelf()
+    }
 }

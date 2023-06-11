@@ -1,5 +1,6 @@
 package com.mace.mace_template.repository
 
+import android.app.Application
 import android.content.Context
 import android.view.View
 import com.mace.mace_template.R
@@ -26,6 +27,8 @@ import java.util.concurrent.TimeUnit
 
 interface Repository {
     fun setBloodDatabase(context: Context)
+    fun isBloodDatabaseInvalid(): Boolean
+    fun saveStagingDatabase()
     fun refreshDatabase(context: Context, refreshCompleted: () -> Unit)
     fun insertDonorIntoDatabase(databaseSelector: DatabaseSelector, donor: Donor, completed: (Boolean) -> Unit)
     fun insertDonorAndProductsIntoDatabase(modalView: View, databaseSelector: DatabaseSelector, donor: Donor, products: List<Product>)
@@ -36,7 +39,7 @@ enum class DatabaseSelector {
     MAINBLOOD_DB
 }
 
-class RepositoryImpl : Repository {
+class RepositoryImpl(private val app: Application) : Repository {
 
     private val tag = Repository::class.java.simpleName
     private lateinit var mainBloodDatabase: BloodDatabase
@@ -56,8 +59,11 @@ class RepositoryImpl : Repository {
         stagingBloodDatabase = dbList[1]
     }
 
+    override fun isBloodDatabaseInvalid(): Boolean {
+        return databaseDonorCount(mainBloodDatabase) == 0
+    }
+
     override fun refreshDatabase(context: Context, refreshCompleted: () -> Unit) {
-        saveDatabase(context, MAIN_DATABASE_NAME)
         var disposable: Disposable? = null
         disposable = donorsService.getDonors(Constants.API_KEY, Constants.LANGUAGE, 13)
             .observeOn(AndroidSchedulers.mainThread())
@@ -134,8 +140,9 @@ class RepositoryImpl : Repository {
         context.deleteDatabase(databaseName)
     }
 
-    private fun saveDatabase(context: Context, databaseName: String) {
-        val db: File = context.getDatabasePath(databaseName)
+    override fun saveStagingDatabase() {
+        val databaseName = MODIFIED_DATABASE_NAME
+        val db: File = app.applicationContext.getDatabasePath(databaseName)
         val dbShm = File(db.parent, "$databaseName-shm")
         val dbWal = File(db.parent, "$databaseName-wal")
         val dbBackup = File(db.parent, "$databaseName-backup")
@@ -282,31 +289,31 @@ class RepositoryImpl : Repository {
 //        return database.databaseDao().loadAllDonorsWithProducts()
 //    }
 //
-    /**
-     * Shows the donor and product counts in both the main database and the staging database in a modal popup
-     */
-    fun databaseCounts() {
-        val entryCountList = listOf(
-            databaseDonorCount(stagingBloodDatabase),
-            databaseDonorCount(mainBloodDatabase)
-        )
-        var disposable: Disposable? = null
-        disposable = Single.zip(entryCountList) { args -> listOf(args) }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ responseList ->
-                disposable?.dispose()
-                val response = responseList[0]
-                getProductEntryCount(response[0] as Int, response[1] as Int)
-                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database donors count success: mainDonorCount=${response[0] as Int}     backupDonorCount=${response[1] as Int}")
-            },
-            { throwable ->
-                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database donors count failure: message=${throwable.message}")
-                disposable?.dispose()
-            })
-    }
-    private fun databaseDonorCount(database: BloodDatabase): Single<Int> {
+//    private fun databaseCounts() {
+//        val entryCountList = listOf(
+//            databaseDonorCount(stagingBloodDatabase),
+//            databaseDonorCount(mainBloodDatabase)
+//        )
+//        var disposable: Disposable? = null
+//        disposable = Single.zip(entryCountList) { args -> listOf(args) }
+//            .subscribeOn(AndroidSchedulers.mainThread())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe({ responseList ->
+//                disposable?.dispose()
+//                val response = responseList[0]
+//                mainDatabaseCount = response[0] as Int
+//                //getProductEntryCount(response[0] as Int, response[1] as Int)
+//                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database donors count success: mainDonorCount=${response[0] as Int}     backupDonorCount=${response[1] as Int}")
+//            },
+//            { throwable ->
+//                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database donors count failure: message=${throwable.message}")
+//                disposable?.dispose()
+//            })
+//    }
+    private fun databaseDonorCount(database: BloodDatabase): Int {
         return database.databaseDao().getDonorEntryCount()
     }
+
     private fun getProductEntryCount(modifiedDonors: Int, mainDonors: Int) {
         val entryCountList = listOf(
             databaseProductCount(stagingBloodDatabase),
