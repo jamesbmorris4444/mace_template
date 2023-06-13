@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -61,7 +62,6 @@ fun DonateProductsScreen(
 ) {
     viewModel.setBloodDatabase()
     val isInvalid = viewModel.isBloodDatabaseInvalid()
-    LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "isInvalid=$isInvalid")
     var completed by remember { mutableStateOf(!isInvalid) }
     if (isInvalid) {
         viewModel.refreshRepository { completed = true }
@@ -129,7 +129,8 @@ fun DonateProductsHandler(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.TopCenter)
+                    .align(Alignment.TopCenter),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row {
                     var text by rememberSaveable { mutableStateOf("") }
@@ -152,6 +153,13 @@ fun DonateProductsHandler(
                             })
                     )
                 }
+                WidgetButton(
+                    padding = PaddingValues(top = 16.dp),
+                    onClick = {
+                        onItemButtonClicked(Donor(lastName = "", middleName = "", firstName = "", dob = "", aboRh = "", branch = ""))
+                    },
+                    buttonText = stringResource(R.string.new_donor_button_text)
+                )
                 Spacer(modifier = Modifier.height(20.dp))
                 if (donors.value.isNotEmpty()) {
                     Divider(color = colorResource(id = R.color.black), thickness = 2.dp)

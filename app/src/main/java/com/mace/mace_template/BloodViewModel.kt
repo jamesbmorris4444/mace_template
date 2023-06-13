@@ -10,6 +10,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.mace.mace_template.repository.DatabaseSelector
 import com.mace.mace_template.repository.RepositoryImpl
 import com.mace.mace_template.repository.storage.Donor
+import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.repository.storage.Product
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -45,6 +46,18 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
 
     fun insertDonorAndProductsIntoDatabase(modalView: View, databaseSelector: DatabaseSelector, donor: Donor, products: List<Product>) {
         repository.insertDonorAndProductsIntoDatabase(modalView, databaseSelector, donor, products)
+    }
+
+    fun donorsFromFullNameWithProducts(searchLast: String, dob: String): List<DonorWithProducts> {
+        return repository.donorsFromFullNameWithProducts(searchLast, dob)
+    }
+
+    fun stagingDatabaseDonorAndProductsList(): List<DonorWithProducts> {
+        return repository.stagingDatabaseDonorAndProductsList()
+    }
+
+    fun mainDatabaseDonorAndProductsList(): List<DonorWithProducts> {
+        return repository.mainDatabaseDonorAndProductsList()
     }
 
 }

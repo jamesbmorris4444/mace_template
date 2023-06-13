@@ -30,6 +30,8 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 
 // See https://www.geeksforgeeks.org/android-jetpack-compose-implement-navigation-drawer/ for Navigation Drawer
@@ -43,12 +45,89 @@ fun DrawerAppComponent(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val currentScreen = remember { mutableStateOf(requestedScreen) }
     val coroutineScope = rememberCoroutineScope()
+    val navController: NavHostController = rememberNavController()
+
+    @Composable
+    fun DrawerContentComponent(
+        currentScreen: MutableState<ScreenNames>,
+        navController: NavHostController,
+        closeDrawer: () -> Unit
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(top = 100.dp)
+                .background(color = colorResource(id = R.color.black)),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Box(
+                modifier = Modifier
+                    .align(CenterHorizontally)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.fs_logo),
+                    contentDescription = stringResource(id = R.string.fs_logo_content_description),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(120.dp)
+                )
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter),
+                    text = stringResource(R.string.walking_blood_bank_text),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colorResource(id = R.color.white)
+                )
+            }
+            Spacer(Modifier.height(24.dp))
+            for (screen in ScreenNames.values()) {
+                Column(
+                    Modifier.clickable(onClick = {
+                        closeDrawer()
+                        currentScreen.value = screen
+                        navController.navigate(view.context.resources.getString(screen.resId))
+                    }),
+                    content = {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = if (currentScreen.value == screen) {
+                                colorResource(id = R.color.white)
+                            } else {
+                                colorResource(id = R.color.darkMagenta)
+                            }
+                        ) {
+                            Text(
+                                text = screen.name,
+                                modifier = Modifier.padding(16.dp),
+                                color = if (currentScreen.value == screen) {
+                                    colorResource(id = R.color.black)
+                                } else {
+                                    colorResource(id = R.color.white)
+                                }
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun BodyContentComponent(
+        view: View,
+        currentScreen: ScreenNames,
+        openDrawer: () -> Unit,
+        bloodViewModel: BloodViewModel
+    ) {
+        ScreenNavigator(view, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer, navController = navController)
+    }
+
     ModalDrawer(
         drawerState = drawerState,
         gesturesEnabled = true,
         drawerContent = {
             DrawerContentComponent(
                 currentScreen = currentScreen,
+                navController = navController,
                 closeDrawer = { coroutineScope.launch { drawerState.close() } }
             )
         },
@@ -62,78 +141,6 @@ fun DrawerAppComponent(
             )
         }
     )
-}
-
-@Composable
-fun DrawerContentComponent(
-    currentScreen: MutableState<ScreenNames>,
-    closeDrawer: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .padding(top = 200.dp)
-            .background(color = colorResource(id = R.color.black)),
-        horizontalAlignment = Alignment.Start
-    ) {
-        Box(
-            modifier = Modifier
-                .align(CenterHorizontally)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.fs_logo),
-                contentDescription = stringResource(id = R.string.fs_logo_content_description),
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(120.dp)
-            )
-            Text(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter),
-                text = stringResource(R.string.walking_blood_bank_text),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colorResource(id = R.color.white)
-            )
-        }
-        Spacer(Modifier.height(24.dp))
-        for (screen in ScreenNames.values()) {
-            Column(
-                Modifier.clickable(onClick = {
-                    closeDrawer()
-                    currentScreen.value = screen
-                }),
-                content = {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = if (currentScreen.value == screen) {
-                            colorResource(id = R.color.white)
-                        } else {
-                            colorResource(id = R.color.darkMagenta)
-                        }
-                    ) {
-                        Text(
-                            text = screen.name,
-                            modifier = Modifier.padding(16.dp),
-                            color = if (currentScreen.value == screen) {
-                                colorResource(id = R.color.black)
-                            } else {
-                                colorResource(id = R.color.white)
-                            }
-                        )
-                    }
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun BodyContentComponent(
-    view: View,
-    currentScreen: ScreenNames,
-    openDrawer: () -> Unit,
-    bloodViewModel: BloodViewModel
-) {
-    ScreenNavigator(view, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer)
 }
 
 enum class ScreenNames(val resId: Int) {

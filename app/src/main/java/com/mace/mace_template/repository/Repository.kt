@@ -32,6 +32,9 @@ interface Repository {
     fun refreshDatabase(context: Context, refreshCompleted: () -> Unit)
     fun insertDonorIntoDatabase(databaseSelector: DatabaseSelector, donor: Donor, completed: (Boolean) -> Unit)
     fun insertDonorAndProductsIntoDatabase(modalView: View, databaseSelector: DatabaseSelector, donor: Donor, products: List<Product>)
+    fun stagingDatabaseDonorAndProductsList(): List<DonorWithProducts>
+    fun mainDatabaseDonorAndProductsList(): List<DonorWithProducts>
+    fun donorsFromFullNameWithProducts(searchLast: String, dob: String): List<DonorWithProducts>
 }
 
 enum class DatabaseSelector {
@@ -268,26 +271,13 @@ class RepositoryImpl(private val app: Application) : Repository {
 //        initializeView()
 //    }
 //
-//    /**
-//     * @param   donorsAndProductsList     callback method in ViewModel when asynchronous operation finishes
-//     * Calls the callback method with the donor and product list of entries in the staging database
-//     *
-//     */
-//    fun getListOfDonorsAndProducts(donorsAndProductsList: (donorsAndProductsList: List<DonorWithProducts>) -> Unit) {
-//        var disposable: Disposable? = null
-//        disposable = databaseDonorAndProductsList(stagingBloodDatabase)
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe({ donorsAndProductsList ->
-//                disposable?.dispose()
-//                donorsAndProductsList(donorsAndProductsList)
-//            }, { throwable ->
-//                disposable?.dispose()
-//                LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.EXC), "getListOfDonorsAndProducts", throwable)
-//            })
-//    }
-//    private fun databaseDonorAndProductsList(database: BloodDatabase): Single<List<DonorWithProducts>> {
-//        return database.databaseDao().loadAllDonorsWithProducts()
-//    }
+    override fun stagingDatabaseDonorAndProductsList(): List<DonorWithProducts> {
+        return stagingBloodDatabase.databaseDao().loadAllDonorsWithProducts()
+    }
+
+    override fun mainDatabaseDonorAndProductsList(): List<DonorWithProducts> {
+        return mainBloodDatabase.databaseDao().loadAllDonorsWithProducts()
+    }
 //
 //    private fun databaseCounts() {
 //        val entryCountList = listOf(
@@ -452,19 +442,8 @@ class RepositoryImpl(private val app: Application) : Repository {
 //
 //    }
 
-//    private fun donorsFromFullNameWithProducts(database: BloodDatabase, search: String): Single<List<DonorWithProducts>> {
-//        var searchLast: String
-//        var searchFirst = "%"
-//        val index = search.indexOf(',')
-//        if (index < 0) {
-//            searchLast = "$search%"
-//        } else {
-//            val last = search.substring(0, index)
-//            val first = search.substring(index + 1)
-//            searchFirst = "$first%"
-//            searchLast = "$last%"
-//        }
-//        return database.databaseDao().donorsFromFullNameWithProducts(searchLast, searchFirst)
-//    }
+    override fun donorsFromFullNameWithProducts(searchLast: String, dob: String): List<DonorWithProducts> {
+        return stagingBloodDatabase.databaseDao().donorsFromFullNameWithProducts(searchLast, dob)
+    }
 
 }

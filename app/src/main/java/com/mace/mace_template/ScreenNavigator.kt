@@ -28,13 +28,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.ui.CreateProductsScreen
 import com.mace.mace_template.ui.DonateProductsScreen
 import com.mace.mace_template.ui.ManageDonorScreen
 import com.mace.mace_template.ui.StandardModalComposeView
+import com.mace.mace_template.ui.ViewDonorListScreen
 import com.mace.mace_template.utils.Constants
 
 
@@ -58,7 +58,7 @@ fun ScreenNavigator(
     view: View,
     viewModel: BloodViewModel,
     currentScreen: ScreenNames,
-    navController: NavHostController = rememberNavController(),
+    navController: NavHostController,
     openDrawer: () -> Unit
 ) {
     lateinit var donor: Donor
@@ -76,6 +76,7 @@ fun ScreenNavigator(
             val donateProductsSearchStringName = stringResource(ScreenNames.DonateProductsSearch.resId)
             val manageDonorSearchStringName = stringResource(ScreenNames.ManageDonorSearch.resId)
             val createProductsStringName = stringResource(ScreenNames.CreateProducts.resId)
+            val viewDonorListStringName = stringResource(ScreenNames.ViewDonorList.resId)
             NavHost(
                 navController = navController,
                 startDestination = donateProductsSearchStringName,
@@ -111,7 +112,7 @@ fun ScreenNavigator(
                         navigateUp = { navController.navigateUp() },
                         openDrawer = openDrawer,
                         donor = donor
-                    ) { changed ->
+                    ) { changed, donor ->
                         if (changed) {
                             viewModel.insertDonorIntoDatabase(donor) { success ->
                                 if (success) {
@@ -157,6 +158,26 @@ fun ScreenNavigator(
                         onCompleteButtonClicked = {
                             navController.navigate(donateProductsSearchStringName)
                         }
+                    )
+                }
+                composable(route = viewDonorListStringName) {
+                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$viewDonorListStringName")
+                    ViewDonorListScreen(
+                        onComposing = {
+                            appBarState = it
+                            LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "appBarState1=$appBarState")
+                        },
+                        canNavigateBack = navController.previousBackStackEntry != null,
+                        navigateUp = { navController.navigateUp() },
+                        openDrawer = openDrawer,
+                        onItemButtonClicked = {
+                            donor = it
+                            navController.navigate(manageDonorSearchStringName)
+                        },
+                        viewModel = viewModel,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(dimensionResource(R.dimen.padding_large))
                     )
                 }
             }

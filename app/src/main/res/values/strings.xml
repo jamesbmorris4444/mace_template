@@ -6,6 +6,7 @@
     <string name="menu_content_description">menu</string>
     <string name="fs_logo_content_description">Florida Software Logo</string>
     <string name="update_button_text">Update</string>
+    <string name="new_donor_button_text">New Donor</string>
     <string name="clear_button_text">Clear</string>
     <string name="confirm_button_text">Confirm</string>
     <string name="complete_button_text">Complete</string>
@@ -31,13 +32,14 @@
     <string name="enter_expiration_text">Enter Expiration</string>
     <string name="expiration_title">EXPIRATION DATE</string>
     <string name="abo_rh_title">ABO/RH</string>
-    <string name="enter_last_name_text">Enter Last Name</string>
     <string name="enter_first_name_text">Enter First Name</string>
     <string name="enter_middle_name_text">Enter Middle Name</string>
-    <string name="enter_dob_text">Enter DOB as 13 Mar 2022</string>
+    <string name="enter_last_name_text">Enter Last Name</string>
+    <string name="enter_dob_text">Enter Date of Birth</string>
     <string name="enter_blood_type_text">Enter Blood Type</string>
     <string name="enter_branch_text">Enter Branch</string>
     <string name="initial_letters_of_last_name_text">Initial letters of last name</string>
+    <string name="donor_search_view_donor_list_text">Donor Search String</string>
     <string name="std_modal_noconfirm_title">Product Entry Not Confirmed</string>
     <string name="std_modal_noconfirm_body">Complete button was clicked without confirming current grid entry. Do you want to confirm?</string>
     

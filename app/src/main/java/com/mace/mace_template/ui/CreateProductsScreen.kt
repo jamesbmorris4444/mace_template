@@ -29,8 +29,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -58,13 +56,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
 import com.mace.mace_template.repository.DatabaseSelector
 import com.mace.mace_template.repository.storage.Donor
+import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.repository.storage.Product
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -121,48 +119,6 @@ fun CreateProductsScreen(
             product.donorId = donor.id
         }
         viewModel.insertDonorAndProductsIntoDatabase(modalView, DatabaseSelector.STAGING_DB, donor, products.value)
-    }
-
-    fun onClearClicked() {
-        dinText = ""
-        productCodeText = ""
-        expirationText = ""
-        clearButtonVisible = false
-        confirmButtonVisible = false
-        confirmNeeded = false
-    }
-
-    fun onConfirmClicked() {
-        clearButtonVisible = true
-        confirmButtonVisible = true
-        confirmNeeded = false
-        processNewProduct()
-    }
-
-    fun onCompleteClicked() {
-        if (confirmNeeded) {
-            StandardModalComposeView(
-                modalView,
-                topIconResId = R.drawable.notification,
-                titleText = viewModel.getResources().getString(R.string.std_modal_noconfirm_title),
-                bodyText = viewModel.getResources().getString(R.string.std_modal_noconfirm_body),
-                positiveText = viewModel.getResources().getString(R.string.positive_button_text_yes),
-                negativeText = viewModel.getResources().getString(R.string.negative_button_text_no),
-            ) { dismissSelector ->
-                when (dismissSelector) {
-                    DismissSelector.POSITIVE -> {
-                        processNewProduct()
-                        addDonorWithProductsToModifiedDatabase()
-                    }
-                    else -> { }
-                }
-            }.show()
-        } else {
-            if (products.value.isNotEmpty()) {
-                addDonorWithProductsToModifiedDatabase()
-            }
-        }
-        onCompleteButtonClicked()
     }
 
     @Composable
@@ -237,6 +193,52 @@ fun CreateProductsScreen(
                 Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
             })
         }
+    }
+
+    fun onClearClicked() {
+        dinText = ""
+        productCodeText = ""
+        expirationText = ""
+        clearButtonVisible = false
+        confirmButtonVisible = false
+        confirmNeeded = false
+    }
+
+    fun onConfirmClicked() {
+        clearButtonVisible = true
+        confirmButtonVisible = true
+        confirmNeeded = false
+        processNewProduct()
+    }
+
+    fun onCompleteClicked() {
+        if (confirmNeeded) {
+            StandardModalComposeView(
+                modalView,
+                topIconResId = R.drawable.notification,
+                titleText = viewModel.getResources().getString(R.string.std_modal_noconfirm_title),
+                bodyText = viewModel.getResources().getString(R.string.std_modal_noconfirm_body),
+                positiveText = viewModel.getResources().getString(R.string.positive_button_text_yes),
+                negativeText = viewModel.getResources().getString(R.string.negative_button_text_no),
+            ) { dismissSelector ->
+                when (dismissSelector) {
+                    DismissSelector.POSITIVE -> {
+                        processNewProduct()
+                        addDonorWithProductsToModifiedDatabase()
+                    }
+                    else -> { }
+                }
+            }.show()
+        } else {
+            if (products.value.isEmpty()) {
+                val dwpList: List<DonorWithProducts> = viewModel.donorsFromFullNameWithProducts(donor.lastName, donor.dob)
+                products.value = dwpList.flatMap { it.products }
+                // ProductList(products.value)
+            } else {
+                addDonorWithProductsToModifiedDatabase()
+            }
+        }
+        onCompleteButtonClicked()
     }
 
     LaunchedEffect(key1 = true) {
@@ -422,48 +424,30 @@ fun CreateProductsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val keyboardController = LocalSoftwareKeyboardController.current
-            Button(
-                modifier = Modifier.padding(PaddingValues(start = 8.dp, end = 8.dp)),
-                shape = RoundedCornerShape(5.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            WidgetButton(
+                padding = PaddingValues(start = 8.dp, end = 8.dp),
                 onClick = {
                     onClearClicked()
                     keyboardController?.hide()
-                }) {
-                Text(
-                    text = stringResource(R.string.clear_button_text),
-                    fontSize = 16.sp,
-                    color = Color.White
-                )
-            }
-            Button(
-                modifier = Modifier.padding(PaddingValues(start = 8.dp, end = 8.dp)),
-                shape = RoundedCornerShape(5.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                },
+                buttonText = stringResource(R.string.clear_button_text)
+            )
+            WidgetButton(
+                padding = PaddingValues(start = 8.dp, end = 8.dp),
                 onClick = {
                     onConfirmClicked()
                     keyboardController?.hide()
-                }) {
-                Text(
-                    text = stringResource(R.string.confirm_button_text),
-                    fontSize = 16.sp,
-                    color = Color.White
-                )
-            }
-            Button(
-                modifier = Modifier.padding(PaddingValues(start = 8.dp, end = 8.dp)),
-                shape = RoundedCornerShape(5.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                },
+                buttonText = stringResource(R.string.confirm_button_text)
+            )
+            WidgetButton(
+                padding = PaddingValues(start = 8.dp, end = 8.dp),
                 onClick = {
                     onCompleteClicked()
                     keyboardController?.hide()
-                }) {
-                Text(
-                    text = stringResource(R.string.complete_button_text),
-                    fontSize = 16.sp,
-                    color = Color.White
-                )
-            }
+                },
+                buttonText = stringResource(R.string.complete_button_text)
+            )
         }
         ProductList(products)
     }

@@ -1,6 +1,8 @@
 package com.mace.mace_template.utils
 
+import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
+import com.mace.mace_template.repository.storage.DonorWithProducts
 
 object Utils {
 //
@@ -14,35 +16,25 @@ object Utils {
 //        return donor.lastName == otherDonor.lastName && donor.firstName == otherDonor.firstName && donor.middleName == otherDonor.middleName && donor.dob == otherDonor.dob
 //    }
 
-    fun donorComparisonByString(donor: Donor): String {
-        return donor.lastName + "," + donor.firstName + "," + donor.middleName + "," + donor.dob
+    fun donorComparisonByString(donorWithProducts: Donor): String {
+        return "${donorWithProducts.lastName},${donorWithProducts.dob}"
     }
 
-//    fun newPatternOfSubpatterns(patternOfSubpatterns: String, index: Int, newPattern: String): String {
-//        // patternOfSubpatterns = P|P|P|...|P
-//        // if there are N subpatterns then index = 0 to N-1
-//        // example of usage: newPatternOfSubpatterns("aaaa|bbbb|cccc|dddd", 2, "xxxxxxxx")
-//        // will return the string value: "aaaa|bbbb|xxxxxxxx|dddd"
-//        val split: MutableList<String> = patternOfSubpatterns.split('|').toMutableList()
-//        val stringBuilder = StringBuilder()
-//        split[index] = newPattern
-//        for (newIndex in split.indices) {
-//            stringBuilder.append(split[newIndex])
-//            if (newIndex < split.size - 1) {
-//                stringBuilder.append('|')
-//            }
-//        }
-//        return stringBuilder.toString()
-//    }
-//
-//    fun getPatternOfSubpatterns(patternOfSubpatterns: String, index: Int): String {
-//        // patternOfSubpatterns = P|P|P|...|P|
-//        // if there are N subpatterns then index = 0 to N-1
-//        // example of usage: getPatternOfSubpatterns("aaaa|bbbb|cccc|dddd", 2)
-//        // will return the string value: "cccc"
-//        val split: MutableList<String> = patternOfSubpatterns.split('|').toMutableList()
-//        return split[index]
-//    }
+    fun donorBloodTypeComparisonByString(donorWithProducts: Donor): String {
+        return donorWithProducts.aboRh
+    }
+
+    fun donorLastNameComparisonByString(donorWithProducts: Donor): String {
+        return donorWithProducts.lastName
+    }
+
+    fun prettyPrintList(list: List<DonorWithProducts>) {
+        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "=======================")
+        list.forEach {
+            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "resultListElement=$it")
+        }
+        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "=======================")
+    }
 //
 //    fun donorsAndProductsList(listOfDonorsAndProducts: List<DonorWithProducts>)  {
 //        for (item in listOfDonorsAndProducts) {

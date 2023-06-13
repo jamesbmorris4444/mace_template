@@ -2,6 +2,7 @@ package com.mace.mace_template.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -22,9 +23,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.Composable
@@ -36,12 +34,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mace.mace_template.AppBarState
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
@@ -56,7 +52,7 @@ fun ManageDonorScreen(
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     donor: Donor,
-    onUpdateButtonClicked: (databaseModified: Boolean) -> Unit
+    onUpdateButtonClicked: (databaseModified: Boolean, donor: Donor) -> Unit
 ) {
     val manageDonorSearchStringName = stringResource(ScreenNames.ManageDonorSearch.resId)
     LaunchedEffect(key1 = true) {
@@ -96,33 +92,37 @@ fun ManageDonorScreen(
         var databaseModified by remember { mutableStateOf(false) }
         var aboRhExpanded by remember { mutableStateOf(false) }
         var branchExpanded by remember { mutableStateOf(false) }
-        var lastNameText by rememberSaveable { mutableStateOf(donor.lastName) }
         var firstNameText by rememberSaveable { mutableStateOf(donor.firstName) }
         var middleNameText by rememberSaveable { mutableStateOf(donor.middleName) }
+        var lastNameText by rememberSaveable { mutableStateOf(donor.lastName) }
         var dobText by rememberSaveable { mutableStateOf(donor.dob) }
         var aboRhText by rememberSaveable { mutableStateOf(donor.aboRh) }
         var branchText by rememberSaveable { mutableStateOf(donor.branch) }
-        val enterLastNameText = stringResource(R.string.enter_last_name_text)
+        var gender by rememberSaveable { mutableStateOf(donor.gender) }
         val enterFirstNameText = stringResource(R.string.enter_first_name_text)
         val enterMiddleNameText = stringResource(R.string.enter_middle_name_text)
+        val enterLastNameText = stringResource(R.string.enter_last_name_text)
         val enterDobText = stringResource(R.string.enter_dob_text)
-        val enterBloodTtypeText = stringResource(R.string.enter_blood_type_text)
+        val enterBloodTypeText = stringResource(R.string.enter_blood_type_text)
         val enterBranchText = stringResource(R.string.enter_branch_text)
 
-        Spacer(modifier = Modifier.padding(top = 16.dp))
-        Row {
-            OutlinedTextField(
-                modifier = Modifier
-                    .height(60.dp),
-                value = lastNameText,
-                onValueChange = {
-                    lastNameText = it
-                    databaseModified = true
-                },
-                shape = RoundedCornerShape(10.dp),
-                label = { Text(enterLastNameText) },
-                singleLine = true
-            )
+        if (donor.lastName.isEmpty()) {
+            databaseModified = true
+            Spacer(modifier = Modifier.padding(top = 16.dp))
+            Row {
+                OutlinedTextField(
+                    modifier = Modifier
+                        .height(60.dp),
+                    value = lastNameText,
+                    onValueChange = {
+                        lastNameText = it
+                        databaseModified = true
+                    },
+                    shape = RoundedCornerShape(10.dp),
+                    label = { Text(enterLastNameText) },
+                    singleLine = true
+                )
+            }
         }
         Spacer(modifier = Modifier.padding(top = 16.dp))
         Row {
@@ -154,24 +154,26 @@ fun ManageDonorScreen(
                 singleLine = true
             )
         }
-        Spacer(modifier = Modifier.padding(top = 16.dp))
-        Row {
-            OutlinedTextField(
-                modifier = Modifier
-                    .height(60.dp),
-                value = dobText,
-                onValueChange = {
-                    dobText = it
-                    databaseModified = true
-                },
-                shape = RoundedCornerShape(10.dp),
-                label = { Text(enterDobText) },
-                singleLine = true
-            )
+        if (donor.dob.isEmpty()) {
+            Spacer(modifier = Modifier.padding(top = 16.dp))
+            Row {
+                OutlinedTextField(
+                    modifier = Modifier
+                        .height(60.dp),
+                    value = dobText,
+                    onValueChange = {
+                        dobText = it
+                        databaseModified = true
+                    },
+                    shape = RoundedCornerShape(10.dp),
+                    label = { Text(enterDobText) },
+                    singleLine = true
+                )
+            }
         }
         Spacer(modifier = Modifier.padding(top = 16.dp))
         Row {
-            HorizontalRadioButtons(donor.gender)
+            HorizontalRadioButtons(donor.gender) { text -> gender = text == "Male" }
         }
         ExposedDropdownMenuBox(
             expanded = aboRhExpanded,
@@ -188,7 +190,7 @@ fun ManageDonorScreen(
                     aboRhText = it
                 },
                 shape = RoundedCornerShape(10.dp),
-                label = { Text(enterBloodTtypeText) },
+                label = { Text(enterBloodTypeText) },
                 singleLine = true,
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(
@@ -262,26 +264,27 @@ fun ManageDonorScreen(
                 }
             }
         }
-        Button(
-            modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
-            shape = RoundedCornerShape(5.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+        WidgetButton(
+            padding = PaddingValues(top = 16.dp, bottom = 24.dp),
             onClick = {
-                onUpdateButtonClicked(databaseModified || radioButtonChanged)
+                donor.firstName = firstNameText
+                donor.middleName = middleNameText
+                donor.lastName = lastNameText
+                donor.dob = dobText
+                donor.aboRh = aboRhText
+                donor.branch = branchText
+                donor.gender = gender
+                onUpdateButtonClicked(databaseModified || radioButtonChanged, donor)
                 radioButtonChanged = false
-            }) {
-            Text(
-                text = stringResource(R.string.update_button_text),
-                fontSize = 16.sp,
-                color = Color.White
-            )
-        }
+            },
+            buttonText = stringResource(R.string.update_button_text)
+        )
     }
 }
 
 private var radioButtonChanged = false
 @Composable
-fun HorizontalRadioButtons(isMale: Boolean) {
+fun HorizontalRadioButtons(isMale: Boolean, setRadioButton: (text: String) -> Unit) {
     val radioOptions = listOf("Male", "Female")
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[if (isMale) 0 else 1]) }
     Row {
@@ -300,6 +303,7 @@ fun HorizontalRadioButtons(isMale: Boolean) {
                     onClick = {
                         radioButtonChanged = true
                         onOptionSelected(text)
+                        setRadioButton(text)
                     }
                 )
                 Text(

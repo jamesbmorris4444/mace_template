@@ -42,8 +42,8 @@ interface DBDao {
     @Query("SELECT * FROM donors WHERE title LIKE :searchLast AND poster_path LIKE :searchFirst")
     fun donorsFromFullName(searchLast: String, searchFirst :String) : Single<List<Donor>>
 
-    @Query("SELECT * FROM donors WHERE title LIKE :searchLast AND poster_path LIKE :searchFirst")
-    fun donorsFromFullNameWithProducts(searchLast: String, searchFirst :String) : Single<List<DonorWithProducts>>
+    @Query("SELECT * FROM donors WHERE title LIKE :searchLast AND release_date LIKE :dob")
+    fun donorsFromFullNameWithProducts(searchLast: String, dob: String) : List<DonorWithProducts>
 
     @Query("SELECT * FROM donors WHERE title = :searchLast AND poster_path = :searchFirst AND original_language = :searchMiddle AND release_date = :searchDate")
     fun donorsFromNameAndDateWithProducts(searchLast: String, searchFirst :String, searchMiddle: String, searchDate :String) : Single<DonorWithProducts>
@@ -54,7 +54,7 @@ interface DBDao {
     // get all donors and products
 
     @Query("SELECT * from donors")
-    fun loadAllDonorsWithProducts(): Single<List<DonorWithProducts>>
+    fun loadAllDonorsWithProducts(): List<DonorWithProducts>
 
     @Query("SELECT * FROM products")
     fun getAllProducts(): List<Product>
