@@ -50,7 +50,6 @@ data class BottomNavItem(
     val route:String,
 )
 
-
 // Called one time at app startup
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -61,9 +60,10 @@ fun ScreenNavigator(
     navController: NavHostController,
     openDrawer: () -> Unit
 ) {
-    lateinit var donor: Donor
-    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Start Initial Screen in ScreenNavigator: name=${currentScreen.name}")
+    var donor by remember { mutableStateOf(Donor()) }
     var appBarState by remember { mutableStateOf(AppBarState()) }
+    var transitionToCreateProductsScreen by remember { mutableStateOf(true) }
+    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Start Initial Screen in ScreenNavigator: name=${currentScreen.name}")
     Scaffold(
         topBar = {
             StartScreenAppBar(appBarState = appBarState)
@@ -74,9 +74,10 @@ fun ScreenNavigator(
     ) { internalPadding ->
         Box(modifier = Modifier.padding(internalPadding)) {
             val donateProductsSearchStringName = stringResource(ScreenNames.DonateProductsSearch.resId)
-            val manageDonorSearchStringName = stringResource(ScreenNames.ManageDonorSearch.resId)
+            val manageDonorAfterSearchStringName = stringResource(ScreenNames.ManageDonorAfterSearch.resId)
             val createProductsStringName = stringResource(ScreenNames.CreateProducts.resId)
             val viewDonorListStringName = stringResource(ScreenNames.ViewDonorList.resId)
+            val manageDonorFromDrawer = stringResource(ScreenNames.ManageDonorFromDrawer.resId)
             NavHost(
                 navController = navController,
                 startDestination = donateProductsSearchStringName,
@@ -86,32 +87,53 @@ fun ScreenNavigator(
                     DonateProductsScreen(
                         onComposing = {
                             appBarState = it
-                            LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "appBarState1=$appBarState")
                         },
                         canNavigateBack = navController.previousBackStackEntry != null,
                         navigateUp = { navController.navigateUp() },
                         openDrawer = openDrawer,
                         onItemButtonClicked = {
                             donor = it
-                            navController.navigate(manageDonorSearchStringName)
+                            transitionToCreateProductsScreen = true
+                            navController.navigate(manageDonorAfterSearchStringName)
                         },
                         viewModel = viewModel,
+                        title = donateProductsSearchStringName,
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(dimensionResource(R.dimen.padding_large))
                     )
                 }
-                composable(route = manageDonorSearchStringName) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorSearchStringName")
-                    ManageDonorScreen(
+                composable(route = manageDonorFromDrawer) {
+                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$manageDonorFromDrawer")
+                    DonateProductsScreen(
                         onComposing = {
                             appBarState = it
-                            LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "appBarState2=$appBarState")
                         },
                         canNavigateBack = navController.previousBackStackEntry != null,
                         navigateUp = { navController.navigateUp() },
                         openDrawer = openDrawer,
-                        donor = donor
+                        onItemButtonClicked = {
+                            donor = it
+                            transitionToCreateProductsScreen = false
+                            navController.navigate(manageDonorAfterSearchStringName)
+                        },
+                        viewModel = viewModel,
+                        title = manageDonorFromDrawer,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(dimensionResource(R.dimen.padding_large))
+                    )
+                }
+                composable(route = manageDonorAfterSearchStringName) {
+                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorAfterSearchStringName")
+                    ManageDonorScreen(
+                        onComposing = {
+                            appBarState = it
+                        },
+                        canNavigateBack = navController.previousBackStackEntry != null,
+                        navigateUp = { navController.navigateUp() },
+                        openDrawer = openDrawer,
+                        donor = donor,
                     ) { changed, donor ->
                         if (changed) {
                             viewModel.insertDonorIntoDatabase(donor) { success ->
@@ -122,14 +144,28 @@ fun ScreenNavigator(
                                         titleText = viewModel.getResources().getString(R.string.made_db_entries_title_text),
                                         bodyText = viewModel.getResources().getString(R.string.made_db_entries_body_text),
                                         positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                                    ) { navController.navigate(createProductsStringName) }.show()
+                                    ) {
+                                        if (transitionToCreateProductsScreen) {
+                                            navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
+                                            navController.navigate(createProductsStringName)
+                                        } else {
+                                            navController.navigateUp()
+                                        }
+                                    }.show()
                                 } else {
                                     StandardModalComposeView(
                                         view,
                                         topIconResId = R.drawable.notification,
                                         titleText = viewModel.getResources().getString(R.string.made_db_entries_failure_text),
                                         positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                                    ) { navController.navigate(createProductsStringName) }.show()
+                                    ) {
+                                        if (transitionToCreateProductsScreen) {
+                                            navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
+                                            navController.navigate(createProductsStringName)
+                                        } else {
+                                            navController.navigateUp()
+                                        }
+                                    }.show()
                                 }
                             }
                         } else {
@@ -138,7 +174,14 @@ fun ScreenNavigator(
                                 topIconResId = R.drawable.notification,
                                 titleText = viewModel.getResources().getString(R.string.no_db_entries_title_text),
                                 positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                            ) { navController.navigate(createProductsStringName) }.show()
+                            ) {
+                                if (transitionToCreateProductsScreen) {
+                                    navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
+                                    navController.navigate(createProductsStringName)
+                                } else {
+                                    navController.navigateUp()
+                                }
+                            }.show()
                         }
                     }
                 }
@@ -147,7 +190,6 @@ fun ScreenNavigator(
                     CreateProductsScreen(
                         onComposing = {
                             appBarState = it
-                            LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "appBarState2=$appBarState")
                         },
                         canNavigateBack = navController.previousBackStackEntry != null,
                         navigateUp = { navController.navigateUp() },
@@ -156,6 +198,7 @@ fun ScreenNavigator(
                         viewModel = viewModel,
                         modalView = view,
                         onCompleteButtonClicked = {
+                            navController.popBackStack(route = createProductsStringName, inclusive = true)
                             navController.navigate(donateProductsSearchStringName)
                         }
                     )
@@ -165,19 +208,11 @@ fun ScreenNavigator(
                     ViewDonorListScreen(
                         onComposing = {
                             appBarState = it
-                            LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "appBarState1=$appBarState")
                         },
                         canNavigateBack = navController.previousBackStackEntry != null,
                         navigateUp = { navController.navigateUp() },
                         openDrawer = openDrawer,
-                        onItemButtonClicked = {
-                            donor = it
-                            navController.navigate(manageDonorSearchStringName)
-                        },
-                        viewModel = viewModel,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(dimensionResource(R.dimen.padding_large))
+                        viewModel = viewModel
                     )
                 }
             }
@@ -213,7 +248,9 @@ fun BottomNavigationBar(navController: NavHostController) {
             BottomNavigationItem(
                 selected = currentRoute == navItem.route,
                 onClick = {
-                    navController.navigate(navItem.route)
+                    navController.navigate(navItem.route) {
+                        popUpTo(navController.graph.id) { inclusive = true}
+                    }
                 },
                 icon = {
                     Icon(imageVector = navItem.icon, contentDescription = navItem.label)

@@ -80,33 +80,35 @@ fun DrawerAppComponent(
             }
             Spacer(Modifier.height(24.dp))
             for (screen in ScreenNames.values()) {
-                Column(
-                    Modifier.clickable(onClick = {
-                        closeDrawer()
-                        currentScreen.value = screen
-                        navController.navigate(view.context.resources.getString(screen.resId))
-                    }),
-                    content = {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = if (currentScreen.value == screen) {
-                                colorResource(id = R.color.white)
-                            } else {
-                                colorResource(id = R.color.darkMagenta)
-                            }
-                        ) {
-                            Text(
-                                text = screen.name,
-                                modifier = Modifier.padding(16.dp),
+                if (screen.inDrawer) {
+                    Column(
+                        Modifier.clickable(onClick = {
+                            closeDrawer()
+                            currentScreen.value = screen
+                            navController.navigate(view.context.resources.getString(screen.resId))
+                        }),
+                        content = {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
                                 color = if (currentScreen.value == screen) {
-                                    colorResource(id = R.color.black)
-                                } else {
                                     colorResource(id = R.color.white)
+                                } else {
+                                    colorResource(id = R.color.darkMagenta)
                                 }
-                            )
+                            ) {
+                                Text(
+                                    text = view.context.resources.getString(screen.resId),
+                                    modifier = Modifier.padding(16.dp),
+                                    color = if (currentScreen.value == screen) {
+                                        colorResource(id = R.color.black)
+                                    } else {
+                                        colorResource(id = R.color.white)
+                                    }
+                                )
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }
@@ -143,11 +145,11 @@ fun DrawerAppComponent(
     )
 }
 
-enum class ScreenNames(val resId: Int) {
-    DonateProductsSearch(R.string.Search_for_donor_title),
-    CreateProducts(R.string.create_blood_product_title),
-    ManageDonorSearch(R.string.manage_donor_after_search_title),
-    ManageDonor(R.string.manage_donor_title),
-    ReassociateDonation(R.string.reassociate_donation_title),
-    ViewDonorList(R.string.view_donor_list_title)
+enum class ScreenNames(val inDrawer: Boolean, val resId: Int) {
+    DonateProductsSearch(true, R.string.Search_for_donor_title),
+    CreateProducts(false, R.string.create_blood_product_title),
+    ManageDonorAfterSearch(false, R.string.manage_donor_after_search_title),
+    ManageDonorFromDrawer(true, R.string.manage_donor_from_drawer_title),
+    ReassociateDonation(true, R.string.reassociate_donation_title),
+    ViewDonorList(true, R.string.view_donor_list_title)
 }

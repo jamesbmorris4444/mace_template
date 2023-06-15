@@ -49,7 +49,6 @@ import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
 import com.mace.mace_template.logger.LogUtils
-import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.utils.Utils
 import java.util.Locale
@@ -61,9 +60,7 @@ fun ViewDonorListScreen(
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
-    onItemButtonClicked: (donor: Donor) -> Unit,
-    viewModel: BloodViewModel,
-    modifier: Modifier = Modifier
+    viewModel: BloodViewModel
 ) {
     val donorsAndProducts: MutableState<List<DonorWithProducts>> = remember { mutableStateOf(listOf()) }
     var nameConstraint by rememberSaveable { mutableStateOf("") }
@@ -213,7 +210,7 @@ fun DonorsAndProductsList(donorsAndProducts: MutableState<List<DonorWithProducts
             ) {
                 Row {
                     Text(
-                        text = "${it.donor.lastName}, ${it.donor.firstName} ${it.donor.middleName}",
+                        text = "${it.donor.lastName}, ${it.donor.firstName} ${it.donor.middleName} (${if (it.donor.gender) "Male" else "Female"})",
                         color = colorResource(id = R.color.black),
                         style = MaterialTheme.typography.bodyMedium
                     )

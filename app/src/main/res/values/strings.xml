@@ -22,6 +22,7 @@
     <string name="Search_for_donor_title">Search Donors by Last Name</string>
     <string name="create_blood_product_title">Create Blood Product</string>
     <string name="manage_donor_after_search_title">Manage Donor After Search</string>
+    <string name="manage_donor_from_drawer_title">Manage Donor From Drawer</string>
     <string name="manage_donor_title">Manage Donor</string>
     <string name="reassociate_donation_title">Reassociate Donation</string>
     <string name="view_donor_list_title">View Donor List</string>

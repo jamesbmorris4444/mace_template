@@ -54,12 +54,12 @@ fun ManageDonorScreen(
     donor: Donor,
     onUpdateButtonClicked: (databaseModified: Boolean, donor: Donor) -> Unit
 ) {
-    val manageDonorSearchStringName = stringResource(ScreenNames.ManageDonorSearch.resId)
+    val manageDonorAfterSearchStringName = stringResource(ScreenNames.ManageDonorAfterSearch.resId)
     LaunchedEffect(key1 = true) {
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorSearchStringName")
+        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorAfterSearchStringName")
         onComposing(
             AppBarState(
-                title = manageDonorSearchStringName,
+                title = manageDonorAfterSearchStringName,
                 actions = {
                     IconButton(onClick = openDrawer) {
                         Icon(

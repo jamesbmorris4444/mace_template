@@ -58,6 +58,7 @@ fun DonateProductsScreen(
     openDrawer: () -> Unit,
     onItemButtonClicked: (donor: Donor) -> Unit,
     viewModel: BloodViewModel,
+    title: String,
     modifier: Modifier = Modifier
 ) {
     viewModel.setBloodDatabase()
@@ -72,6 +73,7 @@ fun DonateProductsScreen(
         navigateUp = navigateUp,
         openDrawer = openDrawer,
         viewModel = viewModel,
+        title = title,
         completed = completed,
         onItemButtonClicked = onItemButtonClicked,
         modifier = modifier)
@@ -85,11 +87,12 @@ fun DonateProductsHandler(
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     viewModel: BloodViewModel,
+    title: String,
     completed: Boolean,
     onItemButtonClicked: (donor: Donor) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val donors: MutableState<List<Donor>> = remember { mutableStateOf(listOf()) }
+    val donors: MutableState<List<Donor>> = rememberSaveable { mutableStateOf(listOf()) }
     fun handleSearchClick(searchKey: String, showDonors: (donorList: List<Donor>) -> Unit) {
         viewModel.handleSearchClick(searchKey = searchKey, searchCompleted = showDonors)
     }
@@ -101,7 +104,7 @@ fun DonateProductsHandler(
         LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=$donateProductsSearchStringName")
         onComposing(
             AppBarState(
-                title = donateProductsSearchStringName,
+                title = title,
                 actions = {
                     IconButton(onClick = openDrawer) {
                         Icon(
@@ -188,8 +191,9 @@ private fun CustomCircularProgressBar(){
 
 @Composable
 fun DonorList(donors: MutableState<List<Donor>>, onItemButtonClicked: (donor: Donor) -> Unit) {
+    LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "donors=${donors.value}")
     LazyColumn {
-        items(items = donors.value, itemContent = {
+        items(items = donors.value) {
             Column(modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onItemButtonClicked(it) }
@@ -226,6 +230,6 @@ fun DonorList(donors: MutableState<List<Donor>>, onItemButtonClicked: (donor: Do
                 )
             }
             Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-        })
+        }
     }
 }

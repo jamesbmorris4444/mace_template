@@ -100,6 +100,7 @@ fun CreateProductsScreen(
     var clearButtonVisible by remember { mutableStateOf(true) }
     var confirmButtonVisible by remember { mutableStateOf(true) }
     var confirmNeeded by remember { mutableStateOf(false) }
+    var addProductsToDatabase by remember { mutableStateOf(true) }
     val products: MutableState<List<Product>> = remember { mutableStateOf(mutableListOf()) }
 
     fun processNewProduct() {
@@ -122,12 +123,19 @@ fun CreateProductsScreen(
     }
 
     @Composable
-    fun ProductList(products: MutableState<List<Product>>) {
-        if (products.value.isNotEmpty()) {
+    fun ProductListContent(
+        products: List<Product>,
+        onProductsChange: (List<Product>) -> Unit,
+        onDinTextChange: (String) -> Unit,
+        onProductCodeTextChange: (String) -> Unit,
+        onExpirationTextChange: (String) -> Unit
+
+    ) {
+        if (products.isNotEmpty()) {
             Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
         }
         LazyColumn {
-            itemsIndexed(items = products.value, itemContent = { index, item ->
+            itemsIndexed(items = products, itemContent = { index, item ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -141,7 +149,7 @@ fun CreateProductsScreen(
                             .clickable(
                                 enabled = true,
                                 onClick = {
-                                    products.value = products.value.filterIndexed { filterIndex, _ -> filterIndex != index  }
+                                    onProductsChange(products.filterIndexed { filterIndex, _ -> filterIndex != index })
                                 }
                             ),
                         painter = painterResource(id = R.drawable.delete_icon),
@@ -155,10 +163,10 @@ fun CreateProductsScreen(
                             .clickable(
                                 enabled = true,
                                 onClick = {
-                                    dinText = products.value[index].din
-                                    productCodeText = products.value[index].productCode
-                                    expirationText = products.value[index].expirationDate
-                                    products.value = products.value.filterIndexed { filterIndex, _ -> filterIndex != index  }
+                                    onDinTextChange(products[index].din)
+                                    onProductCodeTextChange(products[index].productCode)
+                                    onExpirationTextChange(products[index].expirationDate)
+                                    onProductsChange(products.filterIndexed { filterIndex, _ -> filterIndex != index })
                                 }
                             ),
                         painter = painterResource(id = R.drawable.edit_icon),
@@ -195,6 +203,17 @@ fun CreateProductsScreen(
         }
     }
 
+    @Composable
+    fun ProductListScreen(productList: List<Product>) {
+        ProductListContent(
+            products = productList,
+            onProductsChange = { products.value = it },
+            onDinTextChange = { dinText = it },
+            onProductCodeTextChange = { productCodeText = it },
+            onExpirationTextChange = { expirationText = it }
+        )
+    }
+
     fun onClearClicked() {
         dinText = ""
         productCodeText = ""
@@ -205,10 +224,16 @@ fun CreateProductsScreen(
     }
 
     fun onConfirmClicked() {
-        clearButtonVisible = true
-        confirmButtonVisible = true
-        confirmNeeded = false
-        processNewProduct()
+        if (products.value.isEmpty() && dinText.isEmpty() && productCodeText.isEmpty() && expirationText.isEmpty()) {
+            val dwpList: List<DonorWithProducts> = viewModel.donorsFromFullNameWithProducts(donor.lastName, donor.dob)
+            products.value = dwpList.flatMap { it.products }
+            addProductsToDatabase = false
+        } else {
+            clearButtonVisible = true
+            confirmButtonVisible = true
+            confirmNeeded = false
+            processNewProduct()
+        }
     }
 
     fun onCompleteClicked() {
@@ -224,21 +249,20 @@ fun CreateProductsScreen(
                 when (dismissSelector) {
                     DismissSelector.POSITIVE -> {
                         processNewProduct()
-                        addDonorWithProductsToModifiedDatabase()
+                        if (addProductsToDatabase) {
+                            addDonorWithProductsToModifiedDatabase()
+                        }
+                        onCompleteButtonClicked()
                     }
                     else -> { }
                 }
             }.show()
         } else {
-            if (products.value.isEmpty()) {
-                val dwpList: List<DonorWithProducts> = viewModel.donorsFromFullNameWithProducts(donor.lastName, donor.dob)
-                products.value = dwpList.flatMap { it.products }
-                // ProductList(products.value)
-            } else {
+            if (products.value.isNotEmpty() && addProductsToDatabase) {
                 addDonorWithProductsToModifiedDatabase()
             }
+            onCompleteButtonClicked()
         }
-        onCompleteButtonClicked()
     }
 
     LaunchedEffect(key1 = true) {
@@ -444,12 +468,11 @@ fun CreateProductsScreen(
                 padding = PaddingValues(start = 8.dp, end = 8.dp),
                 onClick = {
                     onCompleteClicked()
-                    keyboardController?.hide()
                 },
                 buttonText = stringResource(R.string.complete_button_text)
             )
         }
-        ProductList(products)
+        ProductListScreen(products.value)
     }
 }
 
