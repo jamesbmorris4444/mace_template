@@ -40,6 +40,7 @@
     <string name="enter_blood_type_text">Enter Blood Type</string>
     <string name="enter_branch_text">Enter Branch</string>
     <string name="initial_letters_of_last_name_text">Initial letters of last name</string>
+    <string name="initial_letters_of_incorrect_donor_last_name_text">Incorrect donor last name</string>
     <string name="donor_search_view_donor_list_text">Donor Search String</string>
     <string name="std_modal_noconfirm_title">Product Entry Not Confirmed</string>
     <string name="std_modal_noconfirm_body">Complete button was clicked without confirming current grid entry. Do you want to confirm?</string>

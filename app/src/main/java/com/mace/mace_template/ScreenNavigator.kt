@@ -30,9 +30,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
+import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.ui.CreateProductsScreen
 import com.mace.mace_template.ui.DonateProductsScreen
 import com.mace.mace_template.ui.ManageDonorScreen
+import com.mace.mace_template.ui.ReassociateDonationScreen
 import com.mace.mace_template.ui.StandardModalComposeView
 import com.mace.mace_template.ui.ViewDonorListScreen
 import com.mace.mace_template.utils.Constants
@@ -61,6 +63,7 @@ fun ScreenNavigator(
     openDrawer: () -> Unit
 ) {
     var donor by remember { mutableStateOf(Donor()) }
+    var donorWithProducts by remember { mutableStateOf(DonorWithProducts(donor = Donor())) }
     var appBarState by remember { mutableStateOf(AppBarState()) }
     var transitionToCreateProductsScreen by remember { mutableStateOf(true) }
     LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Start Initial Screen in ScreenNavigator: name=${currentScreen.name}")
@@ -78,6 +81,7 @@ fun ScreenNavigator(
             val createProductsStringName = stringResource(ScreenNames.CreateProducts.resId)
             val viewDonorListStringName = stringResource(ScreenNames.ViewDonorList.resId)
             val manageDonorFromDrawer = stringResource(ScreenNames.ManageDonorFromDrawer.resId)
+            val reassociateDonationSearchStringName = stringResource(ScreenNames.ReassociateDonation.resId)
             NavHost(
                 navController = navController,
                 startDestination = donateProductsSearchStringName,
@@ -213,6 +217,27 @@ fun ScreenNavigator(
                         navigateUp = { navController.navigateUp() },
                         openDrawer = openDrawer,
                         viewModel = viewModel
+                    )
+                }
+                composable(route = reassociateDonationSearchStringName) {
+                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$reassociateDonationSearchStringName")
+                    ReassociateDonationScreen(
+                        onComposing = {
+                            appBarState = it
+                        },
+                        canNavigateBack = navController.previousBackStackEntry != null,
+                        navigateUp = { navController.navigateUp() },
+                        openDrawer = openDrawer,
+                        onItemButtonClicked = {
+                            donorWithProducts = it
+                            transitionToCreateProductsScreen = true
+                            navController.navigate(manageDonorAfterSearchStringName)
+                        },
+                        viewModel = viewModel,
+                        title = reassociateDonationSearchStringName,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(dimensionResource(R.dimen.padding_large))
                     )
                 }
             }

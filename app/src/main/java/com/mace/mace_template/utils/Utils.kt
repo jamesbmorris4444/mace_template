@@ -20,6 +20,10 @@ object Utils {
         return "${donorWithProducts.lastName},${donorWithProducts.dob}"
     }
 
+    fun donorComparisonByStringWithProducts(donorWithProducts: DonorWithProducts): String {
+        return "${donorWithProducts.donor.lastName},${donorWithProducts.donor.dob}"
+    }
+
     fun donorBloodTypeComparisonByString(donorWithProducts: Donor): String {
         return donorWithProducts.aboRh
     }

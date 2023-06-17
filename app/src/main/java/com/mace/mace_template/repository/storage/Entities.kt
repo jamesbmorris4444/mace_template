@@ -1,6 +1,11 @@
 package com.mace.mace_template.repository.storage
 
-import androidx.room.*
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
+import androidx.room.Relation
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
@@ -44,7 +49,7 @@ data class DonorWithProducts(
         parentColumn = "id",
         entityColumn = "donor_id"
     )
-    val products: List<Product>
+    val products: List<Product> = listOf()
 )
 
 data class GeofencingData(

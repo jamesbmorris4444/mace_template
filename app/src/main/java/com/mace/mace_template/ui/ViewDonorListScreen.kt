@@ -67,6 +67,63 @@ fun ViewDonorListScreen(
     val bloodTypeList = stringArrayResource(R.array.abo_rh_array_with_no_value)
     val aboRhArray: MutableState<Array<String>> = remember { mutableStateOf(bloodTypeList) }
     var aboRhConstraint by rememberSaveable { mutableStateOf(aboRhArray.value[0]) }
+
+    @Composable
+    fun DonorsAndProductsList(donorsAndProducts: MutableState<List<DonorWithProducts>>) {
+        LazyColumn {
+            items(items = donorsAndProducts.value, itemContent = {
+                Spacer(modifier = Modifier.padding(top = 8.dp))
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
+                    .padding(PaddingValues(start = 24.dp, end = 24.dp))
+                ) {
+                    Row {
+                        Text(
+                            text = "${it.donor.lastName}, ${it.donor.firstName} ${it.donor.middleName} (${if (it.donor.gender) "Male" else "Female"})",
+                            color = colorResource(id = R.color.black),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    Row {
+                        Text(
+                            text = "DOB:${it.donor.dob}  AboRh:${it.donor.aboRh}  Branch:${it.donor.branch}",
+                            color = colorResource(id = R.color.black),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    if (it.products.isNotEmpty()) {
+                        Divider(color = colorResource(id = R.color.red), thickness = 2.dp)
+
+                    }
+                    it.products.forEach {
+                        Column(modifier = Modifier
+                            .height(IntrinsicSize.Min)
+                        ) {
+                            Spacer(modifier = Modifier.padding(top = 8.dp))
+                            Row {
+                                Text(
+                                    text = "DIN: ${it.din}   Blood Type: ${it.aboRh}",
+                                    color = colorResource(id = R.color.black),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            Row {
+                                Text(
+                                    text = "Product Code: ${it.productCode}    Expires: ${it.expirationDate}",
+                                    color = colorResource(id = R.color.black),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.padding(top = 8.dp))
+                Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+            })
+        }
+    }
+
     fun handleNameOrAboRhTextEntry() {
         val stagingDatabaseEntries = viewModel.stagingDatabaseDonorAndProductsList()
         val mainDatabaseEntries = viewModel.mainDatabaseDonorAndProductsList()
@@ -195,61 +252,5 @@ fun ViewDonorListScreen(
             Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
         }
         DonorsAndProductsList(donorsAndProducts)
-    }
-}
-
-@Composable
-fun DonorsAndProductsList(donorsAndProducts: MutableState<List<DonorWithProducts>>) {
-    LazyColumn {
-        items(items = donorsAndProducts.value, itemContent = {
-            Spacer(modifier = Modifier.padding(top = 8.dp))
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                .padding(PaddingValues(start = 24.dp, end = 24.dp))
-            ) {
-                Row {
-                    Text(
-                        text = "${it.donor.lastName}, ${it.donor.firstName} ${it.donor.middleName} (${if (it.donor.gender) "Male" else "Female"})",
-                        color = colorResource(id = R.color.black),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                Row {
-                    Text(
-                        text = "DOB:${it.donor.dob}  AboRh:${it.donor.aboRh}  Branch:${it.donor.branch}",
-                        color = colorResource(id = R.color.black),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-                if (it.products.isNotEmpty()) {
-                    Divider(color = colorResource(id = R.color.red), thickness = 2.dp)
-
-                }
-                it.products.forEach {
-                    Column(modifier = Modifier
-                        .height(IntrinsicSize.Min)
-                    ) {
-                        Spacer(modifier = Modifier.padding(top = 8.dp))
-                        Row {
-                            Text(
-                                text = "DIN: ${it.din}   Blood Type: ${it.aboRh}",
-                                color = colorResource(id = R.color.black),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                        Row {
-                            Text(
-                                text = "Product Code: ${it.productCode}    Expires: ${it.expirationDate}",
-                                color = colorResource(id = R.color.black),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.padding(top = 8.dp))
-            Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-        })
     }
 }

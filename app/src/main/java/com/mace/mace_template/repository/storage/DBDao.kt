@@ -40,7 +40,7 @@ interface DBDao {
     fun getProductEntryCount(): Single<Int>
 
     @Query("SELECT * FROM donors WHERE title LIKE :searchLast AND poster_path LIKE :searchFirst")
-    fun donorsFromFullName(searchLast: String, searchFirst :String) : Single<List<Donor>>
+    fun donorsFromFullName(searchLast: String, searchFirst :String) : List<Donor>
 
     @Query("SELECT * FROM donors WHERE title LIKE :searchLast AND release_date LIKE :dob")
     fun donorsFromFullNameWithProducts(searchLast: String, dob: String) : List<DonorWithProducts>

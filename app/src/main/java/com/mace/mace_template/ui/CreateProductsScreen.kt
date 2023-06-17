@@ -2,8 +2,6 @@ package com.mace.mace_template.ui
 
 import android.annotation.SuppressLint
 import android.view.View
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,12 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
@@ -30,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -51,7 +45,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
@@ -60,6 +53,7 @@ import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
+import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.DatabaseSelector
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
@@ -100,8 +94,8 @@ fun CreateProductsScreen(
     var clearButtonVisible by remember { mutableStateOf(true) }
     var confirmButtonVisible by remember { mutableStateOf(true) }
     var confirmNeeded by remember { mutableStateOf(false) }
-    var addProductsToDatabase by remember { mutableStateOf(true) }
     val products: MutableState<List<Product>> = remember { mutableStateOf(mutableListOf()) }
+    val displayedProductList: MutableState<List<Product>> = remember { mutableStateOf(mutableListOf()) }
 
     fun processNewProduct() {
         val product = Product()
@@ -122,98 +116,6 @@ fun CreateProductsScreen(
         viewModel.insertDonorAndProductsIntoDatabase(modalView, DatabaseSelector.STAGING_DB, donor, products.value)
     }
 
-    @Composable
-    fun ProductListContent(
-        products: List<Product>,
-        onProductsChange: (List<Product>) -> Unit,
-        onDinTextChange: (String) -> Unit,
-        onProductCodeTextChange: (String) -> Unit,
-        onExpirationTextChange: (String) -> Unit
-
-    ) {
-        if (products.isNotEmpty()) {
-            Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-        }
-        LazyColumn {
-            itemsIndexed(items = products, itemContent = { index, item ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        modifier = Modifier
-                            .padding(start = 40.dp)
-                            .height(40.dp)
-                            .width(30.dp)
-                            .clickable(
-                                enabled = true,
-                                onClick = {
-                                    onProductsChange(products.filterIndexed { filterIndex, _ -> filterIndex != index })
-                                }
-                            ),
-                        painter = painterResource(id = R.drawable.delete_icon),
-                        contentDescription = "Dialog Alert"
-                    )
-                    Image(
-                        modifier = Modifier
-                            .padding(start = 40.dp)
-                            .height(40.dp)
-                            .width(40.dp)
-                            .clickable(
-                                enabled = true,
-                                onClick = {
-                                    onDinTextChange(products[index].din)
-                                    onProductCodeTextChange(products[index].productCode)
-                                    onExpirationTextChange(products[index].expirationDate)
-                                    onProductsChange(products.filterIndexed { filterIndex, _ -> filterIndex != index })
-                                }
-                            ),
-                        painter = painterResource(id = R.drawable.edit_icon),
-                        contentDescription = "Dialog Alert"
-                    )
-                    Column(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 40.dp)
-                    ) {
-                        Text(
-                            text = item.din,
-                            color = colorResource(id = R.color.black),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            text = item.aboRh,
-                            color = colorResource(id = R.color.black),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            text = item.productCode,
-                            color = colorResource(id = R.color.black),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            text = item.expirationDate,
-                            color = colorResource(id = R.color.black),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                }
-                Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-            })
-        }
-    }
-
-    @Composable
-    fun ProductListScreen(productList: List<Product>) {
-        ProductListContent(
-            products = productList,
-            onProductsChange = { products.value = it },
-            onDinTextChange = { dinText = it },
-            onProductCodeTextChange = { productCodeText = it },
-            onExpirationTextChange = { expirationText = it }
-        )
-    }
-
     fun onClearClicked() {
         dinText = ""
         productCodeText = ""
@@ -225,18 +127,23 @@ fun CreateProductsScreen(
 
     fun onConfirmClicked() {
         if (products.value.isEmpty() && dinText.isEmpty() && productCodeText.isEmpty() && expirationText.isEmpty()) {
+            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "onConfirmClicked 1=${products.value.isEmpty()}")
             val dwpList: List<DonorWithProducts> = viewModel.donorsFromFullNameWithProducts(donor.lastName, donor.dob)
-            products.value = dwpList.flatMap { it.products }
-            addProductsToDatabase = false
+            displayedProductList.value = dwpList.flatMap { it.products }
         } else {
+            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "onConfirmClicked 2")
             clearButtonVisible = true
             confirmButtonVisible = true
             confirmNeeded = false
             processNewProduct()
+            if (displayedProductList.value.isNotEmpty()) {
+                displayedProductList.value = listOf()
+            }
         }
     }
 
     fun onCompleteClicked() {
+        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "onCompleteClicked=${products.value.isNotEmpty()}       $confirmNeeded")
         if (confirmNeeded) {
             StandardModalComposeView(
                 modalView,
@@ -249,7 +156,7 @@ fun CreateProductsScreen(
                 when (dismissSelector) {
                     DismissSelector.POSITIVE -> {
                         processNewProduct()
-                        if (addProductsToDatabase) {
+                        if (products.value.isNotEmpty()) {
                             addDonorWithProductsToModifiedDatabase()
                         }
                         onCompleteButtonClicked()
@@ -258,7 +165,7 @@ fun CreateProductsScreen(
                 }
             }.show()
         } else {
-            if (products.value.isNotEmpty() && addProductsToDatabase) {
+            if (products.value.isNotEmpty()) {
                 addDonorWithProductsToModifiedDatabase()
             }
             onCompleteButtonClicked()
@@ -472,7 +379,32 @@ fun CreateProductsScreen(
                 buttonText = stringResource(R.string.complete_button_text)
             )
         }
-        ProductListScreen(products.value)
+        if (displayedProductList.value.isEmpty()) {
+            if (products.value.isNotEmpty()) {
+                Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+            }
+            ProductListScreen(
+                canScrollVertically = true,
+                productList = products.value,
+                onProductsChange = { products.value = it },
+                onDinTextChange = { dinText = it },
+                onProductCodeTextChange = { productCodeText = it },
+                onExpirationTextChange = { expirationText = it }
+            )
+        } else {
+            if (displayedProductList.value.isNotEmpty()) {
+                Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+            }
+            ProductListScreen(
+                canScrollVertically = true,
+                productList = displayedProductList.value,
+                onProductsChange = { products.value = it },
+                onDinTextChange = { dinText = it },
+                onProductCodeTextChange = { productCodeText = it },
+                onExpirationTextChange = { expirationText = it }
+            )
+        }
+
     }
 }
 

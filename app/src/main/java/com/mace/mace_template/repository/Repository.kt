@@ -35,6 +35,8 @@ interface Repository {
     fun stagingDatabaseDonorAndProductsList(): List<DonorWithProducts>
     fun mainDatabaseDonorAndProductsList(): List<DonorWithProducts>
     fun donorsFromFullNameWithProducts(searchLast: String, dob: String): List<DonorWithProducts>
+    fun handleSearchClick(searchKey: String) : List<Donor>
+    fun handleSearchClickWithProducts(searchKey: String) : List<DonorWithProducts>
 }
 
 enum class DatabaseSelector {
@@ -367,31 +369,19 @@ class RepositoryImpl(private val app: Application) : Repository {
 //     * @param   showDonors     callback method in ViewModel when asynchronous operation finishes
 //     * Queries both the staging database and the main database to find a donor from the search key.
 //     */
-    @Suppress("UNCHECKED_CAST")
-    fun handleSearchClick(searchKey: String, showDonors: (donorList: List<Donor>) -> Unit) {
+    override fun handleSearchClick(searchKey: String) : List<Donor> {
         val fullNameResponseList = listOf(
             donorsFromFullName(mainBloodDatabase, searchKey),
             donorsFromFullName(stagingBloodDatabase, searchKey)
         )
-        var disposable: Disposable? = null
-        disposable = Single.zip(fullNameResponseList) { args -> listOf(args) }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .subscribe({ responseList ->
-                disposable?.dispose()
-                val response = responseList[0]
-                val stagingDatabaseList = response[1] as List<Donor>
-                val mainDatabaseList = response[0] as List<Donor>
-                val newList = stagingDatabaseList.union(mainDatabaseList).distinctBy { donor -> Utils.donorComparisonByString(donor) }
-                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "handleSearchClick success: searchKey=$searchKey     returnList=$newList")
-                showDonors(newList)
-            },
-            { throwable ->
-                disposable?.dispose()
-                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "handleSearchClick failure: message=${throwable.message}")
-            })
+        val stagingDatabaseList = fullNameResponseList[1] as List<Donor>
+        val mainDatabaseList = fullNameResponseList[0] as List<Donor>
+        val newList = stagingDatabaseList.union(mainDatabaseList).distinctBy { donor -> Utils.donorComparisonByString(donor) }
+        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "handleSearchClick success: searchKey=$searchKey     returnList=$newList")
+        return newList
     }
-    private fun donorsFromFullName(database: BloodDatabase, search: String): Single<List<Donor>> {
+
+    private fun donorsFromFullName(database: BloodDatabase, search: String): List<Donor> {
         val searchLast: String
         var searchFirst = "%"
         val index = search.indexOf(',')
@@ -404,6 +394,34 @@ class RepositoryImpl(private val app: Application) : Repository {
             searchLast = "$last%"
         }
         return database.databaseDao().donorsFromFullName(searchLast, searchFirst)
+    }
+
+    override fun handleSearchClickWithProducts(searchKey: String) : List<DonorWithProducts> {
+        val fullNameResponseList = listOf(
+            donorsFromFullNameWithProducts(mainBloodDatabase, searchKey),
+            donorsFromFullNameWithProducts(stagingBloodDatabase, searchKey)
+        )
+        val stagingDatabaseList = fullNameResponseList[1]
+        val mainDatabaseList = fullNameResponseList[0]
+        val newList = stagingDatabaseList.union(mainDatabaseList).distinctBy { donor -> Utils.donorComparisonByStringWithProducts(donor) }
+        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "handleSearchClickWithProducts success: searchKey=$searchKey     returnList=$newList")
+        Utils.prettyPrintList(newList)
+        return newList
+    }
+
+    private fun donorsFromFullNameWithProducts(database: BloodDatabase, search: String): List<DonorWithProducts> {
+        val searchLast: String
+        var searchFirst = "%"
+        val index = search.indexOf(',')
+        if (index < 0) {
+            searchLast = "$search%"
+        } else {
+            val last = search.substring(0, index)
+            val first = search.substring(index + 1)
+            searchFirst = "$first%"
+            searchLast = "$last%"
+        }
+        return database.databaseDao().donorsFromFullNameWithProducts(searchLast, searchFirst)
     }
 
 //    /**

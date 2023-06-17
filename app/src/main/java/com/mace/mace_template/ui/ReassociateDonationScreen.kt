@@ -1,16 +1,12 @@
 package com.mace.mace_template.ui
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,7 +18,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -37,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -48,112 +42,104 @@ import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
 import com.mace.mace_template.logger.LogUtils
-import com.mace.mace_template.repository.storage.Donor
+import com.mace.mace_template.repository.storage.DonorWithProducts
+import com.mace.mace_template.repository.storage.Product
 
 @Composable
-fun DonateProductsScreen(
+fun ReassociateDonationScreen(
     onComposing: (AppBarState) -> Unit,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
-    onItemButtonClicked: (donor: Donor) -> Unit,
+    onItemButtonClicked: (donorWithProducts: DonorWithProducts) -> Unit,
     viewModel: BloodViewModel,
     title: String,
     modifier: Modifier = Modifier
 ) {
-    viewModel.setBloodDatabase()
-    val isInvalid = viewModel.isBloodDatabaseInvalid()
-    var completed by remember { mutableStateOf(!isInvalid) }
-    if (isInvalid) {
-        viewModel.refreshRepository { completed = true }
-    }
-    DonateProductsHandler(
+    ReassociateDonationHandler(
         onComposing = onComposing,
         canNavigateBack = canNavigateBack,
         navigateUp = navigateUp,
         openDrawer = openDrawer,
         viewModel = viewModel,
         title = title,
-        completed = completed,
         onItemButtonClicked = onItemButtonClicked,
         modifier = modifier)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun DonateProductsHandler(
+fun ReassociateDonationHandler(
     onComposing: (AppBarState) -> Unit,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     viewModel: BloodViewModel,
     title: String,
-    completed: Boolean,
-    onItemButtonClicked: (donor: Donor) -> Unit,
+    onItemButtonClicked: (donorWithProducts: DonorWithProducts) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val donors: MutableState<List<Donor>> = rememberSaveable { mutableStateOf(listOf()) }
-    val donateProductsSearchStringName = stringResource(ScreenNames.DonateProductsSearch.resId)
+    val donorsWithProducts: MutableState<List<DonorWithProducts>> = rememberSaveable { mutableStateOf(listOf()) }
+    var products: MutableState<List<Product>>
+    val reassociateDonationSearchStringName = stringResource(ScreenNames.ReassociateDonation.resId)
 
-    fun handleSearchClick(searchKey: String) {
-        donors.value = viewModel.handleSearchClick(searchKey = searchKey)
+    fun handleSearchClickWithProducts(searchKey: String) {
+        donorsWithProducts.value = viewModel.handleSearchClickWithProducts(searchKey = searchKey)
     }
 
     @Composable
-    fun CustomCircularProgressBar(){
-        CircularProgressIndicator(
-            modifier = Modifier.size(120.dp),
-            color = Color.Green,
-            strokeWidth = 6.dp)
-    }
-
-    @Composable
-    fun DonorList(donors: MutableState<List<Donor>>, onItemButtonClicked: (donor: Donor) -> Unit) {
-        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "donors=${donors.value}")
+    fun DonorListWithProducts(onItemButtonClicked: (donor: DonorWithProducts) -> Unit) {
         LazyColumn {
-            items(items = donors.value) {
+            items(items = donorsWithProducts.value) {
+                products = remember { mutableStateOf(it.products) }
+                LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "products SIZE=${products.value.size}")
                 Column(modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onItemButtonClicked(it) }
                 ) {
                     Text(
-                        text = it.lastName,
+                        text = it.donor.lastName,
                         color = colorResource(id = R.color.black),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = it.firstName,
+                        text = it.donor.firstName,
                         color = colorResource(id = R.color.black),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = it.middleName,
+                        text = it.donor.middleName,
                         color = colorResource(id = R.color.black),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = it.dob,
+                        text = it.donor.dob,
                         color = colorResource(id = R.color.black),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = it.aboRh,
+                        text = it.donor.aboRh,
                         color = colorResource(id = R.color.black),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = it.branch,
+                        text = it.donor.branch,
                         color = colorResource(id = R.color.black),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                ProductListScreen(
+                    canScrollVertically = false,
+                    productList = products.value,
+                    onProductsChange = { productList -> products.value = productList },
+                )
             }
         }
     }
 
     LaunchedEffect(key1 = true) {
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=$donateProductsSearchStringName")
+        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ReassociateDonationScreen=$reassociateDonationSearchStringName")
         onComposing(
             AppBarState(
                 title = title,
@@ -180,55 +166,38 @@ fun DonateProductsHandler(
     }
     BoxWithConstraints(modifier = modifier.fillMaxWidth(1f)) {
         val keyboardController = LocalSoftwareKeyboardController.current
-        if (completed) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row {
-                    var text by rememberSaveable { mutableStateOf("") }
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .weight(0.7f)
-                            .height(60.dp),
-                        value = text,
-                        onValueChange = {
-                            text = it
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        label = { Text(stringResource(R.string.initial_letters_of_last_name_text)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                keyboardController?.hide()
-                                handleSearchClick(text)
-                            })
-                    )
-                }
-                WidgetButton(
-                    padding = PaddingValues(top = 16.dp),
-                    onClick = {
-                        onItemButtonClicked(Donor(lastName = "", middleName = "", firstName = "", dob = "", aboRh = "", branch = ""))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row {
+                var text by rememberSaveable { mutableStateOf("") }
+                OutlinedTextField(
+                    modifier = Modifier
+                        .weight(0.7f)
+                        .height(60.dp),
+                    value = text,
+                    onValueChange = {
+                        text = it
                     },
-                    buttonText = stringResource(R.string.new_donor_button_text)
+                    shape = RoundedCornerShape(10.dp),
+                    label = { Text(stringResource(R.string.initial_letters_of_incorrect_donor_last_name_text)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                            handleSearchClickWithProducts(text)
+                        })
                 )
-                Spacer(modifier = Modifier.height(20.dp))
-                if (donors.value.isNotEmpty()) {
-                    Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                }
-                DonorList(donors, onItemButtonClicked)
             }
-        } else {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CustomCircularProgressBar()
+            Spacer(modifier = Modifier.height(20.dp))
+            if (donorsWithProducts.value.isNotEmpty()) {
+                Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
             }
+            DonorListWithProducts(onItemButtonClicked)
         }
     }
 }

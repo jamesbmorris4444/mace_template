@@ -24,8 +24,12 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         repository.refreshDatabase(app.applicationContext, refreshCompleted)
     }
 
-    fun handleSearchClick(searchKey: String, searchCompleted: (List<Donor>) -> Unit) {
-        repository.handleSearchClick(searchKey, searchCompleted)
+    fun handleSearchClick(searchKey: String): List<Donor> {
+        return repository.handleSearchClick(searchKey)
+    }
+
+    fun handleSearchClickWithProducts(searchKey: String) : List<DonorWithProducts> {
+        return repository.handleSearchClickWithProducts(searchKey)
     }
 
     fun insertDonorIntoDatabase(donor: Donor, completed: (Boolean) -> Unit) {
