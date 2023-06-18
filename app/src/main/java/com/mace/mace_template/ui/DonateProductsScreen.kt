@@ -48,6 +48,7 @@ import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
+import com.mace.mace_template.utils.Constants.LOG_TAG
 
 @Composable
 fun DonateProductsScreen(
@@ -62,6 +63,7 @@ fun DonateProductsScreen(
 ) {
     viewModel.setBloodDatabase()
     val isInvalid = viewModel.isBloodDatabaseInvalid()
+    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "isInvalid=$isInvalid")
     var completed by remember { mutableStateOf(!isInvalid) }
     if (isInvalid) {
         viewModel.refreshRepository { completed = true }
@@ -108,7 +110,6 @@ fun DonateProductsHandler(
 
     @Composable
     fun DonorList(donors: MutableState<List<Donor>>, onItemButtonClicked: (donor: Donor) -> Unit) {
-        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "donors=${donors.value}")
         LazyColumn {
             items(items = donors.value) {
                 Column(modifier = Modifier
@@ -130,7 +131,7 @@ fun DonateProductsHandler(
     }
 
     LaunchedEffect(key1 = true) {
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=$donateProductsSearchStringName")
+        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=$donateProductsSearchStringName")
         onComposing(
             AppBarState(
                 title = title,

@@ -43,6 +43,7 @@ import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
+import com.mace.mace_template.utils.Constants.LOG_TAG
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -56,7 +57,7 @@ fun ManageDonorScreen(
 ) {
     val manageDonorAfterSearchStringName = stringResource(ScreenNames.ManageDonorAfterSearch.resId)
     LaunchedEffect(key1 = true) {
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorAfterSearchStringName")
+        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorAfterSearchStringName")
         onComposing(
             AppBarState(
                 title = manageDonorAfterSearchStringName,

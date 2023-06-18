@@ -50,6 +50,7 @@ import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.DonorWithProducts
+import com.mace.mace_template.utils.Constants.LOG_TAG
 import com.mace.mace_template.utils.Utils
 import java.util.Locale
 
@@ -63,10 +64,10 @@ fun ViewDonorListScreen(
     viewModel: BloodViewModel
 ) {
     val donorsAndProducts: MutableState<List<DonorWithProducts>> = remember { mutableStateOf(listOf()) }
-    var nameConstraint by rememberSaveable { mutableStateOf("") }
+    var nameConstraint by remember { mutableStateOf("") }
     val bloodTypeList = stringArrayResource(R.array.abo_rh_array_with_no_value)
     val aboRhArray: MutableState<Array<String>> = remember { mutableStateOf(bloodTypeList) }
-    var aboRhConstraint by rememberSaveable { mutableStateOf(aboRhArray.value[0]) }
+    var aboRhConstraint by remember { mutableStateOf(aboRhArray.value[0]) }
 
     @Composable
     fun DonorsAndProductsList(donorsAndProducts: MutableState<List<DonorWithProducts>>) {
@@ -132,22 +133,26 @@ fun ViewDonorListScreen(
                 stagingDonorWithProducts -> Utils.donorComparisonByString(mainDonorWithProducts.donor) == Utils.donorComparisonByString(stagingDonorWithProducts.donor)
             } ?: mainDonorWithProducts
         }
+        Utils.prettyPrintList(resultList)
         val newEntryList = stagingDatabaseEntries.filter { stagingDonorWithProducts ->
             mainDatabaseEntries.none {
                 mainDonorWithProducts -> Utils.donorComparisonByString(mainDonorWithProducts.donor) == Utils.donorComparisonByString(stagingDonorWithProducts.donor)
             }
         }
+        Utils.prettyPrintList(resultList)
         val nameResultList = resultList.plus(newEntryList).filter { finalDonorWithProducts -> Utils.donorLastNameComparisonByString(finalDonorWithProducts.donor).lowercase(Locale.ROOT).startsWith(nameConstraint) }
+        Utils.prettyPrintList(resultList)
         val finalResultList = if (aboRhConstraint == aboRhArray.value[0]) {
             nameResultList
         } else {
             nameResultList.filter { finalDonorWithProducts -> Utils.donorBloodTypeComparisonByString(finalDonorWithProducts.donor) == aboRhConstraint }
         }
+        Utils.prettyPrintList(finalResultList)
         donorsAndProducts.value = finalResultList
     }
     val viewDonorListStringName = stringResource(ScreenNames.ViewDonorList.resId)
     LaunchedEffect(key1 = true) {
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ViewDonorList Screen=$viewDonorListStringName")
+        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ViewDonorList Screen=$viewDonorListStringName")
         onComposing(
             AppBarState(
                 title = viewDonorListStringName,

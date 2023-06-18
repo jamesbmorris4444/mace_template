@@ -37,6 +37,7 @@ import com.mace.mace_template.ui.ReassociateDonationScreen
 import com.mace.mace_template.ui.StandardModalComposeView
 import com.mace.mace_template.ui.ViewDonorListScreen
 import com.mace.mace_template.utils.Constants
+import com.mace.mace_template.utils.Constants.LOG_TAG
 
 
 data class AppBarState(
@@ -64,7 +65,7 @@ fun ScreenNavigator(
     var donor by remember { mutableStateOf(Donor()) }
     var appBarState by remember { mutableStateOf(AppBarState()) }
     var transitionToCreateProductsScreen by remember { mutableStateOf(true) }
-    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Start Initial Screen in ScreenNavigator: name=${currentScreen.name}")
+    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Start Initial Screen in ScreenNavigator: name=${currentScreen.name}")
     Scaffold(
         topBar = {
             StartScreenAppBar(appBarState = appBarState)
@@ -85,7 +86,7 @@ fun ScreenNavigator(
                 startDestination = donateProductsSearchStringName,
             ) {
                 composable(route = donateProductsSearchStringName) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$donateProductsSearchStringName")
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$donateProductsSearchStringName")
                     DonateProductsScreen(
                         onComposing = {
                             appBarState = it
@@ -106,7 +107,7 @@ fun ScreenNavigator(
                     )
                 }
                 composable(route = manageDonorFromDrawer) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$manageDonorFromDrawer")
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$manageDonorFromDrawer")
                     DonateProductsScreen(
                         onComposing = {
                             appBarState = it
@@ -127,7 +128,7 @@ fun ScreenNavigator(
                     )
                 }
                 composable(route = manageDonorAfterSearchStringName) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorAfterSearchStringName")
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorAfterSearchStringName")
                     ManageDonorScreen(
                         onComposing = {
                             appBarState = it
@@ -188,7 +189,7 @@ fun ScreenNavigator(
                     }
                 }
                 composable(route = createProductsStringName) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$createProductsStringName")
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$createProductsStringName")
                     CreateProductsScreen(
                         onComposing = {
                             appBarState = it
@@ -206,7 +207,7 @@ fun ScreenNavigator(
                     )
                 }
                 composable(route = viewDonorListStringName) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$viewDonorListStringName")
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$viewDonorListStringName")
                     ViewDonorListScreen(
                         onComposing = {
                             appBarState = it
@@ -218,7 +219,7 @@ fun ScreenNavigator(
                     )
                 }
                 composable(route = reassociateDonationSearchStringName) {
-                    LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$reassociateDonationSearchStringName")
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch screen=$reassociateDonationSearchStringName")
                     ReassociateDonationScreen(
                         onComposing = {
                             appBarState = it

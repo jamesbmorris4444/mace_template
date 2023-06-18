@@ -18,7 +18,7 @@ object APIClient {
         get() {
             val interceptor = HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
                 override fun log(message: String) {
-                    //LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RXJ), "okHttp logging interceptor: $message")
+                    //LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RXJ), "okHttp logging interceptor: $message")
                 }
             })
             interceptor.level = HttpLoggingInterceptor.Level.BODY  // BASIC or BODY

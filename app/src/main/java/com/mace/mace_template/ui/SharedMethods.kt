@@ -21,7 +21,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.mace.mace_template.R
-import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Product
 
 @Composable
@@ -38,9 +37,7 @@ fun ProductListContent(
     Column(
         modifier = if (canScrollVertically) Modifier.verticalScroll(rememberScrollState()) else Modifier
     ) {
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "columnSize=${products.size}")
         products.forEachIndexed { index, item ->
-            LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "index=$index")
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,

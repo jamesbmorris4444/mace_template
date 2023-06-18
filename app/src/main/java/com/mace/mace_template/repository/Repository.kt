@@ -13,6 +13,7 @@ import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.repository.storage.Product
 import com.mace.mace_template.ui.StandardModalComposeView
 import com.mace.mace_template.utils.Constants
+import com.mace.mace_template.utils.Constants.LOG_TAG
 import com.mace.mace_template.utils.Constants.MAIN_DATABASE_NAME
 import com.mace.mace_template.utils.Constants.MODIFIED_DATABASE_NAME
 import com.mace.mace_template.utils.SingleLiveEvent
@@ -79,11 +80,11 @@ class RepositoryImpl(private val app: Application) : Repository {
             .subscribe ({ donorResponse ->
                 disposable?.dispose()
                 initializeDataBase(context, refreshCompleted, donorResponse.results, donorResponse.products)
-                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "refreshDatabase success: donorsSize=${donorResponse.results.size}       productsSize=${donorResponse.products.size}")
+                LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "refreshDatabase success: donorsSize=${donorResponse.results.size}       productsSize=${donorResponse.products.size}")
             },
             { throwable ->
                 refreshCompleted()
-                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "refreshDatabase failure: message=${throwable.message}")
+                LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "refreshDatabase failure: message=${throwable.message}")
                 disposable?.dispose()
                 initializeDatabaseFailureModal(context, throwable.message)
             })
@@ -95,7 +96,7 @@ class RepositoryImpl(private val app: Application) : Repository {
                 products[donorIndex][productIndex].donorId = donors[donorIndex].id
             }
         }
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "initializeDataBase complete: donorsSize=${donors.size}")
+        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "initializeDataBase complete: donorsSize=${donors.size}")
         insertDonorsAndProductsIntoLocalDatabase(context, refreshCompleted, mainBloodDatabase, donors, products)
     }
 
@@ -108,7 +109,7 @@ class RepositoryImpl(private val app: Application) : Repository {
                 disposable?.dispose()
                 refreshCompleted()
                 liveDonorListEvent.value = donors
-                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "insertDonorsAndProductsIntoLocalDatabase success: donorsSize=${donors.size}")
+                LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "insertDonorsAndProductsIntoLocalDatabase success: donorsSize=${donors.size}")
 //                ComposeView(context).apply {
 //                    setContent {
 //                        MaceTemplateTheme {
@@ -123,7 +124,7 @@ class RepositoryImpl(private val app: Application) : Repository {
             { throwable ->
                 disposable?.dispose()
                 refreshCompleted()
-                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "insertDonorsAndProductsIntoLocalDatabase failure: message=${throwable.message}")
+                LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "insertDonorsAndProductsIntoLocalDatabase failure: message=${throwable.message}")
             })
     }
 
@@ -164,7 +165,7 @@ class RepositoryImpl(private val app: Application) : Repository {
         if (dbWal.exists()) {
             dbWal.copyTo(dbWalBackup, true)
         }
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Path Name $db exists and was backed up")
+        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Path Name $db exists and was backed up")
     }
 
 
@@ -273,10 +274,10 @@ class RepositoryImpl(private val app: Application) : Repository {
 //                val response = responseList[0]
 //                mainDatabaseCount = response[0] as Int
 //                //getProductEntryCount(response[0] as Int, response[1] as Int)
-//                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database donors count success: mainDonorCount=${response[0] as Int}     backupDonorCount=${response[1] as Int}")
+//                LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database donors count success: mainDonorCount=${response[0] as Int}     backupDonorCount=${response[1] as Int}")
 //            },
 //            { throwable ->
-//                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database donors count failure: message=${throwable.message}")
+//                LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database donors count failure: message=${throwable.message}")
 //                disposable?.dispose()
 //            })
 //    }
@@ -308,11 +309,11 @@ class RepositoryImpl(private val app: Application) : Repository {
 //                        override fun onBackPressed() { }
 //                    }
 //                ).show(callbacks.fetchActivity().supportFragmentManager, "MODAL")
-                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database products count success: mainProductCount=${response[0] as Int}     backupProductCount=${response[1] as Int}")
+                LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database products count success: mainProductCount=${response[0] as Int}     backupProductCount=${response[1] as Int}")
             },
             { throwable ->
                 disposable?.dispose()
-                LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database products count failure: message=${throwable.message}")
+                LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "database products count failure: message=${throwable.message}")
             })
     }
     private fun databaseProductCount(database: BloodDatabase): Single<Int> {
@@ -355,7 +356,7 @@ class RepositoryImpl(private val app: Application) : Repository {
         val stagingDatabaseList = fullNameResponseList[1] as List<Donor>
         val mainDatabaseList = fullNameResponseList[0] as List<Donor>
         val newList = stagingDatabaseList.union(mainDatabaseList).distinctBy { donor -> Utils.donorComparisonByString(donor) }
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "handleSearchClick success: searchKey=$searchKey     returnList=$newList")
+        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "handleSearchClick success: searchKey=$searchKey     returnList=$newList")
         return newList
     }
 
@@ -382,8 +383,7 @@ class RepositoryImpl(private val app: Application) : Repository {
         val stagingDatabaseList = fullNameResponseList[1]
         val mainDatabaseList = fullNameResponseList[0]
         val newList = stagingDatabaseList.union(mainDatabaseList).distinctBy { donor -> Utils.donorComparisonByStringWithProducts(donor) }
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "handleSearchClickWithProducts success: searchKey=$searchKey     returnList=$newList")
-        Utils.prettyPrintList(newList)
+        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "handleSearchClickWithProducts success: searchKey=$searchKey     returnList=$newList")
         return newList
     }
 

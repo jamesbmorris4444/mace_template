@@ -14,13 +14,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -45,6 +45,7 @@ import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.repository.storage.Product
+import com.mace.mace_template.utils.Constants.LOG_TAG
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -58,9 +59,10 @@ fun ReassociateDonationScreen(
     title: String,
     modifier: Modifier = Modifier
 ) {
-    val incorrectDonorsWithProducts: MutableState<List<DonorWithProducts>> = rememberSaveable { mutableStateOf(listOf()) }
-    val correctDonorsWithProducts: MutableState<List<DonorWithProducts>> = rememberSaveable { mutableStateOf(listOf()) }
-    val products: MutableState<List<Product>> = rememberSaveable { mutableStateOf(listOf()) }
+    val incorrectDonorsWithProducts: MutableState<List<DonorWithProducts>> = remember { mutableStateOf(listOf()) }
+    val correctDonorsWithProducts: MutableState<List<DonorWithProducts>> = remember { mutableStateOf(listOf()) }
+    val products: MutableState<List<Product>> = remember { mutableStateOf(listOf()) }
+    val singleSelectedProductList: MutableState<List<Product>> = remember { mutableStateOf(listOf()) }
     val reassociateDonationSearchStringName = stringResource(ScreenNames.ReassociateDonation.resId)
     var incorrectDonorWithProducts: DonorWithProducts by remember { mutableStateOf(DonorWithProducts(Donor())) }
     var correctDonorWithProducts: DonorWithProducts by remember { mutableStateOf(DonorWithProducts(Donor())) }
@@ -131,7 +133,7 @@ fun ReassociateDonationScreen(
                     productList = products.value,
                     useOnProductsChange = false,
                     onProductSelected = { productList ->
-                        products.value = productList
+                        singleSelectedProductList.value = productList
                         isProductSelected = true
                     },
                 )
@@ -140,7 +142,7 @@ fun ReassociateDonationScreen(
     }
 
     LaunchedEffect(key1 = true) {
-        LogUtils.D("LogUtilsTag", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ReassociateDonationScreen=$reassociateDonationSearchStringName")
+        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ReassociateDonationScreen=$reassociateDonationSearchStringName")
         onComposing(
             AppBarState(
                 title = title,
@@ -192,6 +194,9 @@ fun ReassociateDonationScreen(
                             color = colorResource(id = R.color.black),
                             style = MaterialTheme.typography.titleLarge
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                        DonorListWithProducts(true, listOf(DonorWithProducts(donor = incorrectDonorWithProducts.donor, products = singleSelectedProductList.value)))
                     } else {
                         Text(
                             modifier = Modifier.align(Alignment.Start),
@@ -205,10 +210,10 @@ fun ReassociateDonationScreen(
                             color = colorResource(id = R.color.red),
                             style = MaterialTheme.typography.titleMedium
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                        DonorListWithProducts(true, incorrectDonorsWithProducts.value)
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                    DonorListWithProducts(true, incorrectDonorsWithProducts.value)
                     if (isProductSelected) {
                         Spacer(modifier = Modifier.height(4.dp))
                         var text by rememberSaveable { mutableStateOf("") }
@@ -243,7 +248,7 @@ fun ReassociateDonationScreen(
                         DonorListWithProducts(true, correctDonorsWithProducts.value)
                     }
                 } else {
-                    var text by rememberSaveable { mutableStateOf("") }
+                    var text by remember { mutableStateOf("") }
                     OutlinedTextField(
                         modifier = Modifier
                             .height(60.dp),

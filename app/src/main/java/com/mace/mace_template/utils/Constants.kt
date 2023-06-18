@@ -20,6 +20,7 @@ object Constants {
     const val LANGUAGE = "en"
     const val MAIN_DATABASE_NAME = "TheatreBlood.db"
     const val MODIFIED_DATABASE_NAME = "TheatreBloodModified.db"
+    const val LOG_TAG = "LogUtils"
 
     // Bottom Navigation Bar Items
 

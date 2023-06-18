@@ -53,7 +53,6 @@ import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
-import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.DatabaseSelector
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
@@ -127,11 +126,9 @@ fun CreateProductsScreen(
 
     fun onConfirmClicked() {
         if (products.value.isEmpty() && dinText.isEmpty() && productCodeText.isEmpty() && expirationText.isEmpty()) {
-            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "onConfirmClicked 1=${products.value.isEmpty()}")
             val dwpList: List<DonorWithProducts> = viewModel.donorsFromFullNameWithProducts(donor.lastName, donor.dob)
             displayedProductList.value = dwpList.flatMap { it.products }
         } else {
-            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "onConfirmClicked 2")
             clearButtonVisible = true
             confirmButtonVisible = true
             confirmNeeded = false
@@ -143,7 +140,6 @@ fun CreateProductsScreen(
     }
 
     fun onCompleteClicked() {
-        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "onCompleteClicked=${products.value.isNotEmpty()}       $confirmNeeded")
         if (confirmNeeded) {
             StandardModalComposeView(
                 modalView,

@@ -3,6 +3,7 @@ package com.mace.mace_template.utils
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
+import com.mace.mace_template.utils.Constants.LOG_TAG
 
 object Utils {
 //
@@ -33,11 +34,11 @@ object Utils {
     }
 
     fun prettyPrintList(list: List<DonorWithProducts>) {
-        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "=======================")
+        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "=======================")
         list.forEach {
-            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "resultListElement=$it")
+            LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "resultListElement=$it")
         }
-        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "=======================")
+        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "=======================")
     }
 //
 //    fun donorsAndProductsList(listOfDonorsAndProducts: List<DonorWithProducts>)  {
