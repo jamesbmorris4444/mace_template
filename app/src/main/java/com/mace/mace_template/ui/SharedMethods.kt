@@ -28,7 +28,9 @@ import com.mace.mace_template.repository.storage.Product
 fun ProductListContent(
     canScrollVertically: Boolean,
     products: List<Product>,
+    useOnProductsChange: Boolean,
     onProductsChange: (List<Product>) -> Unit,
+    onProductSelected: (List<Product>) -> Unit,
     onDinTextChange: (String) -> Unit,
     onProductCodeTextChange: (String) -> Unit,
     onExpirationTextChange: (String) -> Unit
@@ -50,11 +52,16 @@ fun ProductListContent(
                         .height(40.dp)
                         .width(30.dp)
                         .clickable(
-                            enabled = true,
-                            onClick = {
+                            enabled = true
+                        ) {
+                            if (useOnProductsChange) {
                                 onProductsChange(products.filterIndexed { filterIndex, _ -> filterIndex != index })
+                            } else {
+                                val productSelectedAsList = products.filterIndexed { filterIndex, _ -> filterIndex == index }
+                                onProductSelected(productSelectedAsList)
+                                productSelectedAsList[0].removedForReassociation = true
                             }
-                        ),
+                        },
                     painter = painterResource(id = R.drawable.delete_icon),
                     contentDescription = "Dialog Alert"
                 )
@@ -66,10 +73,16 @@ fun ProductListContent(
                         .clickable(
                             enabled = true,
                             onClick = {
-                                onDinTextChange(products[index].din)
-                                onProductCodeTextChange(products[index].productCode)
-                                onExpirationTextChange(products[index].expirationDate)
-                                onProductsChange(products.filterIndexed { filterIndex, _ -> filterIndex != index })
+                                if (useOnProductsChange) {
+                                    onDinTextChange(products[index].din)
+                                    onProductCodeTextChange(products[index].productCode)
+                                    onExpirationTextChange(products[index].expirationDate)
+                                    onProductsChange(products.filterIndexed { filterIndex, _ -> filterIndex != index })
+                                } else {
+                                    val productSelectedAsList = products.filterIndexed { filterIndex, _ -> filterIndex == index }
+                                    onProductSelected(productSelectedAsList)
+                                    productSelectedAsList[0].removedForReassociation = true
+                                }
                             }
                         ),
                     painter = painterResource(id = R.drawable.edit_icon),
@@ -110,7 +123,9 @@ fun ProductListContent(
 fun ProductListScreen(
     canScrollVertically: Boolean,
     productList: List<Product>,
-    onProductsChange: (List<Product>) -> Unit,
+    useOnProductsChange: Boolean,
+    onProductsChange: (List<Product>) -> Unit = { },
+    onProductSelected: (List<Product>) -> Unit = { },
     onDinTextChange: (String) -> Unit = { },
     onProductCodeTextChange: (String) -> Unit = { },
     onExpirationTextChange: (String) -> Unit = { }
@@ -118,9 +133,52 @@ fun ProductListScreen(
     ProductListContent(
         canScrollVertically,
         products = productList,
+        useOnProductsChange = useOnProductsChange,
         onProductsChange = onProductsChange,
+        onProductSelected = onProductSelected,
         onDinTextChange = onDinTextChange,
         onProductCodeTextChange = onProductCodeTextChange,
         onExpirationTextChange = onExpirationTextChange
+    )
+}
+
+@Composable
+fun DonorElementText(
+    donorFirstName: String,
+    donorMiddleName: String,
+    donorLastName: String,
+    dob: String,
+    aboRh: String,
+    branch: String
+) {
+    Text(
+        text = donorLastName,
+        color = colorResource(id = R.color.black),
+        style = MaterialTheme.typography.bodyMedium
+    )
+    Text(
+        text = donorFirstName,
+        color = colorResource(id = R.color.black),
+        style = MaterialTheme.typography.bodyMedium
+    )
+    Text(
+        text = donorMiddleName,
+        color = colorResource(id = R.color.black),
+        style = MaterialTheme.typography.bodyMedium
+    )
+    Text(
+        text = dob,
+        color = colorResource(id = R.color.black),
+        style = MaterialTheme.typography.bodyMedium
+    )
+    Text(
+        text = aboRh,
+        color = colorResource(id = R.color.black),
+        style = MaterialTheme.typography.bodyMedium
+    )
+    Text(
+        text = branch,
+        color = colorResource(id = R.color.black),
+        style = MaterialTheme.typography.bodyMedium
     )
 }

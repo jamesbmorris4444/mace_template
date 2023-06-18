@@ -64,6 +64,14 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         return repository.mainDatabaseDonorAndProductsList()
     }
 
+    fun insertReassociatedProductsIntoDatabase(donor: Donor, products: List<Product>) {
+        repository.insertReassociatedProductsIntoDatabase(donor, products)
+    }
+
+    fun donorFromNameAndDateWithProducts(donor: Donor): DonorWithProducts {
+        return repository.donorFromNameAndDateWithProducts(donor)
+    }
+
 }
 
 class OnClearFromRecentService : Service(), KoinComponent {

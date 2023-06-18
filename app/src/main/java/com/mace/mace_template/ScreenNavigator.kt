@@ -234,6 +234,7 @@ fun ScreenNavigator(
                             navController.navigate(manageDonorAfterSearchStringName)
                         },
                         viewModel = viewModel,
+                        modalView = view,
                         title = reassociateDonationSearchStringName,
                         modifier = Modifier
                             .fillMaxSize()

@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -116,35 +115,13 @@ fun DonateProductsHandler(
                     .fillMaxWidth()
                     .clickable { onItemButtonClicked(it) }
                 ) {
-                    Text(
-                        text = it.lastName,
-                        color = colorResource(id = R.color.black),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = it.firstName,
-                        color = colorResource(id = R.color.black),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = it.middleName,
-                        color = colorResource(id = R.color.black),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = it.dob,
-                        color = colorResource(id = R.color.black),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = it.aboRh,
-                        color = colorResource(id = R.color.black),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = it.branch,
-                        color = colorResource(id = R.color.black),
-                        style = MaterialTheme.typography.bodyMedium
+                    DonorElementText(
+                        it.firstName,
+                        it.middleName,
+                        it.lastName,
+                        it.dob,
+                        it.aboRh,
+                        it.branch
                     )
                 }
                 Divider(color = colorResource(id = R.color.black), thickness = 2.dp)

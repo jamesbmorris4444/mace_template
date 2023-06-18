@@ -14,6 +14,7 @@
     <string name="no_db_entries_title_text">No entries made into the staging database</string>
     <string name="made_db_entries_title_text">Staging entry for donor/products insertion</string>
     <string name="made_db_entries_body_text">An entry was made to the staging database for insertion of new donor product(s)</string>
+    <string name="made_reassociate_entries_body_text">An entry was made to the staging database for insertion of reassociated product(s)</string>
     <string name="made_db_entries_failure_text">Insertion of new donor in database failed</string>
     <string name="positive_button_text_ok">BKG:OK</string>
     <string name="positive_button_text_yes">BKG:Yes</string>
@@ -26,6 +27,12 @@
     <string name="manage_donor_title">Manage Donor</string>
     <string name="reassociate_donation_title">Reassociate Donation</string>
     <string name="view_donor_list_title">View Donor List</string>
+    <string name="incorrect_donor_title">Incorrect Donor</string>
+    <string name="incorrect_donor_and_product_title">Incorrect Donor and Product</string>
+    <string name="reassociate_complete_title">Reassociation Complete\nCorrect Donor Follows</string>
+    <string name="choose_product_for_reassociation_title">Choose product for reassociation</string>
+    <string name="choose_incorrect_donor_title">Choose the incorrect Donor</string>
+    <string name="choose_correct_donor_title">Choose the correct Donor</string>
     <string name="enter_din_text">Enter DIN</string>
     <string name="din_title">DIN</string>
     <string name="enter_product_code">Enter Prod Code</string>
@@ -41,6 +48,7 @@
     <string name="enter_branch_text">Enter Branch</string>
     <string name="initial_letters_of_last_name_text">Initial letters of last name</string>
     <string name="initial_letters_of_incorrect_donor_last_name_text">Incorrect donor last name</string>
+    <string name="initial_letters_of_correct_donor_last_name_text">Correct donor last name</string>
     <string name="donor_search_view_donor_list_text">Donor Search String</string>
     <string name="std_modal_noconfirm_title">Product Entry Not Confirmed</string>
     <string name="std_modal_noconfirm_body">Complete button was clicked without confirming current grid entry. Do you want to confirm?</string>

@@ -386,6 +386,7 @@ fun CreateProductsScreen(
             ProductListScreen(
                 canScrollVertically = true,
                 productList = products.value,
+                useOnProductsChange = true,
                 onProductsChange = { products.value = it },
                 onDinTextChange = { dinText = it },
                 onProductCodeTextChange = { productCodeText = it },
@@ -398,6 +399,7 @@ fun CreateProductsScreen(
             ProductListScreen(
                 canScrollVertically = true,
                 productList = displayedProductList.value,
+                useOnProductsChange = true,
                 onProductsChange = { products.value = it },
                 onDinTextChange = { dinText = it },
                 onProductCodeTextChange = { productCodeText = it },

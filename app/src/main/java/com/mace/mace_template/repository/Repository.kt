@@ -37,6 +37,8 @@ interface Repository {
     fun donorsFromFullNameWithProducts(searchLast: String, dob: String): List<DonorWithProducts>
     fun handleSearchClick(searchKey: String) : List<Donor>
     fun handleSearchClickWithProducts(searchKey: String) : List<DonorWithProducts>
+    fun insertReassociatedProductsIntoDatabase(donor: Donor, products: List<Product>)
+    fun donorFromNameAndDateWithProducts(donor: Donor): DonorWithProducts
 }
 
 enum class DatabaseSelector {
@@ -235,38 +237,10 @@ class RepositoryImpl(private val app: Application) : Repository {
 //        callbacks.fetchActivity().supportFragmentManager.popBackStack(Constants.ROOT_FRAGMENT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE)
 //        callbacks.fetchActivity().loadDonateProductsFragment(true)
     }
-//
-//    fun insertReassociatedProductsIntoDatabase(database: BloodDatabase, donor: Donor, products: List<Product>, initializeView: () -> Unit) {
-//        var disposable: Disposable? = null
-//        val completeableAction = database.databaseDao().insertDonorAndProducts(donor, products)
-//        disposable = Completable.fromAction { completeableAction }
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribeOn(Schedulers.io())
-//            .subscribe ({
-//                disposable?.dispose()
-//                StandardModal(
-//                    callbacks,
-//                    modalType = StandardModal.ModalType.STANDARD,
-//                    titleText = callbacks.fetchActivity().getString(R.string.std_modal_insert_products_staging_title),
-//                    bodyText = callbacks.fetchActivity().getString(R.string.std_modal_insert_products_staging_body),
-//                    positiveText = callbacks.fetchActivity().getString(R.string.std_modal_ok),
-//                    dialogFinishedListener = object : StandardModal.DialogFinishedListener {
-//                        override fun onPositive(string: String) {
-//                            initializeView()
-//                        }
-//                        override fun onNegative() { }
-//                        override fun onNeutral() { }
-//                        override fun onBackPressed() {
-//                            initializeView()
-//                        }
-//                    }
-//                ).show(callbacks.fetchActivity().supportFragmentManager, "MODAL")
-//            },
-//            { throwable ->
-//                disposable?.dispose()
-//                insertReassociatedProductsIntoDatabaseFailure("insertReassociatedProductsIntoDatabase", throwable, initializeView)
-//            })
-//    }
+
+    override fun insertReassociatedProductsIntoDatabase(donor: Donor, products: List<Product>) {
+        stagingBloodDatabase.databaseDao().insertDonorAndProducts(donor, products)
+    }
 //
 //    private fun insertReassociatedProductsIntoDatabaseFailure(method: String, throwable: Throwable, initializeView: () -> Unit) {
 //        LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.EXC), method, throwable)
@@ -275,6 +249,10 @@ class RepositoryImpl(private val app: Application) : Repository {
 //
     override fun stagingDatabaseDonorAndProductsList(): List<DonorWithProducts> {
         return stagingBloodDatabase.databaseDao().loadAllDonorsWithProducts()
+    }
+
+    override fun donorFromNameAndDateWithProducts(donor: Donor): DonorWithProducts {
+        return stagingBloodDatabase.databaseDao().donorFromNameAndDateWithProducts(donor.lastName, donor.dob)
     }
 
     override fun mainDatabaseDonorAndProductsList(): List<DonorWithProducts> {
@@ -423,42 +401,6 @@ class RepositoryImpl(private val app: Application) : Repository {
         }
         return database.databaseDao().donorsFromFullNameWithProducts(searchLast, searchFirst)
     }
-
-//    /**
-//     * @param   searchKey                 first n characters of the last name, case insensitive
-//     * @param   showDonorsAndProducts     callback method in ViewModel when asynchronous operation finishes
-//     * Queries both the staging database and the main database to find a donor (with attached products) from the search key.
-//     * Called both before and after the incorrect donor has been identified, but with a different callback method in ech case.
-//     */
-//    @Suppress("UNCHECKED_CAST")
-//    fun handleReassociateSearchClick(view: View, searchKey: String, showDonorsAndProducts: (donorsAndProductsList: List<DonorWithProducts>) -> Unit) {
-//        val fullNameResponseList = listOf(
-//            donorsFromFullNameWithProducts(mainBloodDatabase, searchKey),
-//            donorsFromFullNameWithProducts(stagingBloodDatabase, searchKey)
-//        )
-//        var disposable: Disposable? = null
-//        disposable = Single.zip(fullNameResponseList) { args -> listOf(args) }
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribeOn(Schedulers.io())
-//            .subscribe ({ responseList ->
-//                disposable?.dispose()
-//                val response = responseList[0]
-//                val stagingDatabaseList = response[1] as List<DonorWithProducts>
-//                val mainDatabaseList = response[0] as List<DonorWithProducts>
-//                if (stagingDatabaseList.isEmpty()) {
-//                    showDonorsAndProducts(mainDatabaseList)
-//                    donorsWithProductsListForReassociate = mainDatabaseList
-//                } else {
-//                    showDonorsAndProducts(stagingDatabaseList)
-//                    donorsWithProductsListForReassociate = stagingDatabaseList
-//                }
-//            },
-//            { throwable ->
-//                disposable?.dispose()
-//                LogUtils.E(LogUtils.FilterTags.withTags(LogUtils.TagFilter.EXC), "handleReassociateSearchClick", throwable)
-//            })
-//
-//    }
 
     override fun donorsFromFullNameWithProducts(searchLast: String, dob: String): List<DonorWithProducts> {
         return stagingBloodDatabase.databaseDao().donorsFromFullNameWithProducts(searchLast, dob)
