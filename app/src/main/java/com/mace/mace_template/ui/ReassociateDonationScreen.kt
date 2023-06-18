@@ -4,7 +4,6 @@ import android.view.View
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,46 +46,21 @@ import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.repository.storage.Product
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ReassociateDonationScreen(
     onComposing: (AppBarState) -> Unit,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
-    onItemButtonClicked: (donorWithProducts: DonorWithProducts) -> Unit,
     viewModel: BloodViewModel,
     modalView: View,
     title: String,
-    modifier: Modifier = Modifier
-) {
-    ReassociateDonationHandler(
-        onComposing = onComposing,
-        canNavigateBack = canNavigateBack,
-        navigateUp = navigateUp,
-        openDrawer = openDrawer,
-        viewModel = viewModel,
-        modalView = modalView,
-        title = title,
-        onItemButtonClicked = onItemButtonClicked,
-        modifier = modifier)
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun ReassociateDonationHandler(
-    onComposing: (AppBarState) -> Unit,
-    canNavigateBack: Boolean,
-    navigateUp: () -> Unit,
-    openDrawer: () -> Unit,
-    viewModel: BloodViewModel,
-    modalView: View,
-    title: String,
-    onItemButtonClicked: (donorWithProducts: DonorWithProducts) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val incorrectDonorsWithProducts: MutableState<List<DonorWithProducts>> = rememberSaveable { mutableStateOf(listOf()) }
     val correctDonorsWithProducts: MutableState<List<DonorWithProducts>> = rememberSaveable { mutableStateOf(listOf()) }
-    var products: MutableState<List<Product>>
+    val products: MutableState<List<Product>> = rememberSaveable { mutableStateOf(listOf()) }
     val reassociateDonationSearchStringName = stringResource(ScreenNames.ReassociateDonation.resId)
     var incorrectDonorWithProducts: DonorWithProducts by remember { mutableStateOf(DonorWithProducts(Donor())) }
     var correctDonorWithProducts: DonorWithProducts by remember { mutableStateOf(DonorWithProducts(Donor())) }
@@ -107,8 +81,6 @@ fun ReassociateDonationHandler(
             donorWithProducts.products.map { product ->
                 if (product.removedForReassociation) product.donorId = correctDonor.id
             }
-            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "moveProductsToCorrectDonor1=${correctDonor.lastName}")
-            LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "moveProductsToCorrectDonor2=${donorWithProducts.products}")
             viewModel.insertReassociatedProductsIntoDatabase(correctDonor, donorWithProducts.products)
             StandardModalComposeView(
                 composeView = modalView,
@@ -117,8 +89,6 @@ fun ReassociateDonationHandler(
                 positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
             ) {
                 correctDonorWithProducts = viewModel.donorFromNameAndDateWithProducts(correctDonor)
-                LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "moveProductsToCorrectDonor3=${correctDonorWithProducts.donor}")
-                LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "moveProductsToCorrectDonor4=${correctDonorWithProducts}")
                 isReassociateCompleted = true
             }.show()
         }
@@ -128,8 +98,7 @@ fun ReassociateDonationHandler(
     fun DonorListWithProducts(isCorrectDonorProcessing: Boolean, donorsWithProducts: List<DonorWithProducts>) {
         LazyColumn {
             items(items = donorsWithProducts) {
-                products = remember { mutableStateOf(it.products) }
-                LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "products SIZE=${products.value.size}")
+                products.value = it.products
                 Column(modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
@@ -205,105 +174,93 @@ fun ReassociateDonationHandler(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isReassociateCompleted) {
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                ) {
-                    Text(
-                        text = stringResource(R.string.reassociate_complete_title),
-                        color = colorResource(id = R.color.black),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                    DonorListWithProducts(true, listOf(correctDonorWithProducts))
-                }
+                Text(
+                    modifier = Modifier.align(Alignment.Start),
+                    text = stringResource(R.string.reassociate_complete_title),
+                    color = colorResource(id = R.color.black),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                DonorListWithProducts(true, listOf(correctDonorWithProducts))
             } else {
                 if (incorrectDonorSelected) {
-                    Column(modifier = Modifier
-                        .fillMaxWidth()
-                    ) {
-                        if (isProductSelected) {
-                            Text(
-                                text = stringResource(R.string.incorrect_donor_and_product_title),
-                                color = colorResource(id = R.color.black),
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        } else {
-                            Text(
-                                text = stringResource(R.string.incorrect_donor_title),
-                                color = colorResource(id = R.color.black),
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                            Text(
-                                text = stringResource(R.string.choose_product_for_reassociation_title),
-                                color = colorResource(id = R.color.red),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                        DonorListWithProducts(true, incorrectDonorsWithProducts.value)
+                    if (isProductSelected) {
+                        Text(
+                            modifier = Modifier.align(Alignment.Start),
+                            text = stringResource(R.string.incorrect_donor_and_product_title),
+                            color = colorResource(id = R.color.black),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    } else {
+                        Text(
+                            modifier = Modifier.align(Alignment.Start),
+                            text = stringResource(R.string.incorrect_donor_title),
+                            color = colorResource(id = R.color.black),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            modifier = Modifier.align(Alignment.Start),
+                            text = stringResource(R.string.choose_product_for_reassociation_title),
+                            color = colorResource(id = R.color.red),
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     }
-                    Column(modifier = Modifier
-                        .fillMaxWidth()
-                    ) {
-                        if (isProductSelected) {
-                            Row {
-                                var text by rememberSaveable { mutableStateOf("") }
-                                OutlinedTextField(
-                                    modifier = Modifier
-                                        .weight(0.7f)
-                                        .height(60.dp),
-                                    value = text,
-                                    onValueChange = {
-                                        text = it
-                                    },
-                                    shape = RoundedCornerShape(10.dp),
-                                    label = { Text(stringResource(R.string.initial_letters_of_correct_donor_last_name_text)) },
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                    keyboardActions = KeyboardActions(
-                                        onDone = {
-                                            keyboardController?.hide()
-                                            handleSearchClickWithProducts(true, text)
-                                        })
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(10.dp))
-                            if (correctDonorsWithProducts.value.isNotEmpty()) {
-                                Text(
-                                    text = stringResource(R.string.choose_correct_donor_title),
-                                    color = colorResource(id = R.color.red),
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                            }
-                            Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                            DonorListWithProducts(true, correctDonorsWithProducts.value)
-                        }
-                    }
-                } else {
-                    Row {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                    DonorListWithProducts(true, incorrectDonorsWithProducts.value)
+                    if (isProductSelected) {
+                        Spacer(modifier = Modifier.height(4.dp))
                         var text by rememberSaveable { mutableStateOf("") }
                         OutlinedTextField(
                             modifier = Modifier
-                                .weight(0.7f)
                                 .height(60.dp),
                             value = text,
                             onValueChange = {
                                 text = it
                             },
                             shape = RoundedCornerShape(10.dp),
-                            label = { Text(stringResource(R.string.initial_letters_of_incorrect_donor_last_name_text)) },
+                            label = { Text(stringResource(R.string.initial_letters_of_correct_donor_last_name_text)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                             keyboardActions = KeyboardActions(
                                 onDone = {
                                     keyboardController?.hide()
-                                    handleSearchClickWithProducts(false, text)
+                                    handleSearchClickWithProducts(true, text)
                                 })
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        if (correctDonorsWithProducts.value.isNotEmpty()) {
+                            Text(
+                                modifier = Modifier.align(Alignment.Start),
+                                text = stringResource(R.string.choose_correct_donor_title),
+                                color = colorResource(id = R.color.red),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+                        Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                        DonorListWithProducts(true, correctDonorsWithProducts.value)
                     }
+                } else {
+                    var text by rememberSaveable { mutableStateOf("") }
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .height(60.dp),
+                        value = text,
+                        onValueChange = {
+                            text = it
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        label = { Text(stringResource(R.string.initial_letters_of_incorrect_donor_last_name_text)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                keyboardController?.hide()
+                                handleSearchClickWithProducts(false, text)
+                            })
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
                     if (incorrectDonorsWithProducts.value.isNotEmpty()) {
                         Text(
