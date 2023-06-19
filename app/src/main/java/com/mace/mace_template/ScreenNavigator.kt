@@ -229,10 +229,7 @@ fun ScreenNavigator(
                         openDrawer = openDrawer,
                         viewModel = viewModel,
                         modalView = view,
-                        title = reassociateDonationSearchStringName,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(dimensionResource(R.dimen.padding_large))
+                        title = reassociateDonationSearchStringName
                     )
                 }
             }

@@ -386,7 +386,8 @@ fun CreateProductsScreen(
                 onProductsChange = { products.value = it },
                 onDinTextChange = { dinText = it },
                 onProductCodeTextChange = { productCodeText = it },
-                onExpirationTextChange = { expirationText = it }
+                onExpirationTextChange = { expirationText = it },
+                enablerForProducts = { true }
             )
         } else {
             if (displayedProductList.value.isNotEmpty()) {
@@ -399,7 +400,8 @@ fun CreateProductsScreen(
                 onProductsChange = { products.value = it },
                 onDinTextChange = { dinText = it },
                 onProductCodeTextChange = { productCodeText = it },
-                onExpirationTextChange = { expirationText = it }
+                onExpirationTextChange = { expirationText = it },
+                enablerForProducts = { true }
             )
         }
 

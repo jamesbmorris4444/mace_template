@@ -32,7 +32,8 @@ fun ProductListContent(
     onProductSelected: (List<Product>) -> Unit,
     onDinTextChange: (String) -> Unit,
     onProductCodeTextChange: (String) -> Unit,
-    onExpirationTextChange: (String) -> Unit
+    onExpirationTextChange: (String) -> Unit,
+    enablerForProducts: (Product) -> Boolean
 ) {
     Column(
         modifier = if (canScrollVertically) Modifier.verticalScroll(rememberScrollState()) else Modifier
@@ -49,7 +50,7 @@ fun ProductListContent(
                         .height(40.dp)
                         .width(30.dp)
                         .clickable(
-                            enabled = true
+                            enabled = enablerForProducts(item)
                         ) {
                             if (useOnProductsChange) {
                                 onProductsChange(products.filterIndexed { filterIndex, _ -> filterIndex != index })
@@ -68,20 +69,20 @@ fun ProductListContent(
                         .height(40.dp)
                         .width(40.dp)
                         .clickable(
-                            enabled = true,
-                            onClick = {
-                                if (useOnProductsChange) {
-                                    onDinTextChange(products[index].din)
-                                    onProductCodeTextChange(products[index].productCode)
-                                    onExpirationTextChange(products[index].expirationDate)
-                                    onProductsChange(products.filterIndexed { filterIndex, _ -> filterIndex != index })
-                                } else {
-                                    val productSelectedAsList = products.filterIndexed { filterIndex, _ -> filterIndex == index }
-                                    onProductSelected(productSelectedAsList)
-                                    productSelectedAsList[0].removedForReassociation = true
-                                }
+                            enabled = enablerForProducts(item)
+                        ) {
+                            if (useOnProductsChange) {
+                                onDinTextChange(products[index].din)
+                                onProductCodeTextChange(products[index].productCode)
+                                onExpirationTextChange(products[index].expirationDate)
+                                onProductsChange(products.filterIndexed { filterIndex, _ -> filterIndex != index })
+                            } else {
+                                val productSelectedAsList =
+                                    products.filterIndexed { filterIndex, _ -> filterIndex == index }
+                                onProductSelected(productSelectedAsList)
+                                productSelectedAsList[0].removedForReassociation = true
                             }
-                        ),
+                        },
                     painter = painterResource(id = R.drawable.edit_icon),
                     contentDescription = "Dialog Alert"
                 )
@@ -125,7 +126,8 @@ fun ProductListScreen(
     onProductSelected: (List<Product>) -> Unit = { },
     onDinTextChange: (String) -> Unit = { },
     onProductCodeTextChange: (String) -> Unit = { },
-    onExpirationTextChange: (String) -> Unit = { }
+    onExpirationTextChange: (String) -> Unit = { },
+    enablerForProducts: (Product) -> Boolean
 ) {
     ProductListContent(
         canScrollVertically,
@@ -135,7 +137,8 @@ fun ProductListScreen(
         onProductSelected = onProductSelected,
         onDinTextChange = onDinTextChange,
         onProductCodeTextChange = onProductCodeTextChange,
-        onExpirationTextChange = onExpirationTextChange
+        onExpirationTextChange = onExpirationTextChange,
+        enablerForProducts = enablerForProducts
     )
 }
 
