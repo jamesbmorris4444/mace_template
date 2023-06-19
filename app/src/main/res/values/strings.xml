@@ -14,6 +14,8 @@
     <string name="no_db_entries_title_text">No entries made into the staging database</string>
     <string name="made_db_entries_title_text">Staging entry for donor/products insertion</string>
     <string name="made_db_entries_body_text">An entry was made to the staging database for insertion of new donor product(s)</string>
+    <string name="failure_db_entries_title_text">Main database initialization failure</string>
+    <string name="failure_db_entries_body_text">Failure Message is: %1$s</string>
     <string name="made_reassociate_entries_body_text">An entry was made to the staging database for insertion of reassociated product(s)</string>
     <string name="made_db_entries_failure_text">Insertion of new donor in database failed</string>
     <string name="positive_button_text_ok">BKG:OK</string>

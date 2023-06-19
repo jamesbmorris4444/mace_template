@@ -1,5 +1,6 @@
 package com.mace.mace_template.ui
 
+import android.view.View
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,6 +60,7 @@ fun DonateProductsScreen(
     openDrawer: () -> Unit,
     onItemButtonClicked: (donor: Donor) -> Unit,
     viewModel: BloodViewModel,
+    modalView: View,
     title: String
 ) {
     viewModel.setBloodDatabase()
@@ -66,7 +68,20 @@ fun DonateProductsScreen(
     LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "isInvalid=$isInvalid")
     var completed by remember { mutableStateOf(!isInvalid) }
     if (isInvalid) {
-        viewModel.refreshRepository { completed = true }
+        viewModel.refreshRepository(
+            refreshCompleted = {
+                completed = true
+            }
+        ) { failureMessage ->
+            completed = true
+            StandardModalComposeView(
+                modalView,
+                topIconResId = R.drawable.notification,
+                titleText = viewModel.getResources().getString(R.string.failure_db_entries_title_text),
+                bodyText = viewModel.getResources().getString(R.string.failure_db_entries_body_text, failureMessage),
+                positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
+            ) { }.show()
+        }
     }
     DonateProductsHandler(
         onComposing = onComposing,
@@ -120,7 +135,8 @@ fun DonateProductsHandler(
                         it.lastName,
                         it.dob,
                         it.aboRh,
-                        it.branch
+                        it.branch,
+                        it.gender
                     )
                 }
                 Divider(color = colorResource(id = R.color.black), thickness = 2.dp)

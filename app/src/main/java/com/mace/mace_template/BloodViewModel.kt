@@ -7,7 +7,6 @@ import android.content.res.Resources
 import android.os.IBinder
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
-import com.mace.mace_template.repository.DatabaseSelector
 import com.mace.mace_template.repository.RepositoryImpl
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
@@ -20,8 +19,8 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
 
     private val repository : RepositoryImpl by inject()
 
-    fun refreshRepository(refreshCompleted: () -> Unit) {
-        repository.refreshDatabase(app.applicationContext, refreshCompleted)
+    fun refreshRepository(refreshCompleted: () -> Unit, refreshFailure: (String?) -> Unit) {
+        repository.refreshDatabase(app.applicationContext, refreshCompleted, refreshFailure)
     }
 
     fun handleSearchClick(searchKey: String): List<Donor> {
@@ -32,8 +31,8 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         return repository.handleSearchClickWithProducts(searchKey)
     }
 
-    fun insertDonorIntoDatabase(donor: Donor, completed: (Boolean) -> Unit) {
-        repository.insertDonorIntoDatabase(DatabaseSelector.STAGING_DB, donor, completed)
+    fun insertDonorIntoDatabase(donor: Donor) {
+        repository.insertDonorIntoDatabase(donor)
     }
 
     fun getResources(): Resources {
@@ -48,8 +47,8 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         return repository.isBloodDatabaseInvalid()
     }
 
-    fun insertDonorAndProductsIntoDatabase(modalView: View, databaseSelector: DatabaseSelector, donor: Donor, products: List<Product>) {
-        repository.insertDonorAndProductsIntoDatabase(modalView, databaseSelector, donor, products)
+    fun insertDonorAndProductsIntoDatabase(modalView: View, donor: Donor, products: List<Product>) {
+        repository.insertDonorAndProductsIntoDatabase(modalView, donor, products)
     }
 
     fun donorsFromFullNameWithProducts(searchLast: String, dob: String): List<DonorWithProducts> {

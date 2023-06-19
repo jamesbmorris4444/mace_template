@@ -64,6 +64,7 @@ fun ManageDonorScreen(
     createProductsStringName: String
 ) {
     val manageDonorAfterSearchStringName = stringResource(ScreenNames.ManageDonorAfterSearch.resId)
+    val stateVertical = rememberScrollState(0)
     LaunchedEffect(key1 = true) {
         LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$manageDonorAfterSearchStringName")
         onComposing(
@@ -90,7 +91,6 @@ fun ManageDonorScreen(
             )
         )
     }
-    val stateVertical = rememberScrollState(0)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -284,38 +284,21 @@ fun ManageDonorScreen(
                 donor.branch = branchText
                 donor.gender = gender
                 if (databaseModified || radioButtonChanged) {
-                    viewModel.insertDonorIntoDatabase(donor) { success ->
-                        if (success) {
-                            StandardModalComposeView(
-                                modalView,
-                                topIconResId = R.drawable.notification,
-                                titleText = viewModel.getResources().getString(R.string.made_db_entries_title_text),
-                                bodyText = viewModel.getResources().getString(R.string.made_db_entries_body_text),
-                                positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                            ) {
-                                if (transitionToCreateProductsScreen) {
-                                    navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
-                                    navController.navigate(createProductsStringName)
-                                } else {
-                                    navController.navigateUp()
-                                }
-                            }.show()
+                    viewModel.insertDonorIntoDatabase(donor)
+                    StandardModalComposeView(
+                        modalView,
+                        topIconResId = R.drawable.notification,
+                        titleText = viewModel.getResources().getString(R.string.made_db_entries_title_text),
+                        bodyText = viewModel.getResources().getString(R.string.made_db_entries_body_text),
+                        positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
+                    ) {
+                        if (transitionToCreateProductsScreen) {
+                            navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
+                            navController.navigate(createProductsStringName)
                         } else {
-                            StandardModalComposeView(
-                                modalView,
-                                topIconResId = R.drawable.notification,
-                                titleText = viewModel.getResources().getString(R.string.made_db_entries_failure_text),
-                                positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                            ) {
-                                if (transitionToCreateProductsScreen) {
-                                    navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
-                                    navController.navigate(createProductsStringName)
-                                } else {
-                                    navController.navigateUp()
-                                }
-                            }.show()
+                            navController.navigateUp()
                         }
-                    }
+                    }.show()
                 } else {
                     StandardModalComposeView(
                         modalView,

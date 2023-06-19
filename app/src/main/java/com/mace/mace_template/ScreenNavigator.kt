@@ -97,6 +97,7 @@ fun ScreenNavigator(
                             navController.navigate(manageDonorAfterSearchStringName)
                         },
                         viewModel = viewModel,
+                        modalView = view,
                         title = donateProductsSearchStringName
                     )
                 }
@@ -115,6 +116,7 @@ fun ScreenNavigator(
                             navController.navigate(manageDonorAfterSearchStringName)
                         },
                         viewModel = viewModel,
+                        modalView = view,
                         title = manageDonorFromDrawer
                     )
                 }

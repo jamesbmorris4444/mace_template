@@ -149,36 +149,17 @@ fun DonorElementText(
     donorLastName: String,
     dob: String,
     aboRh: String,
-    branch: String
+    branch: String,
+    gender: Boolean
 ) {
     Text(
-        text = donorLastName,
+        text = "$donorLastName, $donorFirstName $donorMiddleName (${if (gender) "Male" else "Female"})",
         color = colorResource(id = R.color.black),
         style = MaterialTheme.typography.bodyMedium
     )
     Text(
-        text = donorFirstName,
+        text = "DOB:$dob  AboRh:$aboRh  Branch:$branch",
         color = colorResource(id = R.color.black),
-        style = MaterialTheme.typography.bodyMedium
-    )
-    Text(
-        text = donorMiddleName,
-        color = colorResource(id = R.color.black),
-        style = MaterialTheme.typography.bodyMedium
-    )
-    Text(
-        text = dob,
-        color = colorResource(id = R.color.black),
-        style = MaterialTheme.typography.bodyMedium
-    )
-    Text(
-        text = aboRh,
-        color = colorResource(id = R.color.black),
-        style = MaterialTheme.typography.bodyMedium
-    )
-    Text(
-        text = branch,
-        color = colorResource(id = R.color.black),
-        style = MaterialTheme.typography.bodyMedium
+        style = MaterialTheme.typography.bodySmall
     )
 }

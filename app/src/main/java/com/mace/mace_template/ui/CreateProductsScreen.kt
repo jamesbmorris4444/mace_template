@@ -53,7 +53,6 @@ import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
-import com.mace.mace_template.repository.DatabaseSelector
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.repository.storage.Product
@@ -112,7 +111,14 @@ fun CreateProductsScreen(
         products.value.map { product ->
             product.donorId = donor.id
         }
-        viewModel.insertDonorAndProductsIntoDatabase(modalView, DatabaseSelector.STAGING_DB, donor, products.value)
+        viewModel.insertDonorAndProductsIntoDatabase(modalView, donor, products.value)
+        StandardModalComposeView(
+            modalView,
+            topIconResId = R.drawable.notification,
+            titleText = modalView.context.resources.getString(R.string.made_db_entries_title_text),
+            bodyText = modalView.context.resources.getString(R.string.made_db_entries_body_text),
+            positiveText = modalView.context.resources.getString(R.string.positive_button_text_ok),
+        ) { }.show()
     }
 
     fun onClearClicked() {

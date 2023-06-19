@@ -94,8 +94,8 @@ fun ViewDonorListScreen(
                         )
                     }
                     if (it.products.isNotEmpty()) {
+                        Spacer(modifier = Modifier.padding(top = 8.dp))
                         Divider(color = colorResource(id = R.color.red), thickness = 2.dp)
-
                     }
                     it.products.forEach {
                         Column(modifier = Modifier

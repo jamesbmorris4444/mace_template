@@ -133,7 +133,8 @@ fun ReassociateDonationScreen(
                             it.donor.lastName,
                             it.donor.dob,
                             it.donor.aboRh,
-                            it.donor.branch
+                            it.donor.branch,
+                            it.donor.gender
                         )
                     }
                     Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
