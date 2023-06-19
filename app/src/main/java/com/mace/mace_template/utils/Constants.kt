@@ -12,7 +12,6 @@ object Constants {
     const val MOVIES_ARRAY_DATA_TAG = "results"
     val DONOR_LIST_CLASS_TYPE = (ArrayList<Donor>()).javaClass
     const val THEATRE_BLOOD_BASE_URL = "https://api.themoviedb.org/3/discover/"
-    const val IMAGE_URL_PREFIX = "https://image.tmdb.org/t/p/"
     const val API_KEY_REQUEST_PARAM = "api_key"
     const val LANGUAGE_REQUEST_PARAM = "language"
     const val PAGE_REQUEST_PARAM = "page"

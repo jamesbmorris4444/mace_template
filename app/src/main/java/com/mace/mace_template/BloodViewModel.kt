@@ -1,10 +1,7 @@
 package com.mace.mace_template
 
 import android.app.Application
-import android.app.Service
-import android.content.Intent
 import android.content.res.Resources
-import android.os.IBinder
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import com.mace.mace_template.repository.RepositoryImpl
@@ -39,6 +36,10 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         return app.resources
     }
 
+    fun fetchApplication(): Application {
+        return app
+    }
+
     fun setBloodDatabase() {
         repository.setBloodDatabase(app.applicationContext)
     }
@@ -71,15 +72,4 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         return repository.donorFromNameAndDateWithProducts(donor)
     }
 
-}
-
-class OnClearFromRecentService : Service(), KoinComponent {
-    private val repository: RepositoryImpl by inject()
-    override fun onBind(intent: Intent?): IBinder? = null
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_NOT_STICKY
-    override fun onDestroy() = super.onDestroy()
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        repository.saveStagingDatabase()
-        stopSelf()
-    }
 }

@@ -1,6 +1,5 @@
 package com.mace.mace_template.repository
 
-import android.app.Application
 import android.content.Context
 import android.view.View
 import com.mace.mace_template.logger.LogUtils
@@ -24,7 +23,7 @@ import java.util.concurrent.TimeUnit
 interface Repository {
     fun setBloodDatabase(context: Context)
     fun isBloodDatabaseInvalid(): Boolean
-    fun saveStagingDatabase()
+    fun saveStagingDatabase(databaseName: String, db: File)
     fun refreshDatabase(context: Context, refreshCompleted: () -> Unit, refreshFailure: (String?) -> Unit)
     fun insertDonorIntoDatabase(donor: Donor)
     fun insertDonorAndProductsIntoDatabase(modalView: View, donor: Donor, products: List<Product>)
@@ -37,7 +36,7 @@ interface Repository {
     fun donorFromNameAndDateWithProducts(donor: Donor): DonorWithProducts
 }
 
-class RepositoryImpl(private val app: Application) : Repository {
+class RepositoryImpl : Repository {
 
     private lateinit var mainBloodDatabase: BloodDatabase
     private lateinit var stagingBloodDatabase: BloodDatabase
@@ -82,9 +81,7 @@ class RepositoryImpl(private val app: Application) : Repository {
         mainBloodDatabase.databaseDao().insertDonorsAndProductLists(donors, products)
     }
 
-    override fun saveStagingDatabase() {
-        val databaseName = MODIFIED_DATABASE_NAME
-        val db: File = app.applicationContext.getDatabasePath(databaseName)
+    override fun saveStagingDatabase(databaseName: String, db: File) {
         val dbShm = File(db.parent, "$databaseName-shm")
         val dbWal = File(db.parent, "$databaseName-wal")
         val dbBackup = File(db.parent, "$databaseName-backup")
@@ -111,12 +108,13 @@ class RepositoryImpl(private val app: Application) : Repository {
      *   insertDonorIntoDatabase
      *   insertDonorAndProductsIntoDatabase
      *   insertReassociatedProductsIntoDatabase
-     *   databaseCounts
-     *   getProductEntryCount
+     *   stagingDatabaseDonorAndProductsList
+     *   donorFromNameAndDateWithProducts
+     *   mainDatabaseDonorAndProductsList
+     *   databaseDonorCount
      *   handleSearchClick
-     *   handleReassociateSearchClick
-     *   donorsFromFullName
-     *   retrieveDonorFromNameAndDate
+     *   handleSearchClickWithProducts
+     *   donorsFromFullNameWithProducts
      */
 
     override fun insertDonorIntoDatabase(donor: Donor) {
