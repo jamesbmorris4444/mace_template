@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -22,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -34,7 +32,6 @@ import com.mace.mace_template.ui.CreateProductsScreen
 import com.mace.mace_template.ui.DonateProductsScreen
 import com.mace.mace_template.ui.ManageDonorScreen
 import com.mace.mace_template.ui.ReassociateDonationScreen
-import com.mace.mace_template.ui.StandardModalComposeView
 import com.mace.mace_template.ui.ViewDonorListScreen
 import com.mace.mace_template.utils.Constants
 import com.mace.mace_template.utils.Constants.LOG_TAG
@@ -100,10 +97,7 @@ fun ScreenNavigator(
                             navController.navigate(manageDonorAfterSearchStringName)
                         },
                         viewModel = viewModel,
-                        title = donateProductsSearchStringName,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(dimensionResource(R.dimen.padding_large))
+                        title = donateProductsSearchStringName
                     )
                 }
                 composable(route = manageDonorFromDrawer) {
@@ -121,10 +115,7 @@ fun ScreenNavigator(
                             navController.navigate(manageDonorAfterSearchStringName)
                         },
                         viewModel = viewModel,
-                        title = manageDonorFromDrawer,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(dimensionResource(R.dimen.padding_large))
+                        title = manageDonorFromDrawer
                     )
                 }
                 composable(route = manageDonorAfterSearchStringName) {
@@ -137,56 +128,13 @@ fun ScreenNavigator(
                         navigateUp = { navController.navigateUp() },
                         openDrawer = openDrawer,
                         donor = donor,
-                    ) { changed, donor ->
-                        if (changed) {
-                            viewModel.insertDonorIntoDatabase(donor) { success ->
-                                if (success) {
-                                    StandardModalComposeView(
-                                        view,
-                                        topIconResId = R.drawable.notification,
-                                        titleText = viewModel.getResources().getString(R.string.made_db_entries_title_text),
-                                        bodyText = viewModel.getResources().getString(R.string.made_db_entries_body_text),
-                                        positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                                    ) {
-                                        if (transitionToCreateProductsScreen) {
-                                            navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
-                                            navController.navigate(createProductsStringName)
-                                        } else {
-                                            navController.navigateUp()
-                                        }
-                                    }.show()
-                                } else {
-                                    StandardModalComposeView(
-                                        view,
-                                        topIconResId = R.drawable.notification,
-                                        titleText = viewModel.getResources().getString(R.string.made_db_entries_failure_text),
-                                        positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                                    ) {
-                                        if (transitionToCreateProductsScreen) {
-                                            navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
-                                            navController.navigate(createProductsStringName)
-                                        } else {
-                                            navController.navigateUp()
-                                        }
-                                    }.show()
-                                }
-                            }
-                        } else {
-                            StandardModalComposeView(
-                                view,
-                                topIconResId = R.drawable.notification,
-                                titleText = viewModel.getResources().getString(R.string.no_db_entries_title_text),
-                                positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                            ) {
-                                if (transitionToCreateProductsScreen) {
-                                    navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
-                                    navController.navigate(createProductsStringName)
-                                } else {
-                                    navController.navigateUp()
-                                }
-                            }.show()
-                        }
-                    }
+                        viewModel = viewModel,
+                        navController = navController,
+                        modalView = view,
+                        transitionToCreateProductsScreen = transitionToCreateProductsScreen,
+                        donateProductsSearchStringName = donateProductsSearchStringName,
+                        createProductsStringName = createProductsStringName
+                    )
                 }
                 composable(route = createProductsStringName) {
                     LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch ManageDonorScreen=$createProductsStringName")

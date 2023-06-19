@@ -2,7 +2,7 @@ package com.mace.mace_template.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -58,8 +59,7 @@ fun DonateProductsScreen(
     openDrawer: () -> Unit,
     onItemButtonClicked: (donor: Donor) -> Unit,
     viewModel: BloodViewModel,
-    title: String,
-    modifier: Modifier = Modifier
+    title: String
 ) {
     viewModel.setBloodDatabase()
     val isInvalid = viewModel.isBloodDatabaseInvalid()
@@ -76,8 +76,7 @@ fun DonateProductsScreen(
         viewModel = viewModel,
         title = title,
         completed = completed,
-        onItemButtonClicked = onItemButtonClicked,
-        modifier = modifier)
+        onItemButtonClicked = onItemButtonClicked)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -90,8 +89,7 @@ fun DonateProductsHandler(
     viewModel: BloodViewModel,
     title: String,
     completed: Boolean,
-    onItemButtonClicked: (donor: Donor) -> Unit,
-    modifier: Modifier = Modifier
+    onItemButtonClicked: (donor: Donor) -> Unit
 ) {
     val donors: MutableState<List<Donor>> = rememberSaveable { mutableStateOf(listOf()) }
     val donateProductsSearchStringName = stringResource(ScreenNames.DonateProductsSearch.resId)
@@ -156,7 +154,10 @@ fun DonateProductsHandler(
             )
         )
     }
-    BoxWithConstraints(modifier = modifier.fillMaxWidth(1f)) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(start = 24.dp, end = 24.dp)
+    ) {
         val keyboardController = LocalSoftwareKeyboardController.current
         if (completed) {
             Column(

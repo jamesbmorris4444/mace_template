@@ -1,5 +1,6 @@
 package com.mace.mace_template.ui
 
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,7 +39,9 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.mace.mace_template.AppBarState
+import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
 import com.mace.mace_template.logger.LogUtils
@@ -53,7 +56,12 @@ fun ManageDonorScreen(
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     donor: Donor,
-    onUpdateButtonClicked: (databaseModified: Boolean, donor: Donor) -> Unit
+    viewModel: BloodViewModel,
+    navController: NavHostController,
+    modalView: View,
+    transitionToCreateProductsScreen: Boolean,
+    donateProductsSearchStringName: String,
+    createProductsStringName: String
 ) {
     val manageDonorAfterSearchStringName = stringResource(ScreenNames.ManageDonorAfterSearch.resId)
     LaunchedEffect(key1 = true) {
@@ -275,7 +283,54 @@ fun ManageDonorScreen(
                 donor.aboRh = aboRhText
                 donor.branch = branchText
                 donor.gender = gender
-                onUpdateButtonClicked(databaseModified || radioButtonChanged, donor)
+                if (databaseModified || radioButtonChanged) {
+                    viewModel.insertDonorIntoDatabase(donor) { success ->
+                        if (success) {
+                            StandardModalComposeView(
+                                modalView,
+                                topIconResId = R.drawable.notification,
+                                titleText = viewModel.getResources().getString(R.string.made_db_entries_title_text),
+                                bodyText = viewModel.getResources().getString(R.string.made_db_entries_body_text),
+                                positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
+                            ) {
+                                if (transitionToCreateProductsScreen) {
+                                    navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
+                                    navController.navigate(createProductsStringName)
+                                } else {
+                                    navController.navigateUp()
+                                }
+                            }.show()
+                        } else {
+                            StandardModalComposeView(
+                                modalView,
+                                topIconResId = R.drawable.notification,
+                                titleText = viewModel.getResources().getString(R.string.made_db_entries_failure_text),
+                                positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
+                            ) {
+                                if (transitionToCreateProductsScreen) {
+                                    navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
+                                    navController.navigate(createProductsStringName)
+                                } else {
+                                    navController.navigateUp()
+                                }
+                            }.show()
+                        }
+                    }
+                } else {
+                    StandardModalComposeView(
+                        modalView,
+                        topIconResId = R.drawable.notification,
+                        titleText = viewModel.getResources().getString(R.string.no_db_entries_title_text),
+                        positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
+                    ) {
+                        if (transitionToCreateProductsScreen) {
+                            navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
+                            navController.navigate(createProductsStringName)
+                        } else {
+                            navController.navigateUp()
+                        }
+                    }.show()
+                }
                 radioButtonChanged = false
             },
             buttonText = stringResource(R.string.update_button_text)
