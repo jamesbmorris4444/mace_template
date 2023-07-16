@@ -29,10 +29,9 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -63,35 +62,53 @@ fun DonateProductsScreen(
     modalView: View,
     title: String
 ) {
+
+    @Composable
+    fun CustomCircularProgressBar(){
+        CircularProgressIndicator(
+            modifier = Modifier.size(120.dp),
+            color = Color.Green,
+            strokeWidth = 6.dp)
+    }
+
     viewModel.setBloodDatabase()
-    val isInvalid = viewModel.isBloodDatabaseInvalid()
+    val isInvalid = viewModel.databaseInvalidState.observeAsState().value ?: false
+    val completed = viewModel.refreshCompletedState.observeAsState().value ?: false
+    val failure = viewModel.refreshFailureState.observeAsState().value ?: ""
+    viewModel.isBloodDatabaseInvalid()
     LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "isInvalid=$isInvalid")
-    var completed by remember { mutableStateOf(!isInvalid) }
-    if (isInvalid) {
-        viewModel.refreshRepository(
-            refreshCompleted = {
-                completed = true
+    when {
+        isInvalid -> {
+            viewModel.refreshRepository()
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CustomCircularProgressBar()
             }
-        ) { failureMessage ->
-            completed = true
+        }
+        completed -> {
+            DonateProductsHandler(
+                onComposing = onComposing,
+                canNavigateBack = canNavigateBack,
+                navigateUp = navigateUp,
+                openDrawer = openDrawer,
+                viewModel = viewModel,
+                title = title,
+                onItemButtonClicked = onItemButtonClicked)
+        }
+        failure.isNotEmpty() -> {
             StandardModalComposeView(
                 modalView,
                 topIconResId = R.drawable.notification,
                 titleText = viewModel.getResources().getString(R.string.failure_db_entries_title_text),
-                bodyText = viewModel.getResources().getString(R.string.failure_db_entries_body_text, failureMessage),
+                bodyText = viewModel.getResources().getString(R.string.failure_db_entries_body_text, failure),
                 positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-            ) { }.show()
+            ) { navigateUp() }.show()
         }
+        else -> { }
     }
-    DonateProductsHandler(
-        onComposing = onComposing,
-        canNavigateBack = canNavigateBack,
-        navigateUp = navigateUp,
-        openDrawer = openDrawer,
-        viewModel = viewModel,
-        title = title,
-        completed = completed,
-        onItemButtonClicked = onItemButtonClicked)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -103,28 +120,19 @@ fun DonateProductsHandler(
     openDrawer: () -> Unit,
     viewModel: BloodViewModel,
     title: String,
-    completed: Boolean,
     onItemButtonClicked: (donor: Donor) -> Unit
 ) {
-    val donors: MutableState<List<Donor>> = rememberSaveable { mutableStateOf(listOf()) }
+    val donors = viewModel.donorsAvailableState.observeAsState().value ?: listOf()
     val donateProductsSearchStringName = stringResource(ScreenNames.DonateProductsSearch.resId)
 
     fun handleSearchClick(searchKey: String) {
-        donors.value = viewModel.handleSearchClick(searchKey = searchKey)
+        viewModel.handleSearchClick(searchKey = searchKey)
     }
 
     @Composable
-    fun CustomCircularProgressBar(){
-        CircularProgressIndicator(
-            modifier = Modifier.size(120.dp),
-            color = Color.Green,
-            strokeWidth = 6.dp)
-    }
-
-    @Composable
-    fun DonorList(donors: MutableState<List<Donor>>, onItemButtonClicked: (donor: Donor) -> Unit) {
+    fun DonorList(donors: List<Donor>, onItemButtonClicked: (donor: Donor) -> Unit) {
         LazyColumn {
-            items(items = donors.value) {
+            items(items = donors) {
                 Column(modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onItemButtonClicked(it) }
@@ -175,55 +183,45 @@ fun DonateProductsHandler(
         .padding(start = 24.dp, end = 24.dp)
     ) {
         val keyboardController = LocalSoftwareKeyboardController.current
-        if (completed) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row {
-                    var text by rememberSaveable { mutableStateOf("") }
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .weight(0.7f)
-                            .height(60.dp),
-                        value = text,
-                        onValueChange = {
-                            text = it
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        label = { Text(stringResource(R.string.initial_letters_of_last_name_text)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                keyboardController?.hide()
-                                handleSearchClick(text)
-                            })
-                    )
-                }
-                WidgetButton(
-                    padding = PaddingValues(top = 16.dp),
-                    onClick = {
-                        onItemButtonClicked(Donor(lastName = "", middleName = "", firstName = "", dob = "", aboRh = "", branch = ""))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row {
+                var text by rememberSaveable { mutableStateOf("") }
+                OutlinedTextField(
+                    modifier = Modifier
+                        .weight(0.7f)
+                        .height(60.dp),
+                    value = text,
+                    onValueChange = {
+                        text = it
                     },
-                    buttonText = stringResource(R.string.new_donor_button_text)
+                    shape = RoundedCornerShape(10.dp),
+                    label = { Text(stringResource(R.string.initial_letters_of_last_name_text)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                            handleSearchClick(text)
+                        })
                 )
-                Spacer(modifier = Modifier.height(20.dp))
-                if (donors.value.isNotEmpty()) {
-                    Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                }
-                DonorList(donors, onItemButtonClicked)
             }
-        } else {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CustomCircularProgressBar()
+            WidgetButton(
+                padding = PaddingValues(top = 16.dp),
+                onClick = {
+                    onItemButtonClicked(Donor(lastName = "", middleName = "", firstName = "", dob = "", aboRh = "", branch = ""))
+                },
+                buttonText = stringResource(R.string.new_donor_button_text)
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            if (donors.isNotEmpty()) {
+                Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
             }
+            DonorList(donors, onItemButtonClicked)
         }
     }
 }

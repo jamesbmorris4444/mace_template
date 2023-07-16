@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.res.Resources
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.mace.mace_template.repository.RepositoryImpl
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
@@ -16,12 +18,37 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
 
     private val repository : RepositoryImpl by inject()
 
-    fun refreshRepository(refreshCompleted: () -> Unit, refreshFailure: (String?) -> Unit) {
-        repository.refreshDatabase(app.applicationContext, refreshCompleted, refreshFailure)
+    private val _databaseInvalidState = MutableLiveData(false)
+    val databaseInvalidState: LiveData<Boolean>
+        get() = _databaseInvalidState
+
+    private val _refreshCompletedState = MutableLiveData(false)
+    val refreshCompletedState: LiveData<Boolean>
+        get() = _refreshCompletedState
+
+    private val _refreshFailureState = MutableLiveData("")
+    val refreshFailureState: LiveData<String?>
+        get() = _refreshFailureState
+
+    private val _donorsAvailableState = MutableLiveData<List<Donor>>(listOf())
+    val donorsAvailableState: LiveData<List<Donor>>
+        get() = _donorsAvailableState
+
+    fun refreshRepository() {
+        repository.refreshDatabase(
+            app.applicationContext,
+            refreshCompleted = {
+                _refreshCompletedState.value = true
+                _databaseInvalidState.value = false
+            }
+        ) {
+            _refreshFailureState.value = it
+            _databaseInvalidState.value = false
+        }
     }
 
-    fun handleSearchClick(searchKey: String): List<Donor> {
-        return repository.handleSearchClick(searchKey)
+    fun handleSearchClick(searchKey: String) {
+        _donorsAvailableState.value = repository.handleSearchClick(searchKey)
     }
 
     fun handleSearchClickWithProducts(searchKey: String) : List<DonorWithProducts> {
@@ -44,8 +71,13 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         repository.setBloodDatabase(app.applicationContext)
     }
 
-    fun isBloodDatabaseInvalid(): Boolean {
-        return repository.isBloodDatabaseInvalid()
+    fun isBloodDatabaseInvalid() {
+        if (repository.isBloodDatabaseInvalid()) {
+            _databaseInvalidState.value = true
+        } else {
+            _refreshCompletedState.value = true
+            _databaseInvalidState.value = false
+        }
     }
 
     fun insertDonorAndProductsIntoDatabase(modalView: View, donor: Donor, products: List<Product>) {
