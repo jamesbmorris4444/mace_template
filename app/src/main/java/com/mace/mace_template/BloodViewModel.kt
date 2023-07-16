@@ -18,6 +18,8 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
 
     private val repository : RepositoryImpl by inject()
 
+    // Start Donate Products Screen state
+
     private val _databaseInvalidState = MutableLiveData(false)
     val databaseInvalidState: LiveData<Boolean>
         get() = _databaseInvalidState
@@ -33,6 +35,87 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
     private val _donorsAvailableState = MutableLiveData<List<Donor>>(listOf())
     val donorsAvailableState: LiveData<List<Donor>>
         get() = _donorsAvailableState
+
+    // End Donate Products Screen state
+
+    // Start Reassociate Donation Screen state
+
+    private val _correctDonorsWithProductsState = MutableLiveData<List<DonorWithProducts>>(listOf())
+    val correctDonorsWithProductsState: LiveData<List<DonorWithProducts>>
+        get() = _correctDonorsWithProductsState
+
+    private val _incorrectDonorsWithProductsState = MutableLiveData<List<DonorWithProducts>>(listOf())
+    val incorrectDonorsWithProductsState: LiveData<List<DonorWithProducts>>
+        get() = _incorrectDonorsWithProductsState
+
+    fun changeCorrectDonorsWithProductsState(list: List<DonorWithProducts>) {
+        _correctDonorsWithProductsState.value = list
+    }
+
+    fun changeIncorrectDonorsWithProductsState(list: List<DonorWithProducts>) {
+        _incorrectDonorsWithProductsState.value = list
+    }
+
+    private val _correctDonorWithProductsState = MutableLiveData(DonorWithProducts(Donor()))
+    val correctDonorWithProductsState: LiveData<DonorWithProducts>
+        get() = _correctDonorWithProductsState
+
+    private val _incorrectDonorWithProductsState = MutableLiveData(DonorWithProducts(Donor()))
+    val incorrectDonorWithProductsState: LiveData<DonorWithProducts>
+        get() = _incorrectDonorWithProductsState
+
+    fun changeCorrectDonorWithProductsState(donor: Donor) {
+        _correctDonorWithProductsState.value = donorFromNameAndDateWithProducts(donor)
+    }
+
+    fun changeIncorrectDonorWithProductsState(donor: Donor) {
+        _incorrectDonorWithProductsState.value = donorFromNameAndDateWithProducts(donor)
+    }
+
+    private val _singleSelectedProductListState = MutableLiveData<List<Product>>(listOf())
+    val singleSelectedProductListState: LiveData<List<Product>>
+        get() = _singleSelectedProductListState
+
+    fun changeSingleSelectedProductListState(list: List<Product>) {
+        _singleSelectedProductListState.value = list
+    }
+
+    private val _incorrectDonorSelectedState = MutableLiveData(false)
+    val incorrectDonorSelectedState: LiveData<Boolean>
+        get() = _incorrectDonorSelectedState
+
+    private val _isProductSelectedState = MutableLiveData(false)
+    val isProductSelectedState: LiveData<Boolean>
+        get() = _isProductSelectedState
+
+    private val _isReassociateCompletedState = MutableLiveData(false)
+    val isReassociateCompletedState: LiveData<Boolean>
+        get() = _isReassociateCompletedState
+
+    fun changeIncorrectDonorSelectedState(state: Boolean) {
+        _incorrectDonorSelectedState.value = state
+    }
+
+    fun changeIsProductSelectedState(state: Boolean) {
+        _isProductSelectedState.value = state
+    }
+
+    fun changeIsReassociateCompletedState(state: Boolean) {
+        _isReassociateCompletedState.value = state
+    }
+
+    fun resetReassociateCompletedScreen() {
+        _correctDonorsWithProductsState.value = listOf()
+        _incorrectDonorsWithProductsState.value = listOf()
+        _correctDonorWithProductsState.value = DonorWithProducts(Donor())
+        _incorrectDonorWithProductsState.value = DonorWithProducts(Donor())
+        _singleSelectedProductListState.value = listOf()
+        _incorrectDonorSelectedState.value = false
+        _isProductSelectedState.value = false
+        _isReassociateCompletedState.value = false
+    }
+
+    // End Reassociate Donation Screen state
 
     fun refreshRepository() {
         repository.refreshDatabase(
@@ -51,8 +134,12 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         _donorsAvailableState.value = repository.handleSearchClick(searchKey)
     }
 
-    fun handleSearchClickWithProducts(searchKey: String) : List<DonorWithProducts> {
-        return repository.handleSearchClickWithProducts(searchKey)
+    fun handleSearchClickWithProductsCorrectDonor(searchKey: String) {
+        _correctDonorsWithProductsState.value = repository.handleSearchClickWithProducts(searchKey)
+    }
+
+    fun handleSearchClickWithProductsIncorrectDonor(searchKey: String) {
+        _incorrectDonorsWithProductsState.value = repository.handleSearchClickWithProducts(searchKey)
     }
 
     fun insertDonorIntoDatabase(donor: Donor) {

@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.mace.mace_template.logger.LogUtils
 import kotlinx.coroutines.launch
 
 // See https://www.geeksforgeeks.org/android-jetpack-compose-implement-navigation-drawer/ for Navigation Drawer
@@ -120,9 +121,11 @@ fun DrawerAppComponent(
         openDrawer: () -> Unit,
         bloodViewModel: BloodViewModel
     ) {
+        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "BodyContentComponent: name=${currentScreen.name}")
         ScreenNavigator(view, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer, navController = navController)
     }
 
+    LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "ModalDrawer: name=${currentScreen}")
     ModalDrawer(
         drawerState = drawerState,
         gesturesEnabled = true,

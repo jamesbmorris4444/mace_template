@@ -71,12 +71,12 @@ fun DonateProductsScreen(
             strokeWidth = 6.dp)
     }
 
+    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "Compose: ${ScreenNames.DonateProductsSearch.name}")
     viewModel.setBloodDatabase()
     val isInvalid = viewModel.databaseInvalidState.observeAsState().value ?: false
     val completed = viewModel.refreshCompletedState.observeAsState().value ?: false
     val failure = viewModel.refreshFailureState.observeAsState().value ?: ""
     viewModel.isBloodDatabaseInvalid()
-    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "isInvalid=$isInvalid")
     when {
         isInvalid -> {
             viewModel.refreshRepository()
