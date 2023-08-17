@@ -36,6 +36,13 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
     val donorsAvailableState: LiveData<List<Donor>>
         get() = _donorsAvailableState
 
+    fun resetDonateProductsScreen() {
+        _refreshFailureState.value = ""
+        _refreshCompletedState.value = false
+        _databaseInvalidState.value = false
+        _donorsAvailableState.value = listOf()
+    }
+
     // End Donate Products Screen state
 
     // Start Reassociate Donation Screen state
@@ -116,6 +123,74 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
     }
 
     // End Reassociate Donation Screen state
+
+    // Start Create Products Screen state
+
+    private val _dinTextState = MutableLiveData("")
+    val dinTextState: LiveData<String>
+        get() = _dinTextState
+
+    private val _productCodeTextState  = MutableLiveData("")
+    val productCodeTextState : LiveData<String>
+        get() = _productCodeTextState
+
+    private val _expirationTextState = MutableLiveData("")
+    val expirationTextState: LiveData<String>
+        get() = _expirationTextState
+
+    fun changeDinTextState(text: String) {
+        _dinTextState.value = text
+    }
+
+    fun changeProductCodeTextState(text: String) {
+        _productCodeTextState.value = text
+    }
+
+    fun changeExpirationTextState(text: String) {
+        _expirationTextState.value = text
+    }
+
+    private val _clearButtonVisibleState = MutableLiveData(true)
+    val clearButtonVisibleState: LiveData<Boolean>
+        get() = _clearButtonVisibleState
+
+    private val _confirmButtonVisibleState = MutableLiveData(true)
+    val confirmButtonVisibleState: LiveData<Boolean>
+        get() = _confirmButtonVisibleState
+
+    private val _confirmNeededState = MutableLiveData(false)
+    val confirmNeededState: LiveData<Boolean>
+        get() = _confirmNeededState
+
+    fun changeClearButtonVisibleState(state: Boolean) {
+        _clearButtonVisibleState.value = state
+    }
+
+    fun changeConfirmButtonVisibleState(state: Boolean) {
+        _confirmButtonVisibleState.value = state
+    }
+
+    fun changeConfirmNeededState(state: Boolean) {
+        _confirmNeededState.value = state
+    }
+
+    private val _productsListState = MutableLiveData<List<Product>>(listOf())
+    val productsListState: LiveData<List<Product>>
+        get() = _productsListState
+
+    fun changeProductsListState(list: List<Product>) {
+        _productsListState.value = list
+    }
+
+    private val _displayedProductListState = MutableLiveData<List<Product>>(listOf())
+    val displayedProductListState: LiveData<List<Product>>
+        get() = _displayedProductListState
+
+    fun changeDisplayedProductListState(list: List<Product>) {
+        _displayedProductListState.value = list
+    }
+
+    // End Create Products Screen state
 
     fun refreshRepository() {
         repository.refreshDatabase(

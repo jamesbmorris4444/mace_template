@@ -105,7 +105,10 @@ fun DonateProductsScreen(
                 titleText = viewModel.getResources().getString(R.string.failure_db_entries_title_text),
                 bodyText = viewModel.getResources().getString(R.string.failure_db_entries_body_text, failure),
                 positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-            ) { navigateUp() }.show()
+            ) {
+                navigateUp()
+                viewModel.resetDonateProductsScreen()
+            }.show()
         }
         else -> { }
     }
@@ -167,7 +170,7 @@ fun DonateProductsHandler(
                 },
                 navigationIcon = {
                     if (canNavigateBack) {
-                        IconButton(onClick = navigateUp) {
+                        IconButton(onClick = navigateUp.also { viewModel.resetDonateProductsScreen() }) {
                             Icon(
                                 imageVector = Icons.Filled.ArrowBack,
                                 contentDescription = stringResource(R.string.back_button_content_description)
@@ -207,6 +210,7 @@ fun DonateProductsHandler(
                         onDone = {
                             keyboardController?.hide()
                             handleSearchClick(text)
+                            viewModel.resetDonateProductsScreen()
                         })
                 )
             }
@@ -214,6 +218,7 @@ fun DonateProductsHandler(
                 padding = PaddingValues(top = 16.dp),
                 onClick = {
                     onItemButtonClicked(Donor(lastName = "", middleName = "", firstName = "", dob = "", aboRh = "", branch = ""))
+                    viewModel.resetDonateProductsScreen()
                 },
                 buttonText = stringResource(R.string.new_donor_button_text)
             )

@@ -27,12 +27,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -78,9 +73,6 @@ fun CreateProductsScreen(
     val horizontalGridHeight = horizontalGridWidth * 2 / 3
     val gridCellWidth = horizontalGridWidth / 2
     val gridCellHeight = horizontalGridHeight / 2
-    var dinText by rememberSaveable { mutableStateOf("") }
-    var productCodeText by rememberSaveable { mutableStateOf("") }
-    var expirationText by rememberSaveable { mutableStateOf("") }
     val createProductsStringName = stringResource(ScreenNames.CreateProducts.resId)
     val enterDinText = stringResource(R.string.enter_din_text)
     val dinTitle = stringResource(R.string.din_title)
@@ -89,29 +81,38 @@ fun CreateProductsScreen(
     val enterExpirationText = stringResource(R.string.enter_expiration_text)
     val expirationTitle = stringResource(R.string.expiration_title)
     val aboRhTitle = stringResource(R.string.abo_rh_title)
-    var clearButtonVisible by remember { mutableStateOf(true) }
-    var confirmButtonVisible by remember { mutableStateOf(true) }
-    var confirmNeeded by remember { mutableStateOf(false) }
-    val products: MutableState<List<Product>> = remember { mutableStateOf(mutableListOf()) }
-    val displayedProductList: MutableState<List<Product>> = remember { mutableStateOf(mutableListOf()) }
+
+
+
+
+
+
+    val dinText = viewModel.dinTextState.observeAsState().value ?: ""
+    val expirationText  = viewModel.expirationTextState.observeAsState().value ?: ""
+    val productCodeText = viewModel.productCodeTextState.observeAsState().value ?: ""
+    val clearButtonVisible = viewModel.clearButtonVisibleState.observeAsState().value ?: true
+    val confirmButtonVisible = viewModel.confirmButtonVisibleState.observeAsState().value ?: true
+    val confirmNeeded  = viewModel.confirmNeededState.observeAsState().value ?: false
+    val products = viewModel.productsListState.observeAsState().value ?: listOf()
+    val displayedProductList = viewModel.displayedProductListState.observeAsState().value ?: listOf()
 
     fun processNewProduct() {
         val product = Product()
-        val productList: MutableList<Product> = products.value.toMutableList()
+        val productList: MutableList<Product> = products.toMutableList()
         product.din = dinText
         product.aboRh = donor.aboRh
         product.productCode = productCodeText
         product.expirationDate = expirationText
         product.donorId = donor.id
         productList.add(product)
-        products.value = productList
+        viewModel.changeProductsListState(productList)
     }
 
     fun addDonorWithProductsToModifiedDatabase() {
-        products.value.map { product ->
+        products.map { product ->
             product.donorId = donor.id
         }
-        viewModel.insertDonorAndProductsIntoDatabase(modalView, donor, products.value)
+        viewModel.insertDonorAndProductsIntoDatabase(modalView, donor, products)
         StandardModalComposeView(
             modalView,
             topIconResId = R.drawable.notification,
@@ -122,25 +123,25 @@ fun CreateProductsScreen(
     }
 
     fun onClearClicked() {
-        dinText = ""
-        productCodeText = ""
-        expirationText = ""
-        clearButtonVisible = false
-        confirmButtonVisible = false
-        confirmNeeded = false
+        viewModel.changeDinTextState("")
+        viewModel.changeProductCodeTextState("")
+        viewModel.changeExpirationTextState("")
+        viewModel.changeClearButtonVisibleState(false)
+        viewModel.changeConfirmButtonVisibleState(false)
+        viewModel.changeConfirmNeededState(false)
     }
 
     fun onConfirmClicked() {
-        if (products.value.isEmpty() && dinText.isEmpty() && productCodeText.isEmpty() && expirationText.isEmpty()) {
+        if (products.isEmpty() && dinText.isEmpty() && productCodeText.isEmpty() && expirationText.isEmpty()) {
             val dwpList: List<DonorWithProducts> = viewModel.donorsFromFullNameWithProducts(donor.lastName, donor.dob)
-            displayedProductList.value = dwpList.flatMap { it.products }
+            viewModel.changeDisplayedProductListState(dwpList.flatMap { it.products })
         } else {
-            clearButtonVisible = true
-            confirmButtonVisible = true
-            confirmNeeded = false
+            viewModel.changeClearButtonVisibleState(true)
+            viewModel.changeConfirmButtonVisibleState(true)
+            viewModel.changeConfirmNeededState(false)
             processNewProduct()
-            if (displayedProductList.value.isNotEmpty()) {
-                displayedProductList.value = listOf()
+            if (displayedProductList.isNotEmpty()) {
+                viewModel.changeDisplayedProductListState(listOf())
             }
         }
     }
@@ -158,7 +159,7 @@ fun CreateProductsScreen(
                 when (dismissSelector) {
                     DismissSelector.POSITIVE -> {
                         processNewProduct()
-                        if (products.value.isNotEmpty()) {
+                        if (products.isNotEmpty()) {
                             addDonorWithProductsToModifiedDatabase()
                         }
                         onCompleteButtonClicked()
@@ -167,7 +168,7 @@ fun CreateProductsScreen(
                 }
             }.show()
         } else {
-            if (products.value.isNotEmpty()) {
+            if (products.isNotEmpty()) {
                 addDonorWithProductsToModifiedDatabase()
             }
             onCompleteButtonClicked()
@@ -238,8 +239,8 @@ fun CreateProductsScreen(
                                     .align(Alignment.BottomStart),
                                 value = dinText,
                                 onValueChange = {
-                                    dinText = it
-                                    confirmNeeded = true
+                                    viewModel.changeDinTextState(it)
+                                    viewModel.changeConfirmNeededState(true)
                                 },
                                 shape = RoundedCornerShape(10.dp),
                                 label = { Text(enterDinText) },
@@ -267,8 +268,8 @@ fun CreateProductsScreen(
                                     .align(Alignment.BottomStart),
                                 value = productCodeText,
                                 onValueChange = {
-                                    productCodeText = it
-                                    confirmNeeded = true
+                                    viewModel.changeProductCodeTextState(it)
+                                    viewModel.changeConfirmNeededState(true)
                                 },
                                 shape = RoundedCornerShape(10.dp),
                                 label = { Text(enterProductCodeText) },
@@ -331,8 +332,8 @@ fun CreateProductsScreen(
                                     .align(Alignment.BottomStart),
                                 value = expirationText,
                                 onValueChange = {
-                                    expirationText = it
-                                    confirmNeeded = true
+                                    viewModel.changeExpirationTextState(it)
+                                    viewModel.changeConfirmNeededState(true)
                                 },
                                 shape = RoundedCornerShape(10.dp),
                                 label = { Text(enterExpirationText) },
@@ -381,32 +382,32 @@ fun CreateProductsScreen(
                 buttonText = stringResource(R.string.complete_button_text)
             )
         }
-        if (displayedProductList.value.isEmpty()) {
-            if (products.value.isNotEmpty()) {
+        if (displayedProductList.isEmpty()) {
+            if (products.isNotEmpty()) {
                 Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
             }
             ProductListScreen(
                 canScrollVertically = true,
-                productList = products.value,
+                productList = products,
                 useOnProductsChange = true,
-                onProductsChange = { products.value = it },
-                onDinTextChange = { dinText = it },
-                onProductCodeTextChange = { productCodeText = it },
-                onExpirationTextChange = { expirationText = it },
+                onProductsChange = { viewModel.changeProductsListState(it) },
+                onDinTextChange = { viewModel.changeDinTextState(it) },
+                onProductCodeTextChange = { viewModel.changeProductCodeTextState(it) },
+                onExpirationTextChange = { viewModel.changeDinTextState(it) },
                 enablerForProducts = { true }
             )
         } else {
-            if (displayedProductList.value.isNotEmpty()) {
+            if (displayedProductList.isNotEmpty()) {
                 Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
             }
             ProductListScreen(
                 canScrollVertically = true,
-                productList = displayedProductList.value,
+                productList = displayedProductList,
                 useOnProductsChange = true,
-                onProductsChange = { products.value = it },
-                onDinTextChange = { dinText = it },
-                onProductCodeTextChange = { productCodeText = it },
-                onExpirationTextChange = { expirationText = it },
+                onProductsChange = { viewModel.changeProductsListState(it) },
+                onDinTextChange = { viewModel.changeDinTextState(it) },
+                onProductCodeTextChange = { viewModel.changeProductCodeTextState(it) },
+                onExpirationTextChange = { viewModel.changeDinTextState(it) },
                 enablerForProducts = { true }
             )
         }
