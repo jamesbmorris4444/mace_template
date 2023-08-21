@@ -1,11 +1,5 @@
 package com.mace.mace_template.ui
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.PixelFormat
-import android.view.Gravity
-import android.view.View
-import android.view.WindowManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -42,63 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import androidx.lifecycle.findViewTreeViewModelStoreOwner
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.lifecycle.setViewTreeViewModelStoreOwner
-import androidx.savedstate.findViewTreeSavedStateRegistryOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.mace.mace_template.R
-
-@SuppressLint("ViewConstructor")
-class StandardModalComposeView(
-    private val composeView: View,
-    private val topIconResId: Int = 0,
-    private val titleText: String = "",
-    private val bodyText: String = "",
-    private val positiveText: String = "",
-    private val negativeText: String = "",
-    private val neutralText: String = "",
-    private val onDismiss: (DismissSelector) -> Unit
-) : AbstractComposeView(composeView.context) {
-    private val windowManager = composeView.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private var params: WindowManager.LayoutParams = WindowManager.LayoutParams().apply {
-            gravity = Gravity.TOP
-            type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL
-            token = composeView.applicationWindowToken
-            width = WindowManager.LayoutParams.WRAP_CONTENT
-            height = WindowManager.LayoutParams.WRAP_CONTENT
-            format = PixelFormat.TRANSLUCENT
-            flags = flags or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-    }
-
-    @Composable
-    override fun Content() {
-        StandardModal(
-            topIconResId,
-            titleText,
-            bodyText,
-            positiveText,
-            negativeText,
-            neutralText
-        ) {
-            dismissSelector ->  run {
-                onDismiss(dismissSelector)
-                windowManager.removeView(this)
-            }
-        }
-    }
-
-    init {
-        setViewTreeLifecycleOwner(lifecycleOwner = composeView.findViewTreeLifecycleOwner())
-        setViewTreeViewModelStoreOwner(viewModelStoreOwner = composeView.findViewTreeViewModelStoreOwner())
-        setViewTreeSavedStateRegistryOwner(composeView.findViewTreeSavedStateRegistryOwner())
-    }
-
-    fun show() {
-        windowManager.addView(this, params)
-    }
-}
 
 @Composable
 fun StandardModal(

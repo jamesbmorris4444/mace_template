@@ -43,6 +43,7 @@ import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
+import com.mace.mace_template.StandardModalArgs
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
@@ -57,7 +58,6 @@ fun ReassociateDonationScreen(
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     viewModel: BloodViewModel,
-    modalView: View,
     title: String
 ) {
     val correctDonorsWithProducts = viewModel.correctDonorsWithProductsState.observeAsState().value ?: listOf()
@@ -87,15 +87,17 @@ fun ReassociateDonationScreen(
                 if (product.removedForReassociation) product.donorId = correctDonor.id
             }
             viewModel.insertReassociatedProductsIntoDatabase(correctDonor, donorWithProducts.products)
-            StandardModalComposeView(
-                composeView = modalView,
-                topIconResId = R.drawable.notification,
-                titleText = viewModel.getResources().getString(R.string.made_reassociate_entries_body_text),
-                positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-            ) {
-                viewModel.changeCorrectDonorWithProductsState(correctDonor)
-                viewModel.changeIsReassociateCompletedState(true)
-            }.show()
+            viewModel.changeShowStandardModalState(
+                StandardModalArgs(
+                    topIconResId = R.drawable.notification,
+                    titleText = viewModel.getResources().getString(R.string.made_reassociate_entries_body_text),
+                    positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok)
+                ) {
+                    viewModel.changeCorrectDonorWithProductsState(correctDonor)
+                    viewModel.changeIsReassociateCompletedState(true)
+                    viewModel.changeShowStandardModalState(StandardModalArgs())
+                }
+            )
         }
     }
 

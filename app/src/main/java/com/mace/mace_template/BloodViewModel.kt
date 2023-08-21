@@ -2,7 +2,6 @@ package com.mace.mace_template
 
 import android.app.Application
 import android.content.res.Resources
-import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -18,23 +17,43 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
 
     private val repository : RepositoryImpl by inject()
 
+    private val _showStandardModalState = MutableLiveData(StandardModalArgs())
+    val showStandardModalState: LiveData<StandardModalArgs>
+        get() = _showStandardModalState
+
+    fun changeShowStandardModalState(standardModalArgs: StandardModalArgs) {
+        _showStandardModalState.value = standardModalArgs
+    }
+
     // Start Donate Products Screen state
 
-    private val _databaseInvalidState = MutableLiveData(false)
+    private val _databaseInvalidState = MutableLiveData<Boolean>()
     val databaseInvalidState: LiveData<Boolean>
         get() = _databaseInvalidState
 
-    private val _refreshCompletedState = MutableLiveData(false)
+    private val _refreshCompletedState = MutableLiveData<Boolean>()
     val refreshCompletedState: LiveData<Boolean>
         get() = _refreshCompletedState
 
-    private val _refreshFailureState = MutableLiveData("")
+    private val _refreshFailureState = MutableLiveData<String>()
     val refreshFailureState: LiveData<String?>
         get() = _refreshFailureState
 
     private val _donorsAvailableState = MutableLiveData<List<Donor>>(listOf())
     val donorsAvailableState: LiveData<List<Donor>>
         get() = _donorsAvailableState
+
+    fun changeDatabaseInvalidState(state: Boolean) {
+        _databaseInvalidState.postValue(state)
+    }
+
+    fun changeRefreshCompletedState(state: Boolean) {
+        _refreshCompletedState.postValue(state)
+    }
+
+    fun changeRefreshFailureState(state: String) {
+        _refreshFailureState.postValue(state)
+    }
 
     fun resetDonateProductsScreen() {
         _refreshFailureState.value = ""
@@ -194,14 +213,15 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
 
     fun refreshRepository() {
         repository.refreshDatabase(
-            app.applicationContext,
             refreshCompleted = {
-                _refreshCompletedState.value = true
-                _databaseInvalidState.value = false
+                changeDatabaseInvalidState(false)
+                changeRefreshCompletedState(true)
+                changeRefreshFailureState("")
             }
         ) {
-            _refreshFailureState.value = it
-            _databaseInvalidState.value = false
+            changeDatabaseInvalidState(false)
+            changeRefreshCompletedState(true)
+            changeRefreshFailureState(it)
         }
     }
 
@@ -225,25 +245,16 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         return app.resources
     }
 
-    fun fetchApplication(): Application {
-        return app
-    }
-
     fun setBloodDatabase() {
-        repository.setBloodDatabase(app.applicationContext)
+        repository.setBloodDatabase(app)
     }
 
-    fun isBloodDatabaseInvalid() {
-        if (repository.isBloodDatabaseInvalid()) {
-            _databaseInvalidState.value = true
-        } else {
-            _refreshCompletedState.value = true
-            _databaseInvalidState.value = false
-        }
+    fun isBloodDatabaseInvalid(): Boolean {
+        return repository.isBloodDatabaseInvalid()
     }
 
-    fun insertDonorAndProductsIntoDatabase(modalView: View, donor: Donor, products: List<Product>) {
-        repository.insertDonorAndProductsIntoDatabase(modalView, donor, products)
+    fun insertDonorAndProductsIntoDatabase(donor: Donor, products: List<Product>) {
+        repository.insertDonorAndProductsIntoDatabase(donor, products)
     }
 
     fun donorsFromFullNameWithProducts(searchLast: String, dob: String): List<DonorWithProducts> {

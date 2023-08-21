@@ -1,6 +1,5 @@
 package com.mace.mace_template.ui
 
-import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,6 +43,7 @@ import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
+import com.mace.mace_template.StandardModalArgs
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.utils.Constants.LOG_TAG
@@ -58,7 +58,6 @@ fun ManageDonorScreen(
     donor: Donor,
     viewModel: BloodViewModel,
     navController: NavHostController,
-    modalView: View,
     transitionToCreateProductsScreen: Boolean,
     donateProductsSearchStringName: String,
     createProductsStringName: String
@@ -285,34 +284,38 @@ fun ManageDonorScreen(
                 donor.gender = gender
                 if (databaseModified || radioButtonChanged) {
                     viewModel.insertDonorIntoDatabase(donor)
-                    StandardModalComposeView(
-                        modalView,
-                        topIconResId = R.drawable.notification,
-                        titleText = viewModel.getResources().getString(R.string.made_db_entries_title_text),
-                        bodyText = viewModel.getResources().getString(R.string.made_db_entries_body_text),
-                        positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                    ) {
-                        if (transitionToCreateProductsScreen) {
-                            navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
-                            navController.navigate(createProductsStringName)
-                        } else {
-                            navController.navigateUp()
+                    viewModel.changeShowStandardModalState(
+                        StandardModalArgs(
+                            topIconResId = R.drawable.notification,
+                            titleText = viewModel.getResources().getString(R.string.made_db_entries_title_text),
+                            bodyText = viewModel.getResources().getString(R.string.made_db_entries_body_text),
+                            positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok)
+                        ) {
+                            if (transitionToCreateProductsScreen) {
+                                navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
+                                navController.navigate(createProductsStringName)
+                            } else {
+                                navController.navigateUp()
+                            }
+                            viewModel.changeShowStandardModalState(StandardModalArgs())
                         }
-                    }.show()
+                    )
                 } else {
-                    StandardModalComposeView(
-                        modalView,
-                        topIconResId = R.drawable.notification,
-                        titleText = viewModel.getResources().getString(R.string.no_db_entries_title_text),
-                        positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                    ) {
-                        if (transitionToCreateProductsScreen) {
-                            navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
-                            navController.navigate(createProductsStringName)
-                        } else {
-                            navController.navigateUp()
+                    viewModel.changeShowStandardModalState(
+                        StandardModalArgs(
+                            topIconResId = R.drawable.notification,
+                            titleText = viewModel.getResources().getString(R.string.no_db_entries_title_text),
+                            positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok)
+                        ) {
+                            if (transitionToCreateProductsScreen) {
+                                navController.popBackStack(route = donateProductsSearchStringName, inclusive = true)
+                                navController.navigate(createProductsStringName)
+                            } else {
+                                navController.navigateUp()
+                            }
+                            viewModel.changeShowStandardModalState(StandardModalArgs())
                         }
-                    }.show()
+                    )
                 }
                 radioButtonChanged = false
             },

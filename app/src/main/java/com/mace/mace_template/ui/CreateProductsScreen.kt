@@ -1,7 +1,6 @@
 package com.mace.mace_template.ui
 
 import android.annotation.SuppressLint
-import android.view.View
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +47,7 @@ import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
+import com.mace.mace_template.StandardModalArgs
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.repository.storage.DonorWithProducts
 import com.mace.mace_template.repository.storage.Product
@@ -61,7 +61,6 @@ fun CreateProductsScreen(
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
     donor: Donor,
-    modalView: View,
     viewModel: BloodViewModel,
     onCompleteButtonClicked: () -> Unit,
 ) {
@@ -81,12 +80,6 @@ fun CreateProductsScreen(
     val enterExpirationText = stringResource(R.string.enter_expiration_text)
     val expirationTitle = stringResource(R.string.expiration_title)
     val aboRhTitle = stringResource(R.string.abo_rh_title)
-
-
-
-
-
-
     val dinText = viewModel.dinTextState.observeAsState().value ?: ""
     val expirationText  = viewModel.expirationTextState.observeAsState().value ?: ""
     val productCodeText = viewModel.productCodeTextState.observeAsState().value ?: ""
@@ -112,14 +105,17 @@ fun CreateProductsScreen(
         products.map { product ->
             product.donorId = donor.id
         }
-        viewModel.insertDonorAndProductsIntoDatabase(modalView, donor, products)
-        StandardModalComposeView(
-            modalView,
-            topIconResId = R.drawable.notification,
-            titleText = modalView.context.resources.getString(R.string.made_db_entries_title_text),
-            bodyText = modalView.context.resources.getString(R.string.made_db_entries_body_text),
-            positiveText = modalView.context.resources.getString(R.string.positive_button_text_ok),
-        ) { }.show()
+        viewModel.insertDonorAndProductsIntoDatabase(donor, products)
+        viewModel.changeShowStandardModalState(
+            StandardModalArgs(
+                topIconResId = R.drawable.notification,
+                titleText = viewModel.getResources().getString(R.string.made_db_entries_title_text),
+                bodyText = viewModel.getResources().getString(R.string.made_db_entries_body_text),
+                positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok)
+            ) {
+                viewModel.changeShowStandardModalState(StandardModalArgs())
+            }
+        )
     }
 
     fun onClearClicked() {
@@ -148,25 +144,27 @@ fun CreateProductsScreen(
 
     fun onCompleteClicked() {
         if (confirmNeeded) {
-            StandardModalComposeView(
-                modalView,
-                topIconResId = R.drawable.notification,
-                titleText = viewModel.getResources().getString(R.string.std_modal_noconfirm_title),
-                bodyText = viewModel.getResources().getString(R.string.std_modal_noconfirm_body),
-                positiveText = viewModel.getResources().getString(R.string.positive_button_text_yes),
-                negativeText = viewModel.getResources().getString(R.string.negative_button_text_no),
-            ) { dismissSelector ->
-                when (dismissSelector) {
-                    DismissSelector.POSITIVE -> {
-                        processNewProduct()
-                        if (products.isNotEmpty()) {
-                            addDonorWithProductsToModifiedDatabase()
+            viewModel.changeShowStandardModalState(
+                StandardModalArgs(
+                    topIconResId = R.drawable.notification,
+                    titleText = viewModel.getResources().getString(R.string.std_modal_noconfirm_title),
+                    bodyText = viewModel.getResources().getString(R.string.std_modal_noconfirm_body),
+                    positiveText = viewModel.getResources().getString(R.string.positive_button_text_yes),
+                    negativeText = viewModel.getResources().getString(R.string.negative_button_text_no)
+                ) { dismissSelector ->
+                    when (dismissSelector) {
+                        DismissSelector.POSITIVE -> {
+                            processNewProduct()
+                            if (products.isNotEmpty()) {
+                                addDonorWithProductsToModifiedDatabase()
+                            }
+                            onCompleteButtonClicked()
                         }
-                        onCompleteButtonClicked()
+                        else -> { }
                     }
-                    else -> { }
+                    viewModel.changeShowStandardModalState(StandardModalArgs())
                 }
-            }.show()
+            )
         } else {
             if (products.isNotEmpty()) {
                 addDonorWithProductsToModifiedDatabase()

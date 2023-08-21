@@ -1,6 +1,5 @@
 package com.mace.mace_template.ui
 
-import android.view.View
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,6 +38,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -47,6 +47,7 @@ import com.mace.mace_template.AppBarState
 import com.mace.mace_template.BloodViewModel
 import com.mace.mace_template.R
 import com.mace.mace_template.ScreenNames
+import com.mace.mace_template.StandardModalArgs
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.utils.Constants.LOG_TAG
@@ -59,7 +60,6 @@ fun DonateProductsScreen(
     openDrawer: () -> Unit,
     onItemButtonClicked: (donor: Donor) -> Unit,
     viewModel: BloodViewModel,
-    modalView: View,
     title: String
 ) {
 
@@ -76,17 +76,34 @@ fun DonateProductsScreen(
     val isInvalid = viewModel.databaseInvalidState.observeAsState().value ?: false
     val completed = viewModel.refreshCompletedState.observeAsState().value ?: false
     val failure = viewModel.refreshFailureState.observeAsState().value ?: ""
-    viewModel.isBloodDatabaseInvalid()
+    if (viewModel.isBloodDatabaseInvalid() && !completed) {
+        viewModel.refreshRepository() // updates isInvalid, completed, and failure when API call completes
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CustomCircularProgressBar()
+        }
+    } else {
+        viewModel.changeDatabaseInvalidState(false)
+        viewModel.changeRefreshCompletedState(true)
+        viewModel.changeRefreshFailureState("")
+    }
     when {
-        isInvalid -> {
-            viewModel.refreshRepository()
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CustomCircularProgressBar()
-            }
+        failure.isNotEmpty() -> {
+            viewModel.changeShowStandardModalState(
+                StandardModalArgs(
+                    topIconResId = R.drawable.notification,
+                    titleText = viewModel.getResources().getString(R.string.failure_db_entries_title_text),
+                    bodyText = viewModel.getResources().getString(R.string.failure_db_entries_body_text, failure),
+                    positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
+                ) {
+                    navigateUp()
+                    viewModel.changeShowStandardModalState(StandardModalArgs())
+                    viewModel.changeRefreshFailureState("")
+                }
+            )
         }
         completed -> {
             DonateProductsHandler(
@@ -97,18 +114,6 @@ fun DonateProductsScreen(
                 viewModel = viewModel,
                 title = title,
                 onItemButtonClicked = onItemButtonClicked)
-        }
-        failure.isNotEmpty() -> {
-            StandardModalComposeView(
-                modalView,
-                topIconResId = R.drawable.notification,
-                titleText = viewModel.getResources().getString(R.string.failure_db_entries_title_text),
-                bodyText = viewModel.getResources().getString(R.string.failure_db_entries_body_text, failure),
-                positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-            ) {
-                navigateUp()
-                viewModel.resetDonateProductsScreen()
-            }.show()
         }
         else -> { }
     }
@@ -134,7 +139,10 @@ fun DonateProductsHandler(
 
     @Composable
     fun DonorList(donors: List<Donor>, onItemButtonClicked: (donor: Donor) -> Unit) {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier
+                .testTag("LazyColumn")
+        ) {
             items(items = donors) {
                 Column(modifier = Modifier
                     .fillMaxWidth()
@@ -197,7 +205,8 @@ fun DonateProductsHandler(
                 OutlinedTextField(
                     modifier = Modifier
                         .weight(0.7f)
-                        .height(60.dp),
+                        .height(60.dp)
+                        .testTag("OutlinedTextField"),
                     value = text,
                     onValueChange = {
                         text = it
@@ -210,7 +219,6 @@ fun DonateProductsHandler(
                         onDone = {
                             keyboardController?.hide()
                             handleSearchClick(text)
-                            viewModel.resetDonateProductsScreen()
                         })
                 )
             }

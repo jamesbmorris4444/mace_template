@@ -1,6 +1,5 @@
 package com.mace.mace_template
 
-import android.view.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,14 +31,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.mace.mace_template.logger.LogUtils
 import kotlinx.coroutines.launch
 
 // See https://www.geeksforgeeks.org/android-jetpack-compose-implement-navigation-drawer/ for Navigation Drawer
 
 @Composable
 fun DrawerAppComponent(
-    view: View,
     bloodViewModel: BloodViewModel,
     requestedScreen: ScreenNames
 ) {
@@ -86,7 +83,7 @@ fun DrawerAppComponent(
                         Modifier.clickable(onClick = {
                             closeDrawer()
                             currentScreen.value = screen
-                            navController.navigate(view.context.resources.getString(screen.resId))
+                            navController.navigate(bloodViewModel.getResources().getString(screen.resId))
                         }),
                         content = {
                             Surface(
@@ -98,7 +95,7 @@ fun DrawerAppComponent(
                                 }
                             ) {
                                 Text(
-                                    text = view.context.resources.getString(screen.resId),
+                                    text = bloodViewModel.getResources().getString(screen.resId),
                                     modifier = Modifier.padding(16.dp),
                                     color = if (currentScreen.value == screen) {
                                         colorResource(id = R.color.black)
@@ -116,16 +113,13 @@ fun DrawerAppComponent(
 
     @Composable
     fun BodyContentComponent(
-        view: View,
         currentScreen: ScreenNames,
         openDrawer: () -> Unit,
         bloodViewModel: BloodViewModel
     ) {
-        LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "BodyContentComponent: name=${currentScreen.name}")
-        ScreenNavigator(view, viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer, navController = navController)
+        ScreenNavigator(viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer, navController = navController)
     }
 
-    LogUtils.D("JIMX", LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "ModalDrawer: name=${currentScreen}")
     ModalDrawer(
         drawerState = drawerState,
         gesturesEnabled = true,
@@ -139,7 +133,6 @@ fun DrawerAppComponent(
         drawerBackgroundColor = colorResource(id = R.color.black),
         content = {
             BodyContentComponent(
-                view = view,
                 currentScreen = currentScreen.value,
                 openDrawer = { coroutineScope.launch { drawerState.open() } },
                 bloodViewModel = bloodViewModel

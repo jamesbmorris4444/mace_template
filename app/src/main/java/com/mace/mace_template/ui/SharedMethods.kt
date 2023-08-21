@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -153,6 +154,7 @@ fun DonorElementText(
     gender: Boolean
 ) {
     Text(
+        modifier = Modifier.testTag("item"),
         text = "$donorLastName, $donorFirstName $donorMiddleName (${if (gender) "Male" else "Female"})",
         color = colorResource(id = R.color.black),
         style = MaterialTheme.typography.bodyMedium

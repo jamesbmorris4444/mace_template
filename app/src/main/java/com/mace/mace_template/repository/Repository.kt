@@ -1,7 +1,6 @@
 package com.mace.mace_template.repository
 
-import android.content.Context
-import android.view.View
+import android.app.Application
 import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.network.APIClient
 import com.mace.mace_template.repository.network.APIInterface
@@ -21,12 +20,12 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 interface Repository {
-    fun setBloodDatabase(context: Context)
+    fun setBloodDatabase(app: Application)
     fun isBloodDatabaseInvalid(): Boolean
     fun saveStagingDatabase(databaseName: String, db: File)
-    fun refreshDatabase(context: Context, refreshCompleted: () -> Unit, refreshFailure: (String?) -> Unit)
+    fun refreshDatabase(refreshCompleted: () -> Unit, refreshFailure: (String) -> Unit)
     fun insertDonorIntoDatabase(donor: Donor)
-    fun insertDonorAndProductsIntoDatabase(modalView: View, donor: Donor, products: List<Product>)
+    fun insertDonorAndProductsIntoDatabase(donor: Donor, products: List<Product>)
     fun stagingDatabaseDonorAndProductsList(): List<DonorWithProducts>
     fun mainDatabaseDonorAndProductsList(): List<DonorWithProducts>
     fun donorsFromFullNameWithProducts(searchLast: String, dob: String): List<DonorWithProducts>
@@ -42,8 +41,8 @@ class RepositoryImpl : Repository {
     private lateinit var stagingBloodDatabase: BloodDatabase
     private val donorsService: APIInterface = APIClient.client
 
-    override fun setBloodDatabase(context: Context) {
-        val dbList = BloodDatabase.newInstance(context, MAIN_DATABASE_NAME, MODIFIED_DATABASE_NAME)
+    override fun setBloodDatabase(app: Application) {
+        val dbList = BloodDatabase.newInstance(app.applicationContext, MAIN_DATABASE_NAME, MODIFIED_DATABASE_NAME)
         mainBloodDatabase = dbList[0]
         stagingBloodDatabase = dbList[1]
     }
@@ -52,7 +51,7 @@ class RepositoryImpl : Repository {
         return databaseDonorCount(mainBloodDatabase) == 0
     }
 
-    override fun refreshDatabase(context: Context, refreshCompleted: () -> Unit, refreshFailure: (String?) -> Unit) {
+    override fun refreshDatabase(refreshCompleted: () -> Unit, refreshFailure: (String) -> Unit) {
         var disposable: Disposable? = null
         disposable = donorsService.getDonors(Constants.API_KEY, Constants.LANGUAGE, 13)
             .observeOn(AndroidSchedulers.mainThread())
@@ -61,13 +60,14 @@ class RepositoryImpl : Repository {
             .subscribe ({ donorResponse ->
                 disposable?.dispose()
                 initializeDataBase(refreshCompleted, donorResponse.results, donorResponse.products)
+                refreshFailure("")
                 LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "refreshDatabase success: donorsSize=${donorResponse.results.size}       productsSize=${donorResponse.products.size}")
             },
-            { throwable ->
-                refreshFailure(throwable.message)
-                LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "refreshDatabase failure: message=${throwable.message}")
-                disposable?.dispose()
-            })
+                { throwable ->
+                    refreshFailure(throwable.message ?: "No Message")
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "refreshDatabase failure: message=${throwable.message}")
+                    disposable?.dispose()
+                })
     }
 
     private fun initializeDataBase(refreshCompleted: () -> Unit, donors: List<Donor>, products: List<List<Product>>) {
@@ -121,7 +121,7 @@ class RepositoryImpl : Repository {
         stagingBloodDatabase.databaseDao().insertDonor(donor)
     }
 
-    override fun insertDonorAndProductsIntoDatabase(modalView: View, donor: Donor, products: List<Product>) {
+    override fun insertDonorAndProductsIntoDatabase(donor: Donor, products: List<Product>) {
         stagingBloodDatabase.databaseDao().insertDonorAndProducts(donor, products)
     }
 

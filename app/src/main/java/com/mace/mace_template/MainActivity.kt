@@ -20,12 +20,12 @@ class MainActivity : ComponentActivity(), KoinComponent {
         Timber.plant(Timber.DebugTree())
         setContent {
             MaceTemplateTheme {
-                DrawerAppComponent(this.findViewById(android.R.id.content), BloodViewModel(application), ScreenNames.DonateProductsSearch)
+                DrawerAppComponent(bloodViewModel, ScreenNames.DonateProductsSearch)
             }
         }
     }
     override fun onDestroy() {
         super.onDestroy()
-        repository.saveStagingDatabase(Constants.MODIFIED_DATABASE_NAME, bloodViewModel.fetchApplication().applicationContext.getDatabasePath(Constants.MODIFIED_DATABASE_NAME))
+        repository.saveStagingDatabase(Constants.MODIFIED_DATABASE_NAME, getDatabasePath(Constants.MODIFIED_DATABASE_NAME))
     }
 }
