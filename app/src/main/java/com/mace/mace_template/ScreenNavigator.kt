@@ -14,7 +14,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,7 +32,6 @@ import com.mace.mace_template.ui.DismissSelector
 import com.mace.mace_template.ui.DonateProductsScreen
 import com.mace.mace_template.ui.ManageDonorScreen
 import com.mace.mace_template.ui.ReassociateDonationScreen
-import com.mace.mace_template.ui.StandardModal
 import com.mace.mace_template.ui.ViewDonorListScreen
 import com.mace.mace_template.utils.Constants
 import com.mace.mace_template.utils.Constants.LOG_TAG
@@ -70,7 +68,6 @@ fun ScreenNavigator(
     navController: NavHostController,
     openDrawer: () -> Unit
 ) {
-    val showStandardModalState = viewModel.showStandardModalState.observeAsState().value ?: StandardModalArgs()
     var donor by remember { mutableStateOf(Donor()) }
     var appBarState by remember { mutableStateOf(AppBarState()) }
     var transitionToCreateProductsScreen by remember { mutableStateOf(true) }
@@ -90,116 +87,104 @@ fun ScreenNavigator(
             val viewDonorListStringName = stringResource(ScreenNames.ViewDonorList.resId)
             val manageDonorFromDrawer = stringResource(ScreenNames.ManageDonorFromDrawer.resId)
             val reassociateDonationSearchStringName = stringResource(ScreenNames.ReassociateDonation.resId)
-            if (showStandardModalState.topIconResId >= 0) {
-                StandardModal(
-                    showStandardModalState.topIconResId,
-                    showStandardModalState.titleText,
-                    showStandardModalState.bodyText,
-                    showStandardModalState.positiveText,
-                    showStandardModalState.negativeText,
-                    showStandardModalState.neutralText,
-                    showStandardModalState.onDismiss
-                )
-            } else {
-                NavHost(
-                    navController = navController,
-                    startDestination = donateProductsSearchStringName,
-                ) {
-                    composable(route = donateProductsSearchStringName) {
-                        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$donateProductsSearchStringName")
-                        DonateProductsScreen(
-                            onComposing = {
-                                appBarState = it
-                            },
-                            canNavigateBack = navController.previousBackStackEntry != null,
-                            navigateUp = { navController.navigateUp() },
-                            openDrawer = openDrawer,
-                            onItemButtonClicked = {
-                                donor = it
-                                transitionToCreateProductsScreen = true
-                                navController.navigate(manageDonorAfterSearchStringName)
-                            },
-                            viewModel = viewModel,
-                            title = donateProductsSearchStringName
-                        )
-                    }
-                    composable(route = manageDonorFromDrawer) {
-                        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$manageDonorFromDrawer")
-                        DonateProductsScreen(
-                            onComposing = {
-                                appBarState = it
-                            },
-                            canNavigateBack = navController.previousBackStackEntry != null,
-                            navigateUp = { navController.navigateUp() },
-                            openDrawer = openDrawer,
-                            onItemButtonClicked = {
-                                donor = it
-                                transitionToCreateProductsScreen = false
-                                navController.navigate(manageDonorAfterSearchStringName)
-                            },
-                            viewModel = viewModel,
-                            title = manageDonorFromDrawer
-                        )
-                    }
-                    composable(route = manageDonorAfterSearchStringName) {
-                        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$manageDonorAfterSearchStringName")
-                        ManageDonorScreen(
-                            onComposing = {
-                                appBarState = it
-                            },
-                            canNavigateBack = navController.previousBackStackEntry != null,
-                            navigateUp = { navController.navigateUp() },
-                            openDrawer = openDrawer,
-                            donor = donor,
-                            viewModel = viewModel,
-                            navController = navController,
-                            transitionToCreateProductsScreen = transitionToCreateProductsScreen,
-                            donateProductsSearchStringName = donateProductsSearchStringName,
-                            createProductsStringName = createProductsStringName
-                        )
-                    }
-                    composable(route = createProductsStringName) {
-                        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$createProductsStringName")
-                        CreateProductsScreen(
-                            onComposing = {
-                                appBarState = it
-                            },
-                            canNavigateBack = navController.previousBackStackEntry != null,
-                            navigateUp = { navController.navigateUp() },
-                            openDrawer = openDrawer,
-                            donor = donor,
-                            viewModel = viewModel,
-                            onCompleteButtonClicked = {
-                                navController.popBackStack(route = createProductsStringName, inclusive = true)
-                                navController.navigate(donateProductsSearchStringName)
-                            }
-                        )
-                    }
-                    composable(route = viewDonorListStringName) {
-                        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$viewDonorListStringName")
-                        ViewDonorListScreen(
-                            onComposing = {
-                                appBarState = it
-                            },
-                            canNavigateBack = navController.previousBackStackEntry != null,
-                            navigateUp = { navController.navigateUp() },
-                            openDrawer = openDrawer,
-                            viewModel = viewModel
-                        )
-                    }
-                    composable(route = reassociateDonationSearchStringName) {
-                        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$reassociateDonationSearchStringName")
-                        ReassociateDonationScreen(
-                            onComposing = {
-                                appBarState = it
-                            },
-                            canNavigateBack = navController.previousBackStackEntry != null,
-                            navigateUp = { navController.navigateUp() },
-                            openDrawer = openDrawer,
-                            viewModel = viewModel,
-                            title = reassociateDonationSearchStringName
-                        )
-                    }
+            NavHost(
+                navController = navController,
+                startDestination = donateProductsSearchStringName,
+            ) {
+                composable(route = donateProductsSearchStringName) {
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$donateProductsSearchStringName")
+                    DonateProductsScreen(
+                        onComposing = {
+                            appBarState = it
+                        },
+                        canNavigateBack = navController.previousBackStackEntry != null,
+                        navigateUp = { navController.navigateUp() },
+                        openDrawer = openDrawer,
+                        onItemButtonClicked = {
+                            donor = it
+                            transitionToCreateProductsScreen = true
+                            navController.navigate(manageDonorAfterSearchStringName)
+                        },
+                        viewModel = viewModel,
+                        title = donateProductsSearchStringName
+                    )
+                }
+                composable(route = manageDonorFromDrawer) {
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$manageDonorFromDrawer")
+                    DonateProductsScreen(
+                        onComposing = {
+                            appBarState = it
+                        },
+                        canNavigateBack = navController.previousBackStackEntry != null,
+                        navigateUp = { navController.navigateUp() },
+                        openDrawer = openDrawer,
+                        onItemButtonClicked = {
+                            donor = it
+                            transitionToCreateProductsScreen = false
+                            navController.navigate(manageDonorAfterSearchStringName)
+                        },
+                        viewModel = viewModel,
+                        title = manageDonorFromDrawer
+                    )
+                }
+                composable(route = manageDonorAfterSearchStringName) {
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$manageDonorAfterSearchStringName")
+                    ManageDonorScreen(
+                        onComposing = {
+                            appBarState = it
+                        },
+                        canNavigateBack = navController.previousBackStackEntry != null,
+                        navigateUp = { navController.navigateUp() },
+                        openDrawer = openDrawer,
+                        donor = donor,
+                        viewModel = viewModel,
+                        navController = navController,
+                        transitionToCreateProductsScreen = transitionToCreateProductsScreen,
+                        donateProductsSearchStringName = donateProductsSearchStringName,
+                        createProductsStringName = createProductsStringName
+                    )
+                }
+                composable(route = createProductsStringName) {
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$createProductsStringName")
+                    CreateProductsScreen(
+                        onComposing = {
+                            appBarState = it
+                        },
+                        canNavigateBack = navController.previousBackStackEntry != null,
+                        navigateUp = { navController.navigateUp() },
+                        openDrawer = openDrawer,
+                        donor = donor,
+                        viewModel = viewModel,
+                        onCompleteButtonClicked = {
+                            navController.popBackStack(route = createProductsStringName, inclusive = true)
+                            navController.navigate(donateProductsSearchStringName)
+                        }
+                    )
+                }
+                composable(route = viewDonorListStringName) {
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$viewDonorListStringName")
+                    ViewDonorListScreen(
+                        onComposing = {
+                            appBarState = it
+                        },
+                        canNavigateBack = navController.previousBackStackEntry != null,
+                        navigateUp = { navController.navigateUp() },
+                        openDrawer = openDrawer,
+                        viewModel = viewModel
+                    )
+                }
+                composable(route = reassociateDonationSearchStringName) {
+                    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$reassociateDonationSearchStringName")
+                    ReassociateDonationScreen(
+                        onComposing = {
+                            appBarState = it
+                        },
+                        canNavigateBack = navController.previousBackStackEntry != null,
+                        navigateUp = { navController.navigateUp() },
+                        openDrawer = openDrawer,
+                        viewModel = viewModel,
+                        title = reassociateDonationSearchStringName
+                    )
                 }
             }
         }

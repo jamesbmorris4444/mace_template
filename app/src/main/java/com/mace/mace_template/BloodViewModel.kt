@@ -16,6 +16,8 @@ import org.koin.core.component.inject
 class BloodViewModel(private val app: Application) : AndroidViewModel(app), KoinComponent {
 
     private val repository : RepositoryImpl by inject()
+    var databaseInvalidForTesting = false
+    var databaseInvalidForTestingFailureMessage = ""
 
     private val _showStandardModalState = MutableLiveData(StandardModalArgs())
     val showStandardModalState: LiveData<StandardModalArgs>
@@ -212,16 +214,22 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
     // End Create Products Screen state
 
     fun refreshRepository() {
-        repository.refreshDatabase(
-            refreshCompleted = {
-                changeDatabaseInvalidState(false)
-                changeRefreshCompletedState(true)
-                changeRefreshFailureState("")
-            }
-        ) {
+        if (databaseInvalidForTesting) {
             changeDatabaseInvalidState(false)
             changeRefreshCompletedState(true)
-            changeRefreshFailureState(it)
+            changeRefreshFailureState(databaseInvalidForTestingFailureMessage)
+        } else {
+            repository.refreshDatabase(
+                refreshCompleted = {
+                    changeDatabaseInvalidState(false)
+                    changeRefreshCompletedState(true)
+                    changeRefreshFailureState("")
+                }
+            ) {
+                changeDatabaseInvalidState(false)
+                changeRefreshCompletedState(true)
+                changeRefreshFailureState(it)
+            }
         }
     }
 
@@ -250,7 +258,7 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
     }
 
     fun isBloodDatabaseInvalid(): Boolean {
-        return repository.isBloodDatabaseInvalid()
+        return if (databaseInvalidForTesting) true else repository.isBloodDatabaseInvalid()
     }
 
     fun insertDonorAndProductsIntoDatabase(donor: Donor, products: List<Product>) {
@@ -273,7 +281,7 @@ class BloodViewModel(private val app: Application) : AndroidViewModel(app), Koin
         repository.insertReassociatedProductsIntoDatabase(donor, products)
     }
 
-    fun donorFromNameAndDateWithProducts(donor: Donor): DonorWithProducts {
+    private fun donorFromNameAndDateWithProducts(donor: Donor): DonorWithProducts {
         return repository.donorFromNameAndDateWithProducts(donor)
     }
 

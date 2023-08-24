@@ -73,37 +73,46 @@ fun DonateProductsScreen(
 
     LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "Compose: ${ScreenNames.DonateProductsSearch.name}")
     viewModel.setBloodDatabase()
-    val isInvalid = viewModel.databaseInvalidState.observeAsState().value ?: false
+    val showStandardModalState = viewModel.showStandardModalState.observeAsState().value ?: StandardModalArgs()
+    val isInvalid = viewModel.databaseInvalidState.observeAsState().value ?: viewModel.isBloodDatabaseInvalid()
     val completed = viewModel.refreshCompletedState.observeAsState().value ?: false
     val failure = viewModel.refreshFailureState.observeAsState().value ?: ""
-    if (viewModel.isBloodDatabaseInvalid() && !completed) {
-        viewModel.refreshRepository() // updates isInvalid, completed, and failure when API call completes
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            CustomCircularProgressBar()
-        }
-    } else {
-        viewModel.changeDatabaseInvalidState(false)
-        viewModel.changeRefreshCompletedState(true)
-        viewModel.changeRefreshFailureState("")
-    }
     when {
+        isInvalid -> {
+            viewModel.refreshRepository() // updates isInvalid, completed, and failure when API call completes
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CustomCircularProgressBar()
+            }
+        }
         failure.isNotEmpty() -> {
-            viewModel.changeShowStandardModalState(
-                StandardModalArgs(
-                    topIconResId = R.drawable.notification,
-                    titleText = viewModel.getResources().getString(R.string.failure_db_entries_title_text),
-                    bodyText = viewModel.getResources().getString(R.string.failure_db_entries_body_text, failure),
-                    positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
-                ) {
-                    navigateUp()
-                    viewModel.changeShowStandardModalState(StandardModalArgs())
-                    viewModel.changeRefreshFailureState("")
-                }
-            )
+            if (showStandardModalState.topIconResId >= 0) {
+                StandardModal(
+                    showStandardModalState.topIconResId,
+                    showStandardModalState.titleText,
+                    showStandardModalState.bodyText,
+                    showStandardModalState.positiveText,
+                    showStandardModalState.negativeText,
+                    showStandardModalState.neutralText,
+                    showStandardModalState.onDismiss
+                )
+            } else {
+                viewModel.changeShowStandardModalState(
+                    StandardModalArgs(
+                        topIconResId = R.drawable.notification,
+                        titleText = viewModel.getResources().getString(R.string.failure_db_entries_title_text),
+                        bodyText = viewModel.getResources().getString(R.string.failure_db_entries_body_text, failure),
+                        positiveText = viewModel.getResources().getString(R.string.positive_button_text_ok),
+                    ) {
+                        navigateUp()
+                        viewModel.changeShowStandardModalState(StandardModalArgs())
+                        viewModel.changeRefreshFailureState("")
+                    }
+                )
+            }
         }
         completed -> {
             DonateProductsHandler(
@@ -115,7 +124,11 @@ fun DonateProductsScreen(
                 title = title,
                 onItemButtonClicked = onItemButtonClicked)
         }
-        else -> { }
+        else -> {
+            viewModel.changeDatabaseInvalidState(false)
+            viewModel.changeRefreshCompletedState(true)
+            viewModel.changeRefreshFailureState("")
+        }
     }
 }
 

@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -75,7 +76,7 @@ fun StandardModal(
             )
         ) {
             Card(
-                Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
+                Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp).testTag("StandardModal"),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Column(

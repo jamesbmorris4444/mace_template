@@ -7,11 +7,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -23,7 +25,6 @@ import com.mace.mace_template.ui.theme.MaceTemplateTheme
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.*
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,48 +40,50 @@ class DonateProductsScreenTest {
     val composeTestRule = createComposeRule()
     private val composeActivityTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    @Before
-    fun setUp() {
-        composeTestRule.setContent {
-            every { mockApplication.applicationContext } returns LocalContext.current
-            every { mockApplication.resources } returns LocalContext.current.resources
-            MaceTemplateTheme {
-                var appBarState by remember { mutableStateOf(AppBarState()) }
-                val openDrawer: () -> Unit = { }
-                DonateProductsScreen(
-                    onComposing = {
-                        appBarState = it
-                    },
-                    canNavigateBack = true,
-                    navigateUp = { },
-                    openDrawer = openDrawer,
-                    onItemButtonClicked = { itemWasClicked = true },
-                    viewModel = bloodViewModel,
-                    title = "Donate Products Screen"
-                )
-            }
+    @Test
+    fun initialScreenWithDatabaseRefreshFailureTest() {
+        setup(true, "Refresh Failure")
+        composeTestRule.onAllNodesWithTag("StandardModal").apply {
+            val textValue = composeTestRule.onNodeWithText(substring = true, text = "Refresh Failure")
+            val text = textValue.fetchSemanticsNode().config[SemanticsProperties.Text][0].text
+            assertEquals("Failure Message is: Refresh Failure", text)
         }
+    }
+
+    @Test
+    fun initialScreenWithDatabaseRefreshTest() {
+        setup(true, "")
+        composeTestRule.onNodeWithText(bloodViewModel.getResources().getString(R.string.initial_letters_of_last_name_text)).assertExists()
     }
 
     @Test
     fun initialScreenTest() {
         //composeTestRule.onRoot().printToLog("JIMX")
+        setup(false, "")
         composeTestRule.onNodeWithText(bloodViewModel.getResources().getString(R.string.initial_letters_of_last_name_text)).assertExists()
     }
 
     @Test
     fun searchSetupTest() {
+        setup(false, "")
+//        val textValue = composeTestRule.onNodeWithTag("OutlinedTextField")
+//        textValue.performTextInput("lew")
+//        for ((key, value) in textValue.fetchSemanticsNode().config) {
+//            if (key.name == "EditableText") {
+//                assertEquals("lew", value.toString())
+//            }
+//        }
         val textValue = composeTestRule.onNodeWithTag("OutlinedTextField")
         textValue.performTextInput("lew")
-        for ((key, value) in textValue.fetchSemanticsNode().config) {
-            if (key.name == "EditableText") {
-                assertEquals("lew", value.toString())
-            }
+        textValue.apply {
+            val text = textValue.fetchSemanticsNode().config[SemanticsProperties.EditableText].text
+            assertEquals("lew", text)
         }
     }
 
     @Test
     fun searchTest() {
+        setup(false, "")
         val textValue = composeTestRule.onNodeWithTag("OutlinedTextField")
         textValue.performTextInput("lew")
         textValue.performImeAction()
@@ -92,6 +95,30 @@ class DonateProductsScreenTest {
                     get(index).performClick()
                     assert(itemWasClicked)
                 }
+            }
+        }
+    }
+
+    private fun setup(invalidForTesting: Boolean, failureMessage: String) {
+        composeTestRule.setContent {
+            every { mockApplication.applicationContext } returns LocalContext.current
+            every { mockApplication.resources } returns LocalContext.current.resources
+            MaceTemplateTheme {
+                var appBarState by remember { mutableStateOf(AppBarState()) }
+                val openDrawer: () -> Unit = { }
+                bloodViewModel.databaseInvalidForTesting = invalidForTesting
+                bloodViewModel.databaseInvalidForTestingFailureMessage = failureMessage
+                DonateProductsScreen(
+                    onComposing = {
+                        appBarState = it
+                    },
+                    canNavigateBack = true,
+                    navigateUp = { },
+                    openDrawer = openDrawer,
+                    onItemButtonClicked = { itemWasClicked = true },
+                    viewModel = bloodViewModel,
+                    title = "Donate Products Screen"
+                )
             }
         }
     }
