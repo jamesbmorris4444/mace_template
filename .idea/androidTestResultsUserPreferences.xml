@@ -17,6 +17,48 @@
             </AndroidTestResultsTableState>
           </value>
         </entry>
+        <entry key="-1291493796">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="R5CN80M5ZMP" value="120" />
+                  <entry key="Tests" value="360" />
+                  <entry key="samsung&#10; SM-N986U" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="-1101823408">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="R5CN80M5ZMP" value="120" />
+                  <entry key="Tests" value="360" />
+                  <entry key="samsung&#10; SM-N986U" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="-824298079">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="R5CN80M5ZMP" value="120" />
+                  <entry key="Tests" value="360" />
+                  <entry key="samsung&#10; SM-N986U" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
         <entry key="410283629">
           <value>
             <AndroidTestResultsTableState>
@@ -88,6 +130,20 @@
             </AndroidTestResultsTableState>
           </value>
         </entry>
+        <entry key="1508121673">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="R5CN80M5ZMP" value="120" />
+                  <entry key="Tests" value="360" />
+                  <entry key="samsung&#10; SM-N986U" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
         <entry key="1566309224">
           <value>
             <AndroidTestResultsTableState>
@@ -110,6 +166,20 @@
                 <map>
                   <entry key="Duration" value="90" />
                   <entry key="Nexus_6_API_29" value="120" />
+                  <entry key="R5CN80M5ZMP" value="120" />
+                  <entry key="Tests" value="360" />
+                  <entry key="samsung&#10; SM-N986U" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="1821476959">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
                   <entry key="R5CN80M5ZMP" value="120" />
                   <entry key="Tests" value="360" />
                   <entry key="samsung&#10; SM-N986U" value="120" />

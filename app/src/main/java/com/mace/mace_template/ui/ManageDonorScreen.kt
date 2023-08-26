@@ -34,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -120,7 +121,8 @@ fun ManageDonorScreen(
             Row {
                 OutlinedTextField(
                     modifier = Modifier
-                        .height(60.dp),
+                        .height(60.dp)
+                        .testTag("OutlinedTextField"),
                     value = lastNameText,
                     onValueChange = {
                         lastNameText = it
@@ -136,7 +138,8 @@ fun ManageDonorScreen(
         Row {
             OutlinedTextField(
                 modifier = Modifier
-                    .height(60.dp),
+                    .height(60.dp)
+                    .testTag("OutlinedTextField"),
                 value = firstNameText,
                 onValueChange = {
                     firstNameText = it
@@ -151,7 +154,8 @@ fun ManageDonorScreen(
         Row {
             OutlinedTextField(
                 modifier = Modifier
-                    .height(60.dp),
+                    .height(60.dp)
+                    .testTag("OutlinedTextField"),
                 value = middleNameText,
                 onValueChange = {
                     middleNameText = it
@@ -167,7 +171,8 @@ fun ManageDonorScreen(
             Row {
                 OutlinedTextField(
                     modifier = Modifier
-                        .height(60.dp),
+                        .height(60.dp)
+                        .testTag("OutlinedTextField"),
                     value = dobText,
                     onValueChange = {
                         dobText = it
@@ -191,7 +196,8 @@ fun ManageDonorScreen(
         ) {
             OutlinedTextField(
                 modifier = Modifier
-                    .height(60.dp),
+                    .height(60.dp)
+                    .testTag("OutlinedTextField"),
                 value = aboRhText,
                 readOnly = true,
                 onValueChange = {
@@ -236,7 +242,8 @@ fun ManageDonorScreen(
         ) {
             OutlinedTextField(
                 modifier = Modifier
-                    .height(60.dp),
+                    .height(60.dp)
+                    .testTag("OutlinedTextField"),
                 value = branchText,
                 readOnly = true,
                 onValueChange = {
@@ -334,6 +341,7 @@ fun HorizontalRadioButtons(isMale: Boolean, setRadioButton: (text: String) -> Un
             Row(
                 Modifier
                     .height(60.dp)
+                    .testTag("RadioButton")
                     .selectable(
                         selected = (text == selectedOption),
                         onClick = { onOptionSelected(text) }
