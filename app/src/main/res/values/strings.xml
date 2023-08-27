@@ -14,6 +14,7 @@
     <string name="no_db_entries_title_text">No entries made into the staging database</string>
     <string name="made_db_entries_title_text">Staging entry for donor/products insertion</string>
     <string name="made_db_entries_body_text">An entry was made to the staging database for insertion of new donor product(s)</string>
+    <string name="not_made_db_entries_body_text">An entry was not made to the staging database because product has empty last name or dob</string>
     <string name="failure_db_entries_title_text">Main database initialization failure</string>
     <string name="failure_db_entries_body_text">Failure Message is: %1$s</string>
     <string name="made_reassociate_entries_body_text">An entry was made to the staging database for insertion of reassociated product(s)</string>

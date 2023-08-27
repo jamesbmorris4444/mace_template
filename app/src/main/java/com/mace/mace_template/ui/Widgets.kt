@@ -10,13 +10,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
 fun WidgetButton(padding: PaddingValues, buttonText:String, onClick: () -> Unit) {
     Button(
-        modifier = Modifier.padding(padding),
+        modifier = Modifier.padding(padding).testTag("WidgetButton"),
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
         onClick = onClick

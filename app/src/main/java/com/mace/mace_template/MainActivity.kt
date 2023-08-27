@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
         Timber.plant(Timber.DebugTree())
         setContent {
             MaceTemplateTheme {
-                DrawerAppComponent(bloodViewModel, ScreenNames.DonateProductsSearch)
+                DrawerAppComponent(bloodViewModel)
             }
         }
     }

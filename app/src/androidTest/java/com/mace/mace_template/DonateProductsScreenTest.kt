@@ -109,7 +109,7 @@ class DonateProductsScreenTest {
                 bloodViewModel.databaseInvalidForTesting = invalidForTesting
                 bloodViewModel.databaseInvalidForTestingFailureMessage = failureMessage
                 DonateProductsScreen(
-                    onComposing = {
+                    configAppBar = {
                         appBarState = it
                     },
                     canNavigateBack = true,

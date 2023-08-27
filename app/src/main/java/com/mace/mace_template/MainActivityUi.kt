@@ -17,7 +17,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,23 +30,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.mace.mace_template.logger.LogUtils
+import com.mace.mace_template.utils.Constants.LOG_TAG
 import kotlinx.coroutines.launch
 
 // See https://www.geeksforgeeks.org/android-jetpack-compose-implement-navigation-drawer/ for Navigation Drawer
 
 @Composable
 fun DrawerAppComponent(
-    bloodViewModel: BloodViewModel,
-    requestedScreen: ScreenNames
+    bloodViewModel: BloodViewModel
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val currentScreen = remember { mutableStateOf(requestedScreen) }
+    val currentScreen = remember { mutableStateOf(ScreenNames.DonateProductsSearch) }
     val coroutineScope = rememberCoroutineScope()
     val navController: NavHostController = rememberNavController()
 
     @Composable
     fun DrawerContentComponent(
-        currentScreen: MutableState<ScreenNames>,
         navController: NavHostController,
         closeDrawer: () -> Unit
     ) {
@@ -83,6 +82,7 @@ fun DrawerAppComponent(
                         Modifier.clickable(onClick = {
                             closeDrawer()
                             currentScreen.value = screen
+                            LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "click=${bloodViewModel.getResources().getString(screen.resId)}")
                             navController.navigate(bloodViewModel.getResources().getString(screen.resId))
                         }),
                         content = {
@@ -113,11 +113,10 @@ fun DrawerAppComponent(
 
     @Composable
     fun BodyContentComponent(
-        currentScreen: ScreenNames,
         openDrawer: () -> Unit,
         bloodViewModel: BloodViewModel
     ) {
-        ScreenNavigator(viewModel = bloodViewModel, currentScreen = currentScreen, openDrawer = openDrawer, navController = navController)
+        ScreenNavigator(viewModel = bloodViewModel, openDrawer = openDrawer, navController = navController)
     }
 
     ModalDrawer(
@@ -125,7 +124,6 @@ fun DrawerAppComponent(
         gesturesEnabled = true,
         drawerContent = {
             DrawerContentComponent(
-                currentScreen = currentScreen,
                 navController = navController,
                 closeDrawer = { coroutineScope.launch { drawerState.close() } }
             )
@@ -133,7 +131,6 @@ fun DrawerAppComponent(
         drawerBackgroundColor = colorResource(id = R.color.black),
         content = {
             BodyContentComponent(
-                currentScreen = currentScreen.value,
                 openDrawer = { coroutineScope.launch { drawerState.open() } },
                 bloodViewModel = bloodViewModel
             )
@@ -142,7 +139,7 @@ fun DrawerAppComponent(
 }
 
 enum class ScreenNames(val inDrawer: Boolean, val resId: Int) {
-    DonateProductsSearch(true, R.string.Search_for_donor_title),
+    DonateProductsSearch(false, R.string.Search_for_donor_title),
     CreateProducts(false, R.string.create_blood_product_title),
     ManageDonorAfterSearch(false, R.string.manage_donor_after_search_title),
     ManageDonorFromDrawer(true, R.string.manage_donor_from_drawer_title),

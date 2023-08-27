@@ -29,6 +29,7 @@ import com.mace.mace_template.logger.LogUtils
 import com.mace.mace_template.repository.storage.Donor
 import com.mace.mace_template.ui.CreateProductsScreen
 import com.mace.mace_template.ui.DismissSelector
+import com.mace.mace_template.ui.DonateProductsHandler
 import com.mace.mace_template.ui.DonateProductsScreen
 import com.mace.mace_template.ui.ManageDonorScreen
 import com.mace.mace_template.ui.ReassociateDonationScreen
@@ -64,14 +65,13 @@ data class StandardModalArgs(
 @Composable
 fun ScreenNavigator(
     viewModel: BloodViewModel,
-    currentScreen: ScreenNames,
     navController: NavHostController,
     openDrawer: () -> Unit
 ) {
     var donor by remember { mutableStateOf(Donor()) }
     var appBarState by remember { mutableStateOf(AppBarState()) }
     var transitionToCreateProductsScreen by remember { mutableStateOf(true) }
-    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Start Initial Screen in ScreenNavigator: name=${currentScreen.name}")
+    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.RPO), "Start Initial Screen in ScreenNavigator")
     Scaffold(
         topBar = {
             StartScreenAppBar(appBarState = appBarState)
@@ -94,7 +94,7 @@ fun ScreenNavigator(
                 composable(route = donateProductsSearchStringName) {
                     LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$donateProductsSearchStringName")
                     DonateProductsScreen(
-                        onComposing = {
+                        configAppBar = {
                             appBarState = it
                         },
                         canNavigateBack = navController.previousBackStackEntry != null,
@@ -111,8 +111,8 @@ fun ScreenNavigator(
                 }
                 composable(route = manageDonorFromDrawer) {
                     LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "ScreenNavigator: launch screen=$manageDonorFromDrawer")
-                    DonateProductsScreen(
-                        onComposing = {
+                    DonateProductsHandler(
+                        configAppBar = {
                             appBarState = it
                         },
                         canNavigateBack = navController.previousBackStackEntry != null,

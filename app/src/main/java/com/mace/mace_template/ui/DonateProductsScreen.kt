@@ -54,7 +54,7 @@ import com.mace.mace_template.utils.Constants.LOG_TAG
 
 @Composable
 fun DonateProductsScreen(
-    onComposing: (AppBarState) -> Unit,
+    configAppBar: (AppBarState) -> Unit,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
@@ -116,7 +116,7 @@ fun DonateProductsScreen(
         }
         completed -> {
             DonateProductsHandler(
-                onComposing = onComposing,
+                configAppBar = configAppBar,
                 canNavigateBack = canNavigateBack,
                 navigateUp = navigateUp,
                 openDrawer = openDrawer,
@@ -135,7 +135,7 @@ fun DonateProductsScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DonateProductsHandler(
-    onComposing: (AppBarState) -> Unit,
+    configAppBar: (AppBarState) -> Unit,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     openDrawer: () -> Unit,
@@ -144,7 +144,6 @@ fun DonateProductsHandler(
     onItemButtonClicked: (donor: Donor) -> Unit
 ) {
     val donors = viewModel.donorsAvailableState.observeAsState().value ?: listOf()
-    val donateProductsSearchStringName = stringResource(ScreenNames.DonateProductsSearch.resId)
 
     fun handleSearchClick(searchKey: String) {
         viewModel.handleSearchClick(searchKey = searchKey)
@@ -176,9 +175,10 @@ fun DonateProductsHandler(
         }
     }
 
+    LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=$title    donors=$donors")
+
     LaunchedEffect(key1 = true) {
-        LogUtils.D(LOG_TAG, LogUtils.FilterTags.withTags(LogUtils.TagFilter.TMP), "launch DonateProductsScreen=$donateProductsSearchStringName")
-        onComposing(
+        configAppBar(
             AppBarState(
                 title = title,
                 actions = {
@@ -202,6 +202,7 @@ fun DonateProductsHandler(
             )
         )
     }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(start = 24.dp, end = 24.dp)
