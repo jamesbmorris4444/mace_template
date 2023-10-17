@@ -1,6 +1,5 @@
 package com.mace.mace_template.ui
 
-import android.view.View
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -69,6 +68,7 @@ fun ReassociateDonationScreen(
     val incorrectDonorSelected  = viewModel.incorrectDonorSelectedState.observeAsState().value ?: false
     val isProductSelected = viewModel.isProductSelectedState.observeAsState().value ?: false
     val isReassociateCompleted = viewModel.isReassociateCompletedState.observeAsState().value ?: false
+    val showStandardModalState = viewModel.showStandardModalState.observeAsState().value ?: StandardModalArgs()
 
     val reassociateDonationSearchStringName = stringResource(ScreenNames.ReassociateDonation.resId)
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -193,71 +193,125 @@ fun ReassociateDonationScreen(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (isReassociateCompleted) {
-                // Fourth (Last) run
-                Text(
-                    modifier = Modifier.align(Alignment.Start),
-                    text = stringResource(R.string.reassociate_complete_title),
-                    color = colorResource(id = R.color.black),
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                DonorListWithProducts(
-                    true,
-                    listOf(correctDonorWithProducts),
-                    displayForDonor = { true },
-                    enablerForDonor = { false },
-                    enablerForProducts = { false }
-                )
-            } else {
-                if (incorrectDonorSelected) {
-                    // Second run
-                    if (isProductSelected) {
-                        // Third run
-                        Text(
-                            modifier = Modifier.align(Alignment.Start),
-                            text = stringResource(R.string.incorrect_donor_and_product_title),
-                            color = colorResource(id = R.color.black),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                        DonorListWithProducts(
-                            true,
-                            listOf(DonorWithProducts(donor = incorrectDonorWithProducts.donor, products = singleSelectedProductList)),
-                            displayForDonor = { true },
-                            enablerForDonor = { false },
-                            enablerForProducts = { false }
-                        )
-                    } else {
+            when {
+                isReassociateCompleted -> {
+                    // Fourth (Last) run
+                    Text(
+                        modifier = Modifier.align(Alignment.Start),
+                        text = stringResource(R.string.reassociate_complete_title),
+                        color = colorResource(id = R.color.black),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                    DonorListWithProducts(
+                        true,
+                        listOf(correctDonorWithProducts),
+                        displayForDonor = { true },
+                        enablerForDonor = { false },
+                        enablerForProducts = { false }
+                    )
+
+                }
+                showStandardModalState.topIconResId >= 0 -> {
+                    StandardModal(
+                        showStandardModalState.topIconResId,
+                        showStandardModalState.titleText,
+                        showStandardModalState.bodyText,
+                        showStandardModalState.positiveText,
+                        showStandardModalState.negativeText,
+                        showStandardModalState.neutralText,
+                        showStandardModalState.onDismiss
+                    )
+                }
+                else -> {
+                    if (incorrectDonorSelected) {
                         // Second run
-                        Text(
-                            modifier = Modifier.align(Alignment.Start),
-                            text = stringResource(R.string.incorrect_donor_title),
-                            color = colorResource(id = R.color.black),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Text(
-                            modifier = Modifier.align(Alignment.Start),
-                            text = stringResource(R.string.choose_product_for_reassociation_title),
-                            color = colorResource(id = R.color.red),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                        DonorListWithProducts(
-                            true,
-                            incorrectDonorsWithProducts,
-                            displayForDonor = { true },
-                            enablerForDonor = { false },
-                            enablerForProducts = { true }
-                        )
-                    }
-                    if (isProductSelected) {
-                        // Third run
-                        Spacer(modifier = Modifier.height(4.dp))
-                        var text by rememberSaveable { mutableStateOf("") }
+                        if (isProductSelected) {
+                            // Third run
+                            Text(
+                                modifier = Modifier.align(Alignment.Start),
+                                text = stringResource(R.string.incorrect_donor_and_product_title),
+                                color = colorResource(id = R.color.black),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                            DonorListWithProducts(
+                                true,
+                                listOf(DonorWithProducts(donor = incorrectDonorWithProducts.donor, products = singleSelectedProductList)),
+                                displayForDonor = { true },
+                                enablerForDonor = { false },
+                                enablerForProducts = { false }
+                            )
+                        } else {
+                            // Second run
+                            Text(
+                                modifier = Modifier.align(Alignment.Start),
+                                text = stringResource(R.string.incorrect_donor_title),
+                                color = colorResource(id = R.color.black),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Text(
+                                modifier = Modifier.align(Alignment.Start),
+                                text = stringResource(R.string.choose_product_for_reassociation_title),
+                                color = colorResource(id = R.color.red),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                            DonorListWithProducts(
+                                true,
+                                incorrectDonorsWithProducts,
+                                displayForDonor = { true },
+                                enablerForDonor = { false },
+                                enablerForProducts = { true }
+                            )
+                        }
+                        if (isProductSelected) {
+                            // Third run
+                            Spacer(modifier = Modifier.height(4.dp))
+                            var text by rememberSaveable { mutableStateOf("") }
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .height(60.dp),
+                                value = text,
+                                onValueChange = {
+                                    text = it
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                label = { Text(stringResource(R.string.initial_letters_of_correct_donor_last_name_text)) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        keyboardController?.hide()
+                                        handleSearchClickWithProducts(true, text)
+                                    })
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            if (correctDonorsWithProducts.isNotEmpty()) {
+                                Text(
+                                    modifier = Modifier.align(Alignment.Start),
+                                    text = stringResource(R.string.choose_correct_donor_title),
+                                    color = colorResource(id = R.color.red),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                            Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
+                            DonorListWithProducts(
+                                true,
+                                correctDonorsWithProducts,
+                                displayForDonor = { true },
+                                enablerForDonor = { true },
+                                enablerForProducts = { false }
+                            )
+
+                        }
+                    } else {
+                        // First run
+                        var text by remember { mutableStateOf("") }
                         OutlinedTextField(
                             modifier = Modifier
                                 .height(60.dp),
@@ -265,76 +319,37 @@ fun ReassociateDonationScreen(
                             onValueChange = {
                                 text = it
                             },
+
                             shape = RoundedCornerShape(10.dp),
-                            label = { Text(stringResource(R.string.initial_letters_of_correct_donor_last_name_text)) },
+                            label = { Text(stringResource(R.string.initial_letters_of_incorrect_donor_last_name_text)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                             keyboardActions = KeyboardActions(
                                 onDone = {
                                     keyboardController?.hide()
-                                    handleSearchClickWithProducts(true, text)
+                                    handleSearchClickWithProducts(false, text)
                                 })
                         )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        if (correctDonorsWithProducts.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        if (incorrectDonorsWithProducts.isNotEmpty()) {
                             Text(
-                                modifier = Modifier.align(Alignment.Start),
-                                text = stringResource(R.string.choose_correct_donor_title),
+                                modifier = Modifier
+                                    .align(Alignment.Start),
+                                text = stringResource(R.string.choose_incorrect_donor_title),
                                 color = colorResource(id = R.color.red),
                                 style = MaterialTheme.typography.titleMedium
                             )
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
                         }
-                        Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
                         DonorListWithProducts(
-                            true,
-                            correctDonorsWithProducts,
-                            displayForDonor = { true },
+                            false,
+                            incorrectDonorsWithProducts,
+                            displayForDonor = { donorWithProducts -> donorWithProducts.products.isNotEmpty() },
                             enablerForDonor = { true },
                             enablerForProducts = { false }
                         )
-
                     }
-                } else {
-                    // First run
-                    var text by remember { mutableStateOf("") }
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .height(60.dp),
-                        value = text,
-                        onValueChange = {
-                            text = it
-                        },
-
-                        shape = RoundedCornerShape(10.dp),
-                        label = { Text(stringResource(R.string.initial_letters_of_incorrect_donor_last_name_text)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                keyboardController?.hide()
-                                handleSearchClickWithProducts(false, text)
-                            })
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    if (incorrectDonorsWithProducts.isNotEmpty()) {
-                        Text(
-                            modifier = Modifier
-                                .align(Alignment.Start),
-                            text = stringResource(R.string.choose_incorrect_donor_title),
-                            color = colorResource(id = R.color.red),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Divider(color = colorResource(id = R.color.black), thickness = 2.dp)
-                    }
-                    DonorListWithProducts(
-                        false,
-                        incorrectDonorsWithProducts,
-                        displayForDonor = { donorWithProducts -> donorWithProducts.products.isNotEmpty() },
-                        enablerForDonor = { true },
-                        enablerForProducts = { false }
-                    )
                 }
             }
         }
