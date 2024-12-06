@@ -14,4 +14,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "mace_template"
 include ':app'
-include ':shared'
